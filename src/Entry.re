@@ -1,5 +1,7 @@
 open Belt;
 
+include Configs;
+
 type demo = {
   add: (string, Configs.demoUnit => ReasonReact.reactElement) => unit,
 };
