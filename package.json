@@ -1,0 +1,22 @@
+{
+  "name": "reshowcase",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "reason-react": ">=0.4.0"
+  },
+  "devDependencies": {
+    "bs-platform": "^4.0.7"
+  }
+}
