@@ -1,3 +1,9 @@
+## 1.2.0
+
+Features:
+
+- Add webpack configuration options
+
 ## 1.1.2
 
 Features:

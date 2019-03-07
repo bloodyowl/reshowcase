@@ -12,6 +12,13 @@ if (typeof process.argv[2] !== "string") {
   process.exit(1);
 }
 
+let config;
+try {
+  config = require(path.join(process.cwd(), ".reshowcase/config.js"));
+} catch (err) {
+  config = {};
+}
+
 let compiler = webpack({
   mode: "development",
   entry: {
@@ -24,22 +31,40 @@ let compiler = webpack({
     globalObject: "this",
     jsonpFunction: "reshowcase__d"
   },
+  module: config.module,
   plugins: [
+    ...(config.plugins ? config.plugins : []),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "../src/index.html")
+      template: process.argv.find(item => item.startsWith("--template="))
+        ? path.join(
+            process.cwd(),
+            process.argv
+              .find(item => item.startsWith("--template="))
+              .replace(/--template=/, "")
+          )
+        : path.join(__dirname, "../src/index.html")
     })
   ]
 });
 
+let port = parseInt(
+  process.argv.find(item => item.startsWith("--port="))
+    ? process.argv
+        .find(item => item.startsWith("--port="))
+        .replace(/--port=/, "")
+    : 9000,
+  10
+);
+
 let server = new WebpackDevServer(compiler, {
   compress: true,
-  port: 9000,
+  port: port,
   historyApiFallback: {
     index: "/index.html"
   },
   stats: "errors-only"
 });
 
-server.listen(9000, "0.0.0.0");
+server.listen(port, "0.0.0.0");
 
-child_process.exec("open http://localhost:9000", () => {});
+child_process.exec("open http://localhost:" + port, () => {});
