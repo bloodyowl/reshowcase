@@ -33,7 +33,7 @@ demo("Button", ({add}) =>
   )
 );
 
-start("root"); /* the id of the root element */
+start();
 ```
 
 ## Install
@@ -49,3 +49,7 @@ Then add to your `"reshowcase"` to `bs-dependencies` in your `bsconfig.json`.
 ```console
 $ reshowcase path/to/Demo.bs.js
 ```
+
+If you need custom webpack options, create the `.reshowcase/config.js` and export the webpack config, plugins and modules will be merged.
+
+If you need a custom template, pass `--template=./path/to/template.html`.
