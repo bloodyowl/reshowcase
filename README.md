@@ -32,5 +32,5 @@ demo("Button", ({add}) =>
   )
 );
 
-start();
+start("root"); /* the id of the root element */
 ```
