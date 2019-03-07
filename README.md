@@ -2,6 +2,8 @@
 
 > A tool to create demos for your ReasonReact components
 
+![Screenshot](./example/example.png)
+
 ```reason
 /* path/to/Demo.re */
 open Reshowcase.Entry;
