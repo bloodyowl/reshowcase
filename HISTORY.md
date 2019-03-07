@@ -1,3 +1,9 @@
+## 1.3.0
+
+Features:
+
+- Demo unit isolation
+
 ## 1.2.1
 
 Features:
