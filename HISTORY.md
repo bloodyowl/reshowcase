@@ -1,3 +1,9 @@
+## 1.1.2
+
+Features:
+
+- Export types
+
 ## 1.1.1
 
 Features:
