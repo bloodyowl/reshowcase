@@ -15,12 +15,14 @@
   "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
-    "bs-platform": "^4.0.6",
     "html-webpack-plugin": "^3.2.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "reason-react": ">=0.4.0",
     "webpack": "^4.29.6",
     "webpack-dev-server": "^3.2.1"
+  },
+  "devDependencies": {
+    "bs-platform": "^4.0.6"
   }
 }

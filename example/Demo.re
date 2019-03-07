@@ -1,4 +1,4 @@
-open Reshowcase;
+open Entry;
 
 demo("Title", ({add}) => {
   add("normal", ({string}) =>

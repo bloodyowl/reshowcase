@@ -4,7 +4,7 @@
 
 ```reason
 /* path/to/Demo.re */
-open Reshowcase;
+open Reshowcase.Entry;
 
 demo("Title", ({add}) => {
   add("normal", ({string}) =>
@@ -41,6 +41,8 @@ start("root"); /* the id of the root element */
 ```console
 yarn add --dev reshowcase
 ```
+
+Then add to your `"reshowcase"` to `bs-dependencies` in your `bsconfig.json`.
 
 ## Usage
 
