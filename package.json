@@ -1,6 +1,6 @@
 {
   "name": "reshowcase",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "bin": {
     "reshowcase": "./commands/reshowcase"
   },
