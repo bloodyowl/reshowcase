@@ -20,7 +20,7 @@ let demo = (demoName, func) => {
   );
 };
 
-let start = id => {
+let start = () => {
   let demos = demos->MutableMap.String.toArray->Map.String.fromArray;
-  ReactDOMRe.renderToElementWithId(<ReshowcaseUi.App demos />, id);
+  ReactDOMRe.renderToElementWithId(<ReshowcaseUi.App demos />, "root");
 };

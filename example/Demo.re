@@ -1,9 +1,3 @@
-# Reshowcase
-
-> A tool to create demos for your ReasonReact components
-
-```reason
-/* path/to/Demo.re */
 open Reshowcase;
 
 demo("Title", ({add}) => {
@@ -33,17 +27,4 @@ demo("Button", ({add}) =>
   )
 );
 
-start("root"); /* the id of the root element */
-```
-
-## Install
-
-```console
-yarn add --dev reshowcase
-```
-
-## Usage
-
-```console
-$ reshowcase path/to/Demo.bs.js
-```
+start();

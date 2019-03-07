@@ -1,6 +1,9 @@
 {
   "name": "reshowcase",
   "version": "0.1.0",
+  "bin": {
+    "reshowcase": "./commands/reshowcase"
+  },
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
@@ -9,12 +12,15 @@
   "keywords": [
     "BuckleScript"
   ],
-  "author": "",
+  "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
+    "bs-platform": "^4.0.6",
+    "html-webpack-plugin": "^3.2.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "reason-react": ">=0.4.0",
-    "bs-platform": "^4.0.6"
+    "webpack": "^4.29.6",
+    "webpack-dev-server": "^3.2.1"
   }
 }

@@ -4,4 +4,4 @@ type demo = {
 
 let demo: (Belt.MutableMap.String.key, demo => unit) => unit;
 
-let start: string => unit;
+let start: unit => unit;
