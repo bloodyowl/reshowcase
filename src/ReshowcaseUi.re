@@ -59,10 +59,14 @@ module DemoSidebar = {
         (),
       )
       ->ReactDOMRe.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
-    let subList =
-      ReactDOMRe.Style.make(~fontSize="14px", ~paddingBottom="20px", ());
+    let subList = ReactDOMRe.Style.make(~fontSize="14px", ());
     let demoName =
-      ReactDOMRe.Style.make(~fontSize="18px", ~padding="10px", ());
+      ReactDOMRe.Style.make(
+        ~fontSize="14px",
+        ~fontWeight="700",
+        ~padding="10px",
+        (),
+      );
     let link =
       ReactDOMRe.Style.make(
         ~textDecoration="none",
@@ -378,6 +382,23 @@ module DemoUnit = {
   };
 };
 
+module DemoUnitFrame = {
+  let component = ReasonReact.statelessComponent(__MODULE__);
+  let make = (~demoName, ~demoUnitName, _) => {
+    ...component,
+    render: _ =>
+      <iframe
+        src={j|/unit/$demoName/$demoUnitName|j}
+        style={ReactDOMRe.Style.make(
+          ~height="100vh",
+          ~width="100%",
+          ~border="none",
+          (),
+        )}
+      />,
+  };
+};
+
 module App = {
   type state = {url: ReasonReact.Router.url};
   type action =
@@ -436,25 +457,36 @@ module App = {
     },
     render: ({state}) =>
       <div style=Styles.app>
-        <div style=Styles.navigation> <DemoSidebar demos /> </div>
-        <div style=Styles.main>
-          {switch (state.url.path) {
-           | [demoName, demoUnitName] =>
-             demos
-             ->Map.String.get(demoName)
-             ->Option.flatMap(demo => demo->Map.String.get(demoUnitName))
-             ->Option.map(demoUnit =>
-                 <DemoUnit demoUnit key={demoName ++ "$$" ++ demoUnitName} />
-               )
-             ->Option.getWithDefault(ReasonReact.null)
-           | _ =>
-             <div style=Styles.empty>
-               <div style=Styles.emptyText>
-                 "Pick a demo"->ReasonReact.string
+        {switch (state.url.path) {
+         | ["unit", demoName, demoUnitName] =>
+           <div style=Styles.main>
+             {demos
+              ->Map.String.get(demoName)
+              ->Option.flatMap(demo => demo->Map.String.get(demoUnitName))
+              ->Option.map(demoUnit =>
+                  <DemoUnit demoUnit key={demoName ++ "$$" ++ demoUnitName} />
+                )
+              ->Option.getWithDefault(ReasonReact.null)}
+           </div>
+         | [demoName, demoUnitName] =>
+           <>
+             <div style=Styles.navigation> <DemoSidebar demos /> </div>
+             <div style=Styles.main>
+               <DemoUnitFrame demoName demoUnitName />
+             </div>
+           </>
+         | _ =>
+           <>
+             <div style=Styles.navigation> <DemoSidebar demos /> </div>
+             <div style=Styles.main>
+               <div style=Styles.empty>
+                 <div style=Styles.emptyText>
+                   "Pick a demo"->ReasonReact.string
+                 </div>
                </div>
              </div>
-           }}
-        </div>
+           </>
+         }}
       </div>,
   };
 };
