@@ -3,7 +3,7 @@ open Belt;
 include Configs;
 
 type demo = {
-  add: (string, Configs.demoUnit => ReasonReact.reactElement) => unit,
+  add: (string, Configs.demoUnit => React.element) => unit,
 };
 
 let demos = MutableMap.String.make();
@@ -11,7 +11,7 @@ let demos = MutableMap.String.make();
 let demo = (demoName, func) => {
   let demoUnits = MutableMap.String.make();
   let demo = {
-    add: (demoUnitName, demo: Configs.demoUnit => ReasonReact.reactElement) => {
+    add: (demoUnitName, demo: Configs.demoUnit => React.element) => {
       demoUnits->MutableMap.String.set(demoUnitName, demo);
     },
   };

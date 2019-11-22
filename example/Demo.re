@@ -2,7 +2,7 @@ open Entry;
 
 demo("Title", ({add}) => {
   add("normal", ({string}) =>
-    <h1> {string("text", "hello")->ReasonReact.string} </h1>
+    <h1> {string("text", "hello")->React.string} </h1>
   );
   add("font-size", ({string, int}) =>
     <h1
@@ -14,7 +14,7 @@ demo("Title", ({add}) => {
         },
         (),
       )}>
-      {string("text", "hello")->ReasonReact.string}
+      {string("text", "hello")->React.string}
     </h1>
   );
 });
@@ -22,7 +22,7 @@ demo("Title", ({add}) => {
 demo("Button", ({add}) =>
   add("normal", ({string, bool}) =>
     <button disabled={bool("disabled", false)}>
-      {string("text", "hello")->ReasonReact.string}
+      {string("text", "hello")->React.string}
     </button>
   )
 );

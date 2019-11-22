@@ -17,7 +17,7 @@ type demoUnit = {
 };
 
 type demo = {
-  add: (string, Configs.demoUnit => ReasonReact.reactElement) => unit,
+  add: (string, Configs.demoUnit => React.element) => unit,
 };
 
 let demo: (Belt.MutableMap.String.key, demo => unit) => unit;
