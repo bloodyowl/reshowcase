@@ -1,15 +1,12 @@
 module App: {
-  let makeProps:
-    (~demos: 'demos, ~key: string=?, unit) => {. "demos": 'demos};
+  [@react.component]
   let make:
-    {
-      .
-      "demos":
-        Belt.Map.String.t(
-          Belt.Map.String.t(
-            Reshowcase.Configs.demoUnit => React.element,
-          ),
-        ),
-    } =>
+    (
+      ~demos: Belt.Map.String.t(
+                Belt.Map.String.t(
+                  Reshowcase.Configs.demoUnit => React.element,
+                ),
+              )
+    ) =>
     React.element;
 };
