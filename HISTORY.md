@@ -1,3 +1,9 @@
+## 2.0.0
+
+Changes:
+
+- Upgrade to JSX3 (thanks [@jchavarri](https://github.com/jchavarri)!) (be028d9)
+
 ## 1.3.0
 
 Features:
