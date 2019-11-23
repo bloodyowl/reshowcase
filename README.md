@@ -46,6 +46,8 @@ yarn add --dev reshowcase
 
 Then add to your `"reshowcase"` to `bs-dependencies` in your `bsconfig.json`.
 
+> If you're still using JSX 2, install `reshowcase@1.4.0`.
+
 ## Usage
 
 ```console
