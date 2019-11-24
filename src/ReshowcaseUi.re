@@ -112,118 +112,17 @@ module DemoUnitSidebar = {
         (),
       )
       ->ReactDOMRe.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
-    let label =
-      ReactDOMRe.Style.make(~paddingBottom="10px", ~display="block", ());
-    let labelText =
-      ReactDOMRe.Style.make(~fontSize="10px", ~textTransform="uppercase", ());
+    // let label =
+    //   ReactDOMRe.Style.make(~paddingBottom="10px", ~display="block", ());
+    // let labelText =
+    //   ReactDOMRe.Style.make(~fontSize="10px", ~textTransform="uppercase", ());
   };
   [@react.component]
-  let make =
-      (
-        ~strings: Map.String.t((Configs.stringConfig, string)),
-        ~ints: Map.String.t((Configs.numberConfig(int), int)),
-        ~floats: Map.String.t((Configs.numberConfig(float), float)),
-        ~bools: Map.String.t((Configs.boolConfig, bool)),
-        ~onStringChange,
-        ~onIntChange,
-        ~onFloatChange,
-        ~onBoolChange,
-        _,
-      ) =>
-    <div style=Styles.container>
-      {strings
-       ->Map.String.toArray
-       ->Array.map(((propName, (_config, value))) =>
-           <label key=propName style=Styles.label>
-             <div style=Styles.labelText> propName->React.string </div>
-             <input
-               type_="text"
-               value
-               onChange={event =>
-                 onStringChange(
-                   propName,
-                   event->ReactEvent.Form.target##value,
-                 )
-               }
-             />
-           </label>
-         )
-       ->React.array}
-      {ints
-       ->Map.String.toArray
-       ->Array.map(((propName, ({min, max}, value))) =>
-           <label key=propName style=Styles.label>
-             <div style=Styles.labelText> propName->React.string </div>
-             <input
-               type_="number"
-               min
-               max={j|$max|j}
-               value={j|$value|j}
-               onChange={event =>
-                 onIntChange(
-                   propName,
-                   event->ReactEvent.Form.target##value->int_of_string,
-                 )
-               }
-             />
-           </label>
-         )
-       ->React.array}
-      {floats
-       ->Map.String.toArray
-       ->Array.map(((propName, ({min, max}, value))) =>
-           <label key=propName style=Styles.label>
-             <div style=Styles.labelText> propName->React.string </div>
-             <input
-               type_="number"
-               min={min->Obj.magic}
-               max={j|$max|j}
-               value={j|$value|j}
-               onChange={event =>
-                 onFloatChange(
-                   propName,
-                   event->ReactEvent.Form.target##value->float_of_string,
-                 )
-               }
-             />
-           </label>
-         )
-       ->React.array}
-      {bools
-       ->Map.String.toArray
-       ->Array.map(((propName, (_config, checked))) =>
-           <label key=propName style=Styles.label>
-             <div style=Styles.labelText> propName->React.string </div>
-             <input
-               type_="checkbox"
-               checked
-               onChange={event =>
-                 onBoolChange(
-                   propName,
-                   event->ReactEvent.Form.target##checked,
-                 )
-               }
-             />
-           </label>
-         )
-       ->React.array}
-    </div>;
+  let make = (~children, _) =>
+    <div style=Styles.container> {children->List.toArray->React.array} </div>;
 };
 
 module DemoUnit = {
-  type state = {
-    strings: Map.String.t((Configs.stringConfig, string)),
-    ints: Map.String.t((Configs.numberConfig(int), int)),
-    floats: Map.String.t((Configs.numberConfig(float), float)),
-    bools: Map.String.t((Configs.boolConfig, bool)),
-  };
-
-  type action =
-    | SetString(string, string)
-    | SetInt(string, int)
-    | SetFloat(string, float)
-    | SetBool(string, bool);
-
   module Styles = {
     let container =
       ReactDOMRe.Style.make(
@@ -255,111 +154,17 @@ module DemoUnit = {
   };
 
   [@react.component]
-  let make = (~demoUnit: Configs.demoUnit => React.element) => {
-    let (state, dispatch) =
-      React.useReducer(
-        (state, action) =>
-          switch (action) {
-          | SetString(name, newValue) => {
-              ...state,
-              strings:
-                state.strings
-                ->Map.String.update(name, value =>
-                    value->Option.map(((config, _value)) =>
-                      (config, newValue)
-                    )
-                  ),
-            }
-          | SetInt(name, newValue) => {
-              ...state,
-              ints:
-                state.ints
-                ->Map.String.update(name, value =>
-                    value->Option.map(((config, _value)) =>
-                      (config, newValue)
-                    )
-                  ),
-            }
-          | SetFloat(name, newValue) => {
-              ...state,
-              floats:
-                state.floats
-                ->Map.String.update(name, value =>
-                    value->Option.map(((config, _value)) =>
-                      (config, newValue)
-                    )
-                  ),
-            }
-          | SetBool(name, newValue) => {
-              ...state,
-              bools:
-                state.bools
-                ->Map.String.update(name, value =>
-                    value->Option.map(((config, _value)) =>
-                      (config, newValue)
-                    )
-                  ),
-            }
-          },
-        {
-          let strings = ref(Map.String.empty);
-          let ints = ref(Map.String.empty);
-          let floats = ref(Map.String.empty);
-          let bools = ref(Map.String.empty);
-          let props: Configs.demoUnit = {
-            string: (name, config) => {
-              strings := (strings^)->Map.String.set(name, (config, config));
-              config;
-            },
-            int: (name, config) => {
-              ints := (ints^)->Map.String.set(name, (config, config.initial));
-              config.initial;
-            },
-            float: (name, config) => {
-              floats :=
-                (floats^)->Map.String.set(name, (config, config.initial));
-              config.initial;
-            },
-            bool: (name, config) => {
-              bools := (bools^)->Map.String.set(name, (config, config));
-              config;
-            },
-          };
-          let _ = demoUnit(props);
-          {strings: strings^, ints: ints^, floats: floats^, bools: bools^};
-        },
-      );
-    let props: Configs.demoUnit = {
-      string: (name, _config) => {
-        let (_, value) = state.strings->Map.String.getExn(name);
-        value;
-      },
-      int: (name, _config) => {
-        let (_, value) = state.ints->Map.String.getExn(name);
-        value;
-      },
-      float: (name, _config) => {
-        let (_, value) = state.floats->Map.String.getExn(name);
-        value;
-      },
-      bool: (name, _config) => {
-        let (_, value) = state.bools->Map.String.getExn(name);
-        value;
-      },
-    };
+  let make = (~demoUnit) => {
+    let elements = demoUnit();
+    let (el, sidebarControls) =
+      switch (elements->List.reverse) {
+      | [] => failwith("Missing element in demo unit")
+      | [el, ...sidebarControls] => (el, sidebarControls)
+      };
     <div style=Styles.container>
-      <div style=Styles.contents> {demoUnit(props)} </div>
+      <div style=Styles.contents> el </div>
       <div style=Styles.sidebar>
-        <DemoUnitSidebar
-          strings={state.strings}
-          ints={state.ints}
-          floats={state.floats}
-          bools={state.bools}
-          onStringChange={(name, value) => dispatch(SetString(name, value))}
-          onIntChange={(name, value) => dispatch(SetInt(name, value))}
-          onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
-          onBoolChange={(name, value) => dispatch(SetBool(name, value))}
-        />
+        <DemoUnitSidebar> sidebarControls </DemoUnitSidebar>
       </div>
     </div>;
   };

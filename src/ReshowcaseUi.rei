@@ -3,9 +3,7 @@ module App: {
   let make:
     (
       ~demos: Belt.Map.String.t(
-                Belt.Map.String.t(
-                  Reshowcase.Configs.demoUnit => React.element,
-                ),
+                Belt.Map.String.t(unit => list(React.element)),
               )
     ) =>
     React.element;

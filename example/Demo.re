@@ -1,29 +1,33 @@
 open Entry;
 
 demo("Title", ({add}) => {
-  add("normal", ({string}) =>
-    <h1> {string("text", "hello")->React.string} </h1>
+  add("font-size", () =>
+    Test.intProp("font size", 2, size =>
+      Test.stringProp("text", "hello", text =>
+        [
+          <h1
+            style={ReactDOMRe.Style.make(
+              ~fontSize=size->Belt.Int.toString,
+              (),
+            )}>
+            text->React.string
+          </h1>,
+        ]
+      )
+    )
   );
-  add("font-size", ({string, int}) =>
-    <h1
-      style={ReactDOMRe.Style.make(
-        ~fontSize={
-          let size =
-            int("font size", {min: 0, max: 100, initial: 30, step: 1});
-          {j|$(size)px|j};
-        },
-        (),
-      )}>
-      {string("text", "hello")->React.string}
-    </h1>
+  add("normal", () =>
+    Test.stringProp("text", "hello", text => [<h1> text->React.string </h1>])
   );
 });
 
 demo("Button", ({add}) =>
-  add("normal", ({string, bool}) =>
-    <button disabled={bool("disabled", false)}>
-      {string("text", "hello")->React.string}
-    </button>
+  add("normal", () =>
+    Test.boolProp("font size", false, disabled =>
+      Test.stringProp("text", "hello", text =>
+        [<button disabled> text->React.string </button>]
+      )
+    )
   )
 );
 
