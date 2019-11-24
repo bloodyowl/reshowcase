@@ -2,12 +2,12 @@ open Entry;
 
 demo("Title", ({add}) => {
   add("font-size", () =>
-    intProp("font size", 2, size =>
+    intProp("font size", 30, size =>
       stringProp("text", "hello", text =>
         [
           <h1
             style={ReactDOMRe.Style.make(
-              ~fontSize=size->Belt.Int.toString,
+              ~fontSize=size->Belt.Int.toString ++ "px",
               (),
             )}>
             text->React.string
