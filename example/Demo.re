@@ -32,7 +32,7 @@ demo("Button", ({add}) =>
 );
 
 let dateProp =
-  makeProp((_date, setState) =>
+  withControl((_date, setState) =>
     <button onClick={_event => setState(Js.Date.make())}>
       "Set to now"->React.string
     </button>

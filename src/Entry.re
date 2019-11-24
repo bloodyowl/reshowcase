@@ -11,7 +11,7 @@ let useState = initial => {
   React.useReducer((_ignored, newState) => newState, initial);
 };
 
-let makeProp = (sidebarControl, propName, initialValue, continuation) => {
+let withControl = (sidebarControl, propName, initialValue, continuation) => {
   let (state, setState) = useState(initialValue);
   [
     <label key=propName style=label>
@@ -22,7 +22,7 @@ let makeProp = (sidebarControl, propName, initialValue, continuation) => {
   ];
 };
 let boolProp =
-  makeProp((checked, setState) =>
+  withControl((checked, setState) =>
     <input
       type_="checkbox"
       checked
@@ -30,7 +30,7 @@ let boolProp =
     />
   );
 let intProp =
-  makeProp((state, setState) =>
+  withControl((state, setState) =>
     <input
       type_="number"
       min=0
@@ -42,7 +42,7 @@ let intProp =
     />
   );
 let stringProp =
-  makeProp((value, setState) =>
+  withControl((value, setState) =>
     <input
       type_="text"
       value

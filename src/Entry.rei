@@ -1,6 +1,6 @@
 type demo = {add: (string, unit => list(React.element)) => unit};
 
-let makeProp:
+let withControl:
   (
     ('a, 'a => unit) => ReasonReact.reactElement,
     string,
