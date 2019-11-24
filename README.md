@@ -9,29 +9,47 @@
 open Reshowcase.Entry;
 
 demo("Title", ({add}) => {
-  add("normal", ({string}) =>
-    <h1> {string("text", "hello")->React.string} </h1>
+  add("normal", () =>
+    stringProp("text", "hello", text => [<h1> text->React.string </h1>])
   );
-  add("font-size", ({string, int}) =>
-    <h1
-      style={ReactDOMRe.Style.make(
-        ~fontSize={
-          let size =
-            int("font size", {min: 0, max: 100, initial: 30, step: 1});
-          {j|$(size)px|j};
-        },
-        (),
-      )}>
-      {string("text", "hello")->React.string}
-    </h1>
+  add("font-size", () =>
+    intProp("font size", 2, size =>
+      stringProp("text", "hello", text =>
+        [
+          <h1
+            style={ReactDOMRe.Style.make(
+              ~fontSize=size->Belt.Int.toString,
+              (),
+            )}>
+            text->React.string
+          </h1>,
+        ]
+      )
+    )
   );
 });
 
 demo("Button", ({add}) =>
-  add("normal", ({string, bool}) =>
-    <button disabled={bool("disabled", false)}>
-      {string("text", "hello")->React.string}
+  add("normal", () =>
+    boolProp("disabled", false, disabled =>
+      stringProp("text", "hello", text =>
+        [<button disabled> text->React.string </button>]
+      )
+    )
+  )
+);
+
+let dateProp =
+  makeProp((_date, setState) =>
+    <button onClick={_event => setState(Js.Date.make())}>
+      "Set to now"->React.string
     </button>
+  );
+demo("CustomProps", ({add}) =>
+  add("now", () =>
+    dateProp("date", Js.Date.make(), date =>
+      [<h1> {date->Js.Date.toUTCString->React.string} </h1>]
+    )
   )
 );
 

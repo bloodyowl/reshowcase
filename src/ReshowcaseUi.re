@@ -112,10 +112,6 @@ module DemoUnitSidebar = {
         (),
       )
       ->ReactDOMRe.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
-    // let label =
-    //   ReactDOMRe.Style.make(~paddingBottom="10px", ~display="block", ());
-    // let labelText =
-    //   ReactDOMRe.Style.make(~fontSize="10px", ~textTransform="uppercase", ());
   };
   [@react.component]
   let make = (~children, _) =>

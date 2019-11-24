@@ -2,8 +2,8 @@ open Entry;
 
 demo("Title", ({add}) => {
   add("font-size", () =>
-    Test.intProp("font size", 2, size =>
-      Test.stringProp("text", "hello", text =>
+    intProp("font size", 2, size =>
+      stringProp("text", "hello", text =>
         [
           <h1
             style={ReactDOMRe.Style.make(
@@ -17,16 +17,30 @@ demo("Title", ({add}) => {
     )
   );
   add("normal", () =>
-    Test.stringProp("text", "hello", text => [<h1> text->React.string </h1>])
+    stringProp("text", "hello", text => [<h1> text->React.string </h1>])
   );
 });
 
 demo("Button", ({add}) =>
   add("normal", () =>
-    Test.boolProp("font size", false, disabled =>
-      Test.stringProp("text", "hello", text =>
+    boolProp("disabled", false, disabled =>
+      stringProp("text", "hello", text =>
         [<button disabled> text->React.string </button>]
       )
+    )
+  )
+);
+
+let dateProp =
+  makeProp((_date, setState) =>
+    <button onClick={_event => setState(Js.Date.make())}>
+      "Set to now"->React.string
+    </button>
+  );
+demo("CustomProps", ({add}) =>
+  add("now", () =>
+    dateProp("date", Js.Date.make(), date =>
+      [<h1> {date->Js.Date.toUTCString->React.string} </h1>]
     )
   )
 );
