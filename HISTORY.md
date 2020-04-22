@@ -1,3 +1,9 @@
+## 2.0.1
+
+Changes:
+
+- Fix bug in interface file with namespace (thanks [@johnhaley81](https://github.com/johnhaley81)!) (0ec6975)
+
 ## 2.0.0
 
 Changes:
