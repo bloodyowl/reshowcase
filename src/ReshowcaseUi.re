@@ -156,7 +156,7 @@ module DemoUnitSidebar = {
              <div style=Styles.labelText> propName->React.string </div>
              <input
                type_="number"
-               min
+               min={j|$min|j}
                max={j|$max|j}
                value={j|$value|j}
                onChange={event =>
