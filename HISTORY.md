@@ -1,3 +1,10 @@
+## 3.0.0
+
+Changes:
+
+- Upgrade ReasonReact (ce8fe9c)
+- Bump BS version (ce8fe9c)
+
 ## 2.0.1
 
 Changes:
