@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "bs-platform": "^7.1.1",
+    "concurrently": "^6.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   }
