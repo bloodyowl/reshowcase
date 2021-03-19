@@ -5,9 +5,11 @@
     "reshowcase": "./commands/reshowcase"
   },
   "scripts": {
-    "build": "bsb -make-world",
-    "start": "bsb -make-world -w",
-    "clean": "bsb -clean-world"
+    "build-bsb": "bsb -make-world",
+    "start-bsb": "bsb -make-world -w",
+    "clean-bsb": "bsb -clean-world",
+    "start-reshowcase": "./commands/reshowcase ./example/Demo.bs.js",
+    "start": "npm run clean-bsb && concurrently --names 'wp,bsb' -c 'bgBlue.bold,bgGreen.bold' 'npm run start-bsb' 'npm run start-reshowcase'"
   },
   "keywords": [
     "BuckleScript"
