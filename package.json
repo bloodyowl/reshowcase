@@ -5,11 +5,11 @@
     "reshowcase": "./commands/reshowcase"
   },
   "scripts": {
-    "build-bsb": "bsb -make-world",
+    "build": "bsb -make-world",
+    "clean": "bsb -clean-world",
     "start-bsb": "bsb -make-world -w",
-    "clean-bsb": "bsb -clean-world",
     "start-reshowcase": "./commands/reshowcase ./example/Demo.bs.js",
-    "start": "npm run clean-bsb && concurrently --names 'wp,bsb' -c 'bgBlue.bold,bgGreen.bold' 'npm run start-bsb' 'npm run start-reshowcase'"
+    "start": "npm run clean && concurrently --names 'wp,bsb' -c 'bgBlue.bold,bgGreen.bold' 'npm run start-bsb' 'npm run start-reshowcase'"
   },
   "keywords": [
     "BuckleScript"
@@ -23,7 +23,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "devDependencies": {
-    "bs-platform": "^7.1.1",
+    "bs-platform": "^9.0.2",
     "concurrently": "^6.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
