@@ -9,7 +9,7 @@
     "clean": "bsb -clean-world",
     "start-bsb": "bsb -make-world -w",
     "start-reshowcase": "./commands/reshowcase ./example/Demo.bs.js",
-    "start": "npm run clean && concurrently --names 'wp,bsb' -c 'bgBlue.bold,bgGreen.bold' 'npm run start-bsb' 'npm run start-reshowcase'"
+    "start": "yarn clean && yarn build && concurrently --names 'wp,bsb' -c 'bgBlue.bold,bgGreen.bold' 'yarn run start-bsb' 'yarn run start-reshowcase'"
   },
   "keywords": [
     "BuckleScript"
