@@ -8,8 +8,7 @@
     "build": "bsb -make-world",
     "clean": "bsb -clean-world",
     "start-bsb": "bsb -make-world -w",
-    "start-reshowcase": "./commands/reshowcase ./example/Demo.bs.js",
-    "start": "yarn clean && yarn build && concurrently --names 'wp,bsb' -c 'bgBlue.bold,bgGreen.bold' 'yarn run start-bsb' 'yarn run start-reshowcase'"
+    "start": "bsb -clean-world && bsb -make-world && concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase ./example/Demo.bs.js'"
   },
   "keywords": [
     "BuckleScript"
