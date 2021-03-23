@@ -71,12 +71,11 @@ module DemoSidebar = {
 
   module MenuItem = {
     [@react.component]
-    let make = (~demoName, ~demoUnits) =>
+    let make = (~demoName, ~demoUnitNames) =>
       <div key=demoName>
         <div style=Styles.demoName> demoName->React.string </div>
         <div style=Styles.subList>
-          {demoUnits
-           ->Map.String.keysToArray
+          {demoUnitNames
            ->Array.map(demoUnitName =>
                <div key=demoUnitName>
                  <Link
@@ -92,8 +91,6 @@ module DemoSidebar = {
       </div>;
   };
 
-  let isBlank = s => Js.String.trim(s) == "";
-
   let hasSubstring = (s, ~substring) =>
     s->Js.String2.toLowerCase->Js.String2.includes(substring);
 
@@ -107,20 +104,33 @@ module DemoSidebar = {
           value=filterValue
           onChange={event =>
             setFilterValue(_ =>
-              event->ReactEvent.Form.target##value->Js.String.toLowerCase
+              event->ReactEvent.Form.target##value->Js.String2.toLowerCase
             )
           }
         />
         {demos
          ->Map.String.toArray
          ->Array.keepMap(((demoName, demoUnits)) => {
-             let demoNameHasSubstring =
-               demoName->hasSubstring(~substring=filterValue);
+             let demoUnitNames = demoUnits->Map.String.keysToArray;
 
-             if (filterValue->isBlank || demoNameHasSubstring) {
-               Some(<MenuItem demoName demoUnits />);
+             if (filterValue->Js.String2.trim == "") {
+               Some(<MenuItem demoName demoUnitNames />);
              } else {
-               None;
+               let demoNameHasSubstring =
+                 demoName->hasSubstring(~substring=filterValue);
+               let filteredDemoUnitNames =
+                 demoUnitNames->Array.keep(name =>
+                   name->hasSubstring(~substring=filterValue)
+                 );
+               switch (demoNameHasSubstring, filteredDemoUnitNames) {
+               | (false, [||]) => None
+               | (true, [||]) => Some(<MenuItem demoName demoUnitNames />)
+               | (true, _)
+               | (false, _) =>
+                 Some(
+                   <MenuItem demoName demoUnitNames=filteredDemoUnitNames />,
+                 )
+               };
              };
            })
          ->React.array}
