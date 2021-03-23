@@ -69,6 +69,29 @@ module DemoSidebar = {
       );
   };
 
+  module MenuItem = {
+    [@react.component]
+    let make = (~demoName, ~demoUnits) =>
+      <div key=demoName>
+        <div style=Styles.demoName> demoName->React.string </div>
+        <div style=Styles.subList>
+          {demoUnits
+           ->Map.String.keysToArray
+           ->Array.map(demoUnitName =>
+               <div key=demoUnitName>
+                 <Link
+                   style=Styles.link
+                   activeStyle=Styles.activeLink
+                   href={"/" ++ demoName ++ "/" ++ demoUnitName}
+                   text=demoUnitName
+                 />
+               </div>
+             )
+           ->React.array}
+        </div>
+      </div>;
+  };
+
   let isBlank = s => Js.String.trim(s) == "";
 
   let hasSubstring = (s, ~substring) =>
@@ -90,33 +113,16 @@ module DemoSidebar = {
         />
         {demos
          ->Map.String.toArray
-         ->Array.keepMap(((demoName, demoUnits)) =>
-             if (filterValue->isBlank
-                 || demoName->hasSubstring(~substring=filterValue)) {
-               Some(
-                 <div key=demoName>
-                   <div style=Styles.demoName> demoName->React.string </div>
-                   <div style=Styles.subList>
-                     {demoUnits
-                      ->Map.String.keysToArray
-                      ->Array.map(demoUnitName =>
-                          <div key=demoUnitName>
-                            <Link
-                              style=Styles.link
-                              activeStyle=Styles.activeLink
-                              href={"/" ++ demoName ++ "/" ++ demoUnitName}
-                              text=demoUnitName
-                            />
-                          </div>
-                        )
-                      ->React.array}
-                   </div>
-                 </div>,
-               );
+         ->Array.keepMap(((demoName, demoUnits)) => {
+             let demoNameHasSubstring =
+               demoName->hasSubstring(~substring=filterValue);
+
+             if (filterValue->isBlank || demoNameHasSubstring) {
+               Some(<MenuItem demoName demoUnits />);
              } else {
                None;
-             }
-           )
+             };
+           })
          ->React.array}
       </div>
     </div>;
