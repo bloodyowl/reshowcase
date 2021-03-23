@@ -1,3 +1,9 @@
+## 3.0.1
+
+Changes:
+
+- Dependencies updates and scripts reorg (thanks [@denis-ok](https://github.com/denis-ok)) (c7aad28)
+
 ## 3.0.0
 
 Changes:
