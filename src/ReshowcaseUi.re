@@ -68,31 +68,54 @@ module DemoSidebar = {
         (),
       );
   };
+
+  let isBlank = s => Js.String.trim(s) == "";
+
+  let hasSubstring = (s, ~substring) =>
+    s->Js.String2.toLowerCase->Js.String2.includes(substring);
+
   [@react.component]
   let make = (~demos) => {
+    let (filterValue, setFilterValue) = React.useState(() => "");
+
     <div style=Styles.container>
       <div>
+        <input
+          value=filterValue
+          onChange={event =>
+            setFilterValue(_ =>
+              event->ReactEvent.Form.target##value->Js.String.toLowerCase
+            )
+          }
+        />
         {demos
          ->Map.String.toArray
-         ->Array.map(((demoName, demoUnits)) =>
-             <div key=demoName>
-               <div style=Styles.demoName> demoName->React.string </div>
-               <div style=Styles.subList>
-                 {demoUnits
-                  ->Map.String.keysToArray
-                  ->Array.map(demoUnitName =>
-                      <div key=demoUnitName>
-                        <Link
-                          style=Styles.link
-                          activeStyle=Styles.activeLink
-                          href={"/" ++ demoName ++ "/" ++ demoUnitName}
-                          text=demoUnitName
-                        />
-                      </div>
-                    )
-                  ->React.array}
-               </div>
-             </div>
+         ->Array.keepMap(((demoName, demoUnits)) =>
+             if (filterValue->isBlank
+                 || demoName->hasSubstring(~substring=filterValue)) {
+               Some(
+                 <div key=demoName>
+                   <div style=Styles.demoName> demoName->React.string </div>
+                   <div style=Styles.subList>
+                     {demoUnits
+                      ->Map.String.keysToArray
+                      ->Array.map(demoUnitName =>
+                          <div key=demoUnitName>
+                            <Link
+                              style=Styles.link
+                              activeStyle=Styles.activeLink
+                              href={"/" ++ demoName ++ "/" ++ demoUnitName}
+                              text=demoUnitName
+                            />
+                          </div>
+                        )
+                      ->React.array}
+                   </div>
+                 </div>,
+               );
+             } else {
+               None;
+             }
            )
          ->React.array}
       </div>
