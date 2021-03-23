@@ -27,9 +27,9 @@ let compiler = webpack({
   output: {
     path: os.tmpdir(),
     publicPath: "/",
-    filename: "reshowcase[hash].js",
+    filename: "reshowcase[fullhash].js",
     globalObject: "this",
-    jsonpFunction: "reshowcase__d"
+    chunkLoadingGlobal: "reshowcase__d"
   },
   module: config.module,
   plugins: [

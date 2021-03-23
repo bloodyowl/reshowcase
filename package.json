@@ -6,8 +6,9 @@
   },
   "scripts": {
     "build": "bsb -make-world",
-    "start": "bsb -make-world -w",
-    "clean": "bsb -clean-world"
+    "clean": "bsb -clean-world",
+    "start-bsb": "bsb -make-world -w",
+    "start": "bsb -clean-world && bsb -make-world && concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase ./example/Demo.bs.js'"
   },
   "keywords": [
     "BuckleScript"
@@ -15,12 +16,15 @@
   "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
-    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-plugin": "^5.3.1",
     "reason-react": ">=0.9.1",
-    "webpack": "^4.41.2",
-    "webpack-dev-server": "^3.9.0"
+    "webpack": "^5.27.0",
+    "webpack-dev-server": "^3.11.2"
   },
   "devDependencies": {
-    "bs-platform": "^7.1.1"
+    "bs-platform": "^9.0.2",
+    "concurrently": "^6.0.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
   }
 }
