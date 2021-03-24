@@ -35,6 +35,8 @@ module Link = {
 };
 
 module DemoSidebar = {
+  module String = Js.String2;
+
   module Styles = {
     let container =
       ReactDOMRe.Style.make(
@@ -92,22 +94,67 @@ module DemoSidebar = {
   };
 
   module InputFilter = {
-    [@react.component]
-    let make = (~value, ~onChange) => {
-      <div
-        style={ReactDOMRe.Style.make(~padding="10px", ~display="flex", ())}>
-        <input
-          style={ReactDOMRe.Style.make(~padding="5px", ~width="100%", ())}
-          placeholder="Filter"
-          value
-          onChange
-        />
-      </div>;
+    module Styles = {
+      let buttonClear =
+        ReactDOM.Style.make(
+          ~position="absolute",
+          ~right="15px",
+          ~display="flex",
+          ~cursor="pointer",
+          ~border="none",
+          ~padding="0",
+          ~backgroundColor="transparent",
+          (),
+        );
+
+      let inputWrapper =
+        ReactDOM.Style.make(
+          ~position="relative",
+          ~padding="10px",
+          ~display="flex",
+          ~alignItems="center",
+          (),
+        );
+
+      let input =
+        ReactDOMRe.Style.make(
+          ~padding="5px",
+          ~paddingRight="20px",
+          ~width="100%",
+          (),
+        );
     };
+
+    module ButtonClear = {
+      let iconClose =
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 18 18">
+          <path
+            fill="gray"
+            d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"
+          />
+        </svg>;
+
+      [@react.component]
+      let make = (~onClear) =>
+        <button style=Styles.buttonClear onClick={_event => onClear()}>
+          iconClose
+        </button>;
+    };
+
+    [@react.component]
+    let make = (~value, ~onChange, ~onClear) =>
+      <div style=Styles.inputWrapper>
+        <input style=Styles.input placeholder="Filter" value onChange />
+        <ButtonClear onClear />
+      </div>;
   };
 
-  let hasSubstring = (s, ~substring) =>
-    s->Js.String2.toLowerCase->Js.String2.includes(substring);
+  let hasSubstring = (string, ~substring) =>
+    string->String.toLowerCase->String.includes(substring);
 
   [@react.component]
   let make = (~demos) => {
@@ -119,17 +166,18 @@ module DemoSidebar = {
           value=filterValue
           onChange={event =>
             setFilterValue(_ =>
-              event->ReactEvent.Form.target##value->Js.String2.toLowerCase
+              event->ReactEvent.Form.target##value->String.toLowerCase
             )
           }
+          onClear={() => setFilterValue(_ => "")}
         />
         {demos
          ->Map.String.toArray
          ->Array.keepMap(((demoName, demoUnits)) => {
              let demoUnitNames = demoUnits->Map.String.keysToArray;
 
-             if (filterValue->Js.String2.trim == "") {
-               Some(<MenuItem demoName demoUnitNames />);
+             if (filterValue->String.trim == "") {
+               Some(<MenuItem key=demoName demoName demoUnitNames />);
              } else {
                let demoNameHasSubstring =
                  demoName->hasSubstring(~substring=filterValue);
@@ -139,11 +187,16 @@ module DemoSidebar = {
                  );
                switch (demoNameHasSubstring, filteredDemoUnitNames) {
                | (false, [||]) => None
-               | (true, [||]) => Some(<MenuItem demoName demoUnitNames />)
+               | (true, [||]) =>
+                 Some(<MenuItem key=demoName demoName demoUnitNames />)
                | (true, _)
                | (false, _) =>
                  Some(
-                   <MenuItem demoName demoUnitNames=filteredDemoUnitNames />,
+                   <MenuItem
+                     key=demoName
+                     demoName
+                     demoUnitNames=filteredDemoUnitNames
+                   />,
                  )
                };
              };
