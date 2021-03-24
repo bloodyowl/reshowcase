@@ -91,6 +91,21 @@ module DemoSidebar = {
       </div>;
   };
 
+  module InputFilter = {
+    [@react.component]
+    let make = (~value, ~onChange) => {
+      <div
+        style={ReactDOMRe.Style.make(~padding="10px", ~display="flex", ())}>
+        <input
+          style={ReactDOMRe.Style.make(~padding="5px", ~width="100%", ())}
+          placeholder="Filter"
+          value
+          onChange
+        />
+      </div>;
+    };
+  };
+
   let hasSubstring = (s, ~substring) =>
     s->Js.String2.toLowerCase->Js.String2.includes(substring);
 
@@ -100,7 +115,7 @@ module DemoSidebar = {
 
     <div style=Styles.container>
       <div>
-        <input
+        <InputFilter
           value=filterValue
           onChange={event =>
             setFilterValue(_ =>
