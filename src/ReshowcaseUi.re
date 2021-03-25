@@ -24,7 +24,7 @@ module Link = {
         | (Some(style), _, false) => Some(style)
         | (Some(style), None, true) => Some(style)
         | (Some(style), Some(activeStyle), true) =>
-          Some(ReactDOMRe.Style.combine(style, activeStyle))
+          Some(ReactDOM.Style.combine(style, activeStyle))
         | (_, Some(activeStyle), true) => Some(activeStyle)
         | _ => None
         }
@@ -37,23 +37,23 @@ module Link = {
 module DemoSidebar = {
   module Styles = {
     let container =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~flexGrow="1",
         ~backgroundColor="#F4F7F8",
         ~overflowY="auto",
         (),
       )
-      ->ReactDOMRe.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
-    let subList = ReactDOMRe.Style.make(~fontSize="14px", ());
+      ->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
+    let subList = ReactDOM.Style.make(~fontSize="14px", ());
     let demoName =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~fontSize="14px",
         ~fontWeight="700",
         ~padding="10px",
         (),
       );
     let link =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~textDecoration="none",
         ~color="#195EAE",
         ~display="block",
@@ -61,7 +61,7 @@ module DemoSidebar = {
         (),
       );
     let activeLink =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~fontWeight="700",
         ~backgroundColor="#195EAE",
         ~color="#fff",
@@ -103,7 +103,7 @@ module DemoSidebar = {
 module DemoUnitSidebar = {
   module Styles = {
     let container =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~flexGrow="1",
         ~backgroundColor="#F4F7F8",
         ~fontSize="14px",
@@ -111,11 +111,11 @@ module DemoUnitSidebar = {
         ~overflowY="auto",
         (),
       )
-      ->ReactDOMRe.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
+      ->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
     let label =
-      ReactDOMRe.Style.make(~paddingBottom="10px", ~display="block", ());
+      ReactDOM.Style.make(~paddingBottom="10px", ~display="block", ());
     let labelText =
-      ReactDOMRe.Style.make(~fontSize="10px", ~textTransform="uppercase", ());
+      ReactDOM.Style.make(~fontSize="10px", ~textTransform="uppercase", ());
   };
   [@react.component]
   let make =
@@ -226,7 +226,7 @@ module DemoUnit = {
 
   module Styles = {
     let container =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~flexGrow="1",
         ~display="flex",
         ~alignItems="stretch",
@@ -234,7 +234,7 @@ module DemoUnit = {
         (),
       );
     let contents =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~flexGrow="1",
         ~padding="10px",
         ~overflowY="auto",
@@ -244,9 +244,9 @@ module DemoUnit = {
         ~justifyContent="center",
         (),
       )
-      ->ReactDOMRe.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
+      ->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
     let sidebar =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~width="200px",
         ~display="flex",
         ~flexDirection="column",
@@ -370,7 +370,7 @@ module DemoUnitFrame = {
   let make = (~demoName, ~demoUnitName, _) =>
     <iframe
       src={j|/unit/$demoName/$demoUnitName|j}
-      style={ReactDOMRe.Style.make(
+      style={ReactDOM.Style.make(
         ~height="100vh",
         ~width="100%",
         ~border="none",
@@ -382,7 +382,7 @@ module DemoUnitFrame = {
 module App = {
   module Styles = {
     let app =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~display="flex",
         ~flexDirection="row",
         ~minHeight="100vh",
@@ -390,21 +390,21 @@ module App = {
         (),
       );
     let navigation =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~width="200px",
         ~display="flex",
         ~flexDirection="column",
         (),
       );
     let main =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~flexGrow="1",
         ~display="flex",
         ~flexDirection="column",
         (),
       );
     let empty =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~flexGrow="1",
         ~display="flex",
         ~flexDirection="column",
@@ -413,7 +413,7 @@ module App = {
         (),
       );
     let emptyText =
-      ReactDOMRe.Style.make(
+      ReactDOM.Style.make(
         ~fontSize="22px",
         ~color="rgba(0, 0, 0, 0.4)",
         ~textAlign="center",
