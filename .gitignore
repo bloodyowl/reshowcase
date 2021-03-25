@@ -6,3 +6,6 @@ npm-debug.log
 /lib/bs/
 /node_modules/
 *.bs.js
+_esy
+esy.lock
+.vscode/settings.json
