@@ -1,31 +1,30 @@
 # Reshowcase
 
-> A tool to create demos for your ReasonReact components
+> A tool to create demos for your ReScript React components
 
 ![Screenshot](./example/example-2021.png)
 
-```reason
+```rescript
 /* path/to/Demo.re */
-open Reshowcase.Entry;
+open Reshowcase.Entry
 
 demo("Title", ({add}) => {
   add("normal", ({string}) =>
     <h1> {string("text", "hello")->React.string} </h1>
-  );
+  )
   add("font-size", ({string, int}) =>
     <h1
-      style={ReactDOMRe.Style.make(
+      style={ReactDOM.Style.make(
         ~fontSize={
-          let size =
-            int("font size", {min: 0, max: 100, initial: 30, step: 1});
-          {j|$(size)px|j};
+          let size = int("font size", {min: 0, max: 100, initial: 30, step: 1})
+          `$(size->Belt.Int.toString)px`
         },
         (),
       )}>
       {string("text", "hello")->React.string}
     </h1>
-  );
-});
+  )
+})
 
 demo("Button", ({add}) =>
   add("normal", ({string, bool}) =>
@@ -33,9 +32,9 @@ demo("Button", ({add}) =>
       {string("text", "hello")->React.string}
     </button>
   )
-);
+)
 
-start();
+start()
 ```
 
 ## Install
