@@ -22,7 +22,10 @@ let demo = (demoName, func) => {
   );
 };
 
-let start = () => {
-  let demos = demos->MutableMap.String.toArray->Map.String.fromArray;
-  ReactDOMRe.renderToElementWithId(<ReshowcaseUi.App demos />, "root");
-};
+let start = () =>
+  switch (ReactDOM.querySelector("#root")) {
+  | Some(root) =>
+    let demos = demos->MutableMap.String.toArray->Map.String.fromArray;
+    ReactDOM.render(<ReshowcaseUi.App demos />, root);
+  | None => ()
+  };
