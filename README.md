@@ -2,7 +2,7 @@
 
 > A tool to create demos for your ReasonReact components
 
-![Screenshot](./example/example.png)
+![Screenshot](./example/example-2021.png)
 
 ```reason
 /* path/to/Demo.re */
