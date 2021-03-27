@@ -5,19 +5,22 @@
 ![Screenshot](./example/example-2021.png)
 
 ```rescript
-/* path/to/Demo.re */
 open Reshowcase.Entry
 
+// Create a demo
 demo("Title", ({add}) => {
+  // Add an example
   add("normal", ({string}) =>
+    // Register "handles" from your JSX directly
     <h1> {string("text", "hello")->React.string} </h1>
   )
   add("font-size", ({string, int}) =>
     <h1
       style={ReactDOM.Style.make(
         ~fontSize={
+          // Handles can be strings, ints, floats and booleans
           let size = int("font size", {min: 0, max: 100, initial: 30, step: 1})
-          `$(size->Belt.Int.toString)px`
+          `${size->Belt.Int.toString}px`
         },
         (),
       )}>
