@@ -1,3 +1,15 @@
+## 3.1.0
+
+Features:
+
+- Add search (thanks [@denis-ok](https://github.com/denis-ok)) (3253c5c)
+
+Changes:
+
+- Update React (thanks [@denis-ok](https://github.com/denis-ok)) (1d2cc99)
+- UI updates (5789d48)
+
+
 ## 3.0.1
 
 Changes:
