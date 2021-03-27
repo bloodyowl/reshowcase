@@ -47,8 +47,7 @@ module DemoSidebar = {
     let subList = ReactDOM.Style.make(~fontSize="16px", ());
     let demoName =
       ReactDOM.Style.make(
-        ~fontSize="18px",
-        ~fontWeight="700",
+        ~fontWeight="500",
         ~padding="10px",
         ~margin="10px 10px 0",
         (),
@@ -59,8 +58,9 @@ module DemoSidebar = {
         ~color="#0091FF",
         ~display="block",
         ~padding="7px 10px",
-        ~margin="0 10px",
+        ~margin="0 10px 0 20px",
         ~borderRadius="7px",
+        ~fontWeight="500",
         (),
       );
     let activeLink =
