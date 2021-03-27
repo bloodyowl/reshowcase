@@ -5,7 +5,7 @@ module Link = {
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
     let url = ReasonReact.Router.useUrl();
     let path = "/" ++ String.concat("/", url.path);
-    let isActive = path === href;
+    let isActive = path ++ "?" ++ url.search === href;
     <a
       href
       onClick={event =>
@@ -35,40 +35,36 @@ module Link = {
 };
 
 module DemoSidebar = {
-  module String = Js.String2;
-
   module Styles = {
     let container =
       ReactDOM.Style.make(
         ~flexGrow="1",
-        ~backgroundColor="#F4F7F8",
+        ~backgroundColor="#F5F6F6",
         ~overflowY="auto",
         (),
       )
       ->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
-    let subList = ReactDOM.Style.make(~fontSize="14px", ());
+    let subList = ReactDOM.Style.make(~fontSize="16px", ());
     let demoName =
       ReactDOM.Style.make(
-        ~fontSize="14px",
+        ~fontSize="18px",
         ~fontWeight="700",
         ~padding="10px",
+        ~margin="10px 10px 0",
         (),
       );
     let link =
       ReactDOM.Style.make(
         ~textDecoration="none",
-        ~color="#195EAE",
+        ~color="#0091FF",
         ~display="block",
-        ~padding="5px 10px",
+        ~padding="7px 10px",
+        ~margin="0 10px",
+        ~borderRadius="7px",
         (),
       );
     let activeLink =
-      ReactDOM.Style.make(
-        ~fontWeight="700",
-        ~backgroundColor="#195EAE",
-        ~color="#fff",
-        (),
-      );
+      ReactDOM.Style.make(~backgroundColor="#0091FF", ~color="#fff", ());
   };
 
   module MenuItem = {
@@ -83,7 +79,12 @@ module DemoSidebar = {
                  <Link
                    style=Styles.link
                    activeStyle=Styles.activeLink
-                   href={"/" ++ demoName ++ "/" ++ demoUnitName}
+                   href={
+                     "/?demo="
+                     ++ demoName->Js.Global.encodeURIComponent
+                     ++ "&unit="
+                     ++ demoUnitName->Js.Global.encodeURIComponent
+                   }
                    text=demoUnitName
                  />
                </div>
@@ -93,45 +94,56 @@ module DemoSidebar = {
       </div>;
   };
 
-  module InputFilter = {
+  module SearchInput = {
     module Styles = {
       let buttonClear =
         ReactDOM.Style.make(
           ~position="absolute",
-          ~right="15px",
+          ~right="7px",
           ~display="flex",
           ~cursor="pointer",
           ~border="none",
           ~padding="0",
           ~backgroundColor="transparent",
+          ~top="50%",
+          ~transform="translateY(-50%)",
+          ~margin="0",
           (),
         );
 
       let inputWrapper =
         ReactDOM.Style.make(
           ~position="relative",
-          ~padding="10px",
           ~display="flex",
           ~alignItems="center",
+          ~backgroundColor="#E0E2E4",
+          ~borderRadius="7px",
+          ~margin="10px",
           (),
         );
 
       let input =
         ReactDOMRe.Style.make(
-          ~padding="5px",
-          ~paddingRight="20px",
+          ~padding="7px 10px",
           ~width="100%",
+          ~margin="0",
+          ~fontFamily="inherit",
+          ~fontSize="16px",
+          ~border="none",
+          ~backgroundColor="transparent",
+          ~borderRadius="7px",
           (),
         );
     };
 
-    module ButtonClear = {
+    module ClearButton = {
       let iconClose =
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="18"
           height="18"
-          viewBox="0 0 18 18">
+          viewBox="0 0 18 18"
+          style={ReactDOM.Style.make(~display="block", ())}>
           <path
             fill="gray"
             d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"
@@ -149,41 +161,41 @@ module DemoSidebar = {
     let make = (~value, ~onChange, ~onClear) =>
       <div style=Styles.inputWrapper>
         <input style=Styles.input placeholder="Filter" value onChange />
-        <ButtonClear onClear />
+        {value === "" ? React.null : <ClearButton onClear />}
       </div>;
   };
 
-  let hasSubstring = (string, ~substring) =>
-    string->String.toLowerCase->String.includes(substring);
-
   [@react.component]
   let make = (~demos) => {
-    let (filterValue, setFilterValue) = React.useState(() => "");
+    let (filterValue, setFilterValue) = React.useState(() => None);
 
     <div style=Styles.container>
       <div>
-        <InputFilter
-          value=filterValue
-          onChange={event =>
+        <SearchInput
+          value={filterValue->Option.getWithDefault("")}
+          onChange={event => {
+            let value = event->ReactEvent.Form.target##value;
             setFilterValue(_ =>
-              event->ReactEvent.Form.target##value->String.toLowerCase
-            )
-          }
-          onClear={() => setFilterValue(_ => "")}
+              value->Js.String2.trim === "" ? None : Some(value)
+            );
+          }}
+          onClear={() => setFilterValue(_ => None)}
         />
         {demos
          ->Map.String.toArray
          ->Array.keepMap(((demoName, demoUnits)) => {
              let demoUnitNames = demoUnits->Map.String.keysToArray;
-
-             if (filterValue->String.trim == "") {
-               Some(<MenuItem key=demoName demoName demoUnitNames />);
-             } else {
+             switch (filterValue) {
+             | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
+             | Some(filterValue) =>
+               let search = filterValue->Js.String2.toLowerCase;
                let demoNameHasSubstring =
-                 demoName->hasSubstring(~substring=filterValue);
+                 demoName
+                 ->Js.String2.toLowerCase
+                 ->Js.String2.includes(search);
                let filteredDemoUnitNames =
                  demoUnitNames->Array.keep(name =>
-                   name->hasSubstring(~substring=filterValue)
+                   name->Js.String2.toLowerCase->Js.String2.includes(search)
                  );
                switch (demoNameHasSubstring, filteredDemoUnitNames) {
                | (false, [||]) => None
@@ -212,17 +224,49 @@ module DemoUnitSidebar = {
     let container =
       ReactDOM.Style.make(
         ~flexGrow="1",
-        ~backgroundColor="#F4F7F8",
-        ~fontSize="14px",
+        ~backgroundColor="#F5F6F6",
+        ~fontSize="16px",
         ~padding="10px",
         ~overflowY="auto",
         (),
       )
       ->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
     let label =
-      ReactDOM.Style.make(~paddingBottom="10px", ~display="block", ());
+      ReactDOM.Style.make(
+        ~display="block",
+        ~margin="10px",
+        ~padding="10px",
+        ~backgroundColor="#fff",
+        ~borderRadius="7px",
+        ~boxShadow="0 5px 10px rgba(0, 0, 0, 0.07)",
+        (),
+      );
     let labelText =
-      ReactDOM.Style.make(~fontSize="10px", ~textTransform="uppercase", ());
+      ReactDOM.Style.make(
+        ~fontSize="16px",
+        ~textAlign="center",
+        ~paddingBottom="10px",
+        (),
+      );
+    let textInput =
+      ReactDOM.Style.make(
+        ~fontSize="16px",
+        ~width="100%",
+        ~boxSizing="border-box",
+        ~backgroundColor="#f5f6f6",
+        ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
+        ~border="none",
+        ~padding="10px",
+        ~borderRadius="7px",
+        (),
+      );
+    let checkbox =
+      ReactDOM.Style.make(
+        ~fontSize="16px",
+        ~margin="0 auto",
+        ~display="block",
+        (),
+      );
   };
   [@react.component]
   let make =
@@ -246,6 +290,7 @@ module DemoUnitSidebar = {
              <input
                type_="text"
                value
+               style=Styles.textInput
                onChange={event =>
                  onStringChange(
                    propName,
@@ -266,6 +311,7 @@ module DemoUnitSidebar = {
                min={j|$min|j}
                max={j|$max|j}
                value={j|$value|j}
+               style=Styles.textInput
                onChange={event =>
                  onIntChange(
                    propName,
@@ -286,6 +332,7 @@ module DemoUnitSidebar = {
                min={j|$min|j}
                max={j|$max|j}
                value={j|$value|j}
+               style=Styles.textInput
                onChange={event =>
                  onFloatChange(
                    propName,
@@ -304,6 +351,7 @@ module DemoUnitSidebar = {
              <input
                type_="checkbox"
                checked
+               style=Styles.checkbox
                onChange={event =>
                  onBoolChange(
                    propName,
@@ -354,7 +402,7 @@ module DemoUnit = {
       ->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch");
     let sidebar =
       ReactDOM.Style.make(
-        ~width="200px",
+        ~width="230px",
         ~display="flex",
         ~flexDirection="column",
         (),
@@ -474,9 +522,14 @@ module DemoUnit = {
 
 module DemoUnitFrame = {
   [@react.component]
-  let make = (~demoName, ~demoUnitName, _) =>
+  let make = (~demoName=?, ~demoUnitName=?, _) =>
     <iframe
-      src={j|/unit/$demoName/$demoUnitName|j}
+      src={
+        switch (demoName, demoUnitName) {
+        | (Some(demo), Some(unit)) => {j|/unit?demo=$demo&unit=$unit|j}
+        | _ => "/unit"
+        }
+      }
       style={ReactDOM.Style.make(
         ~height="100vh",
         ~width="100%",
@@ -494,11 +547,12 @@ module App = {
         ~flexDirection="row",
         ~minHeight="100vh",
         ~alignItems="stretch",
+        ~color="#42484D",
         (),
       );
     let navigation =
       ReactDOM.Style.make(
-        ~width="200px",
+        ~width="230px",
         ~display="flex",
         ~flexDirection="column",
         (),
@@ -527,12 +581,29 @@ module App = {
         (),
       );
   };
+  type route =
+    | Unit(string, string)
+    | Demo(string, string)
+    | Home;
+  type urlSearchParams;
+  [@bs.new]
+  external urlSearchParams: string => urlSearchParams = "URLSearchParams";
+  [@bs.return nullable] [@bs.send]
+  external get: (urlSearchParams, string) => option(string) = "get";
+
   [@react.component]
   let make = (~demos) => {
     let url = ReasonReact.Router.useUrl();
+    let queryString = url.search->urlSearchParams;
+    let route =
+      switch (url.path, queryString->get("demo"), queryString->get("unit")) {
+      | (["unit"], Some(demo), Some(unit)) => Unit(demo, unit)
+      | ([], Some(demo), Some(unit)) => Demo(demo, unit)
+      | _ => Home
+      };
     <div style=Styles.app>
-      {switch (url.path) {
-       | ["unit", demoName, demoUnitName] =>
+      {switch (route) {
+       | Unit(demoName, demoUnitName) =>
          <div style=Styles.main>
            {demos
             ->Map.String.get(demoName)
@@ -542,14 +613,14 @@ module App = {
               )
             ->Option.getWithDefault(React.null)}
          </div>
-       | [demoName, demoUnitName] =>
+       | Demo(demoName, demoUnitName) =>
          <>
            <div style=Styles.navigation> <DemoSidebar demos /> </div>
            <div style=Styles.main>
              <DemoUnitFrame demoName demoUnitName />
            </div>
          </>
-       | _ =>
+       | Home =>
          <>
            <div style=Styles.navigation> <DemoSidebar demos /> </div>
            <div style=Styles.main>
