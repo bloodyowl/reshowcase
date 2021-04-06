@@ -52,8 +52,16 @@ Then add to your `"reshowcase"` to `bs-dependencies` in your `bsconfig.json`.
 
 ## Usage
 
+### To start / develop:
+
 ```console
-$ reshowcase path/to/Demo.bs.js
+$ reshowcase start --entry=path/to/Demo.bs.js
+```
+
+### To build bundle:
+
+```console
+$ reshowcase build --entry=path/to/Demo.bs.js --output=path/to/bundle
 ```
 
 If you need custom webpack options, create the `.reshowcase/config.js` and export the webpack config, plugins and modules will be merged.
