@@ -225,11 +225,29 @@ module DemoUnitSidebar = {
       ~borderRadius="7px",
       (),
     )
+    let select =
+      ReactDOM.Style.make(
+        ~fontSize="16px",
+        ~width="100%",
+        ~boxSizing="border-box",
+        ~backgroundColor="#f5f6f6",
+        ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
+        ~border="none",
+        ~padding="10px",
+        ~borderRadius="7px",
+        ~appearance="none",
+        ~paddingRight="30px",
+        ~backgroundImage=`url("data:image/svg+xml,%3Csvg width='36' height='36' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%2342484E' stroke-width='2' d='M12.246 14.847l5.826 5.826 5.827-5.826' fill='none' fill-rule='evenodd' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+        ~backgroundPosition="center right",
+        ~backgroundSize="contain",
+        ~backgroundRepeat="no-repeat",
+        (),
+      )->ReactDOM.Style.unsafeAddProp("WebkitAppearance", "none")
     let checkbox = ReactDOM.Style.make(~fontSize="16px", ~margin="0 auto", ~display="block", ())
   }
   @react.component
   let make = (
-    ~strings: Map.String.t<(Configs.stringConfig, string)>,
+    ~strings: Map.String.t<(Configs.stringConfig, string, option<array<(string, string)>>)>,
     ~ints: Map.String.t<(Configs.numberConfig<int>, int)>,
     ~floats: Map.String.t<(Configs.numberConfig<float>, float)>,
     ~bools: Map.String.t<(Configs.boolConfig, bool)>,
@@ -242,15 +260,33 @@ module DemoUnitSidebar = {
     <div style=Styles.container>
       {strings
       ->Map.String.toArray
-      ->Array.map(((propName, (_config, value))) =>
+      ->Array.map(((propName, (_config, value, options))) =>
         <label key=propName style=Styles.label>
           <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="text"
-            value
-            style=Styles.textInput
-            onChange={event => onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
-          />
+          {switch options {
+          | None =>
+            <input
+              type_="text"
+              value
+              style=Styles.textInput
+              onChange={event => onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+            />
+          | Some(options) =>
+            <select
+              style=Styles.select
+              onChange={event => {
+                let value = (event->ReactEvent.Form.target)["value"]
+                onStringChange(propName, value)
+              }}>
+              {options
+              ->Array.map(((key, optionValue)) => {
+                <option key selected={value == optionValue} value={optionValue}>
+                  {key->React.string}
+                </option>
+              })
+              ->React.array}
+            </select>
+          }}
         </label>
       )
       ->React.array}
@@ -307,7 +343,7 @@ module DemoUnitSidebar = {
 
 module DemoUnit = {
   type state = {
-    strings: Map.String.t<(Configs.stringConfig, string)>,
+    strings: Map.String.t<(Configs.stringConfig, string, option<array<(string, string)>>)>,
     ints: Map.String.t<(Configs.numberConfig<int>, int)>,
     floats: Map.String.t<(Configs.numberConfig<float>, float)>,
     bools: Map.String.t<(Configs.boolConfig, bool)>,
@@ -349,7 +385,7 @@ module DemoUnit = {
         | SetString(name, newValue) => {
             ...state,
             strings: state.strings->Map.String.update(name, value =>
-              value->Option.map(((config, _value)) => (config, newValue))
+              value->Option.map(((config, _value, options)) => (config, newValue, options))
             ),
           }
         | SetInt(name, newValue) => {
@@ -377,8 +413,8 @@ module DemoUnit = {
         let floats = ref(Map.String.empty)
         let bools = ref(Map.String.empty)
         let props: Configs.demoUnit = {
-          string: (name, config) => {
-            strings := strings.contents->Map.String.set(name, (config, config))
+          string: (name, ~options=?, config) => {
+            strings := strings.contents->Map.String.set(name, (config, config, options))
             config
           },
           int: (name, config) => {
@@ -404,8 +440,8 @@ module DemoUnit = {
       },
     )
     let props: Configs.demoUnit = {
-      string: (name, _config) => {
-        let (_, value) = state.strings->Map.String.getExn(name)
+      string: (name, ~options as _=?, _config) => {
+        let (_, value, _) = state.strings->Map.String.getExn(name)
         value
       },
       int: (name, _config) => {
