@@ -4,7 +4,7 @@ module Link = {
   @react.component
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
     let url = ReasonReact.Router.useUrl()
-    let path = "/" ++ String.concat("/", url.path)
+    let path = String.concat("/", url.path)
     let isActive = path ++ ("?" ++ url.search) === href
     <a
       href
@@ -68,7 +68,7 @@ module DemoSidebar = {
               <Link
                 style=Styles.link
                 activeStyle=Styles.activeLink
-                href={"/?demo=" ++
+                href={"?demo=" ++
                 (demoName->Js.Global.encodeURIComponent ++
                 ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
                 text=demoUnitName
@@ -444,8 +444,8 @@ module DemoUnitFrame = {
   let make = (~demoName=?, ~demoUnitName=?, _) =>
     <iframe
       src={switch (demoName, demoUnitName) {
-      | (Some(demo), Some(unit)) => j`/?iframe=true&demo=$demo&unit=$unit`
-      | _ => "/?iframe=true"
+      | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
+      | _ => "?iframe=true"
       }}
       style={ReactDOM.Style.make(~height="100vh", ~width="100%", ~border="none", ())}
     />
@@ -497,7 +497,11 @@ module App = {
   let make = (~demos) => {
     let url = ReasonReact.Router.useUrl()
     let queryString = url.search->urlSearchParams
-    let route = switch (queryString->get("iframe"), queryString->get("demo"), queryString->get("unit")) {
+    let route = switch (
+      queryString->get("iframe"),
+      queryString->get("demo"),
+      queryString->get("unit"),
+    ) {
     | (Some("true"), Some(demo), Some(unit)) => Unit(demo, unit)
     | (_, Some(demo), Some(unit)) => Demo(demo, unit)
     | _ => Home
