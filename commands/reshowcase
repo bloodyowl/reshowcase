@@ -1,16 +1,63 @@
 #!/usr/bin/env node
 
-let webpack = require("webpack");
-let WebpackDevServer = require("webpack-dev-server");
-let path = require("path");
-let os = require("os");
-let HtmlWebpackPlugin = require("html-webpack-plugin");
-let child_process = require("child_process");
+const webpack = require("webpack");
+const WebpackDevServer = require("webpack-dev-server");
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const child_process = require("child_process");
 
-if (typeof process.argv[2] !== "string") {
-  console.error("You need to pass the path to the entry point");
+const toAbsolutePath = (filepath) => {
+  if (path.isAbsolute(filepath)) {
+    return filepath;
+  } else {
+    return path.join(process.cwd(), filepath);
+  }
+};
+
+const getRequiredPathValue = (name) => {
+  const prefix = `--${name}=`;
+  const arg = process.argv.find((item) => item.startsWith(prefix));
+  if (arg === undefined) {
+    console.error(`Please pass ${name} path: ${prefix}...`);
+    process.exit(1);
+  } else {
+    const value = arg.replace(prefix, "");
+    if (value === "") {
+      console.error(`${name} path can't be empty`);
+      process.exit(1);
+    } else {
+      return toAbsolutePath(value);
+    }
+  }
+};
+
+const task = process.argv[2];
+
+if (task !== "build" && task !== "start") {
+  console.error(
+    "You need to pass 'start' or 'build' command and path to the entry point.\nFor example: reshowcase start --entry=./example/Demo.bs.js"
+  );
   process.exit(1);
 }
+
+const isBuild = task === "build";
+
+const entryPath = getRequiredPathValue("entry");
+
+if (!fs.existsSync(entryPath)) {
+  console.error(`Entry file not found here: ${entryPath}`);
+  process.exit(1);
+}
+
+const outputPath = (() => {
+  if (isBuild) {
+    return getRequiredPathValue("output");
+  } else {
+    return os.tmpdir();
+  }
+})();
 
 let config;
 try {
@@ -19,52 +66,64 @@ try {
   config = {};
 }
 
-let compiler = webpack({
+const compiler = webpack({
   mode: "development",
   entry: {
-    index: path.join(process.cwd(), process.argv[2])
+    index: entryPath,
   },
   output: {
-    path: os.tmpdir(),
+    path: outputPath,
     publicPath: "/",
     filename: "reshowcase[fullhash].js",
     globalObject: "this",
-    chunkLoadingGlobal: "reshowcase__d"
+    chunkLoadingGlobal: "reshowcase__d",
   },
   module: config.module,
   plugins: [
     ...(config.plugins ? config.plugins : []),
     new HtmlWebpackPlugin({
-      template: process.argv.find(item => item.startsWith("--template="))
+      template: process.argv.find((item) => item.startsWith("--template="))
         ? path.join(
             process.cwd(),
             process.argv
-              .find(item => item.startsWith("--template="))
+              .find((item) => item.startsWith("--template="))
               .replace(/--template=/, "")
           )
-        : path.join(__dirname, "../src/index.html")
-    })
-  ]
+        : path.join(__dirname, "../src/index.html"),
+    }),
+  ],
 });
 
-let port = parseInt(
-  process.argv.find(item => item.startsWith("--port="))
-    ? process.argv
-        .find(item => item.startsWith("--port="))
-        .replace(/--port=/, "")
-    : 9000,
-  10
-);
+if (isBuild) {
+  console.log("Building reshowcase bundle...");
+  compiler.run((err, _result) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Build finished.");
+    }
+  });
+} else {
+  const port = parseInt(
+    process.argv.find((item) => item.startsWith("--port="))
+      ? process.argv
+          .find((item) => item.startsWith("--port="))
+          .replace(/--port=/, "")
+      : 9000,
+    10
+  );
 
-let server = new WebpackDevServer(compiler, {
-  compress: true,
-  port: port,
-  historyApiFallback: {
-    index: "/index.html"
-  },
-  stats: "errors-only"
-});
+  const server = new WebpackDevServer(compiler, {
+    compress: true,
+    port: port,
+    publicPath: "/",
+    historyApiFallback: {
+      index: "/index.html",
+    },
+    stats: "errors-only",
+  });
 
-server.listen(port, "0.0.0.0");
+  server.listen(port, "0.0.0.0");
 
-child_process.exec("open http://localhost:" + port, () => {});
+  child_process.exec("open http://localhost:" + port, () => {});
+}

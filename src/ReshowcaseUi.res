@@ -444,8 +444,8 @@ module DemoUnitFrame = {
   let make = (~demoName=?, ~demoUnitName=?, _) =>
     <iframe
       src={switch (demoName, demoUnitName) {
-      | (Some(demo), Some(unit)) => j`/unit?demo=$demo&unit=$unit`
-      | _ => "/unit"
+      | (Some(demo), Some(unit)) => j`/?iframe=true&demo=$demo&unit=$unit`
+      | _ => "/?iframe=true"
       }}
       style={ReactDOM.Style.make(~height="100vh", ~width="100%", ~border="none", ())}
     />
@@ -497,9 +497,9 @@ module App = {
   let make = (~demos) => {
     let url = ReasonReact.Router.useUrl()
     let queryString = url.search->urlSearchParams
-    let route = switch (url.path, queryString->get("demo"), queryString->get("unit")) {
-    | (list{"unit"}, Some(demo), Some(unit)) => Unit(demo, unit)
-    | (list{}, Some(demo), Some(unit)) => Demo(demo, unit)
+    let route = switch (queryString->get("iframe"), queryString->get("demo"), queryString->get("unit")) {
+    | (Some("true"), Some(demo), Some(unit)) => Unit(demo, unit)
+    | (_, Some(demo), Some(unit)) => Demo(demo, unit)
     | _ => Home
     }
     <div style=Styles.app>

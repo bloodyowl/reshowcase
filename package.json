@@ -5,10 +5,11 @@
     "reshowcase": "./commands/reshowcase"
   },
   "scripts": {
-    "build": "bsb -make-world",
+    "build-bsb": "bsb -make-world",
     "clean": "bsb -clean-world",
     "start-bsb": "bsb -make-world -w",
-    "start": "bsb -clean-world && bsb -make-world && concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase ./example/Demo.bs.js'"
+    "start": "bsb -clean-world && bsb -make-world && concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase start --entry=./example/Demo.bs.js'",
+    "build": "bsb -clean-world && bsb -make-world && rm -r build ; ./commands/reshowcase build --entry=./example/Demo.bs.js --output=./build"
   },
   "keywords": [
     "BuckleScript"
