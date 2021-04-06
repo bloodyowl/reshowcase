@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const child_process = require("child_process");
 
 const toAbsolutePath = (filepath) => {
@@ -80,6 +81,9 @@ const compiler = webpack({
   module: config.module,
   plugins: [
     ...(config.plugins ? config.plugins : []),
+    new CopyWebpackPlugin({
+      patterns: [{ from: "src/favicon.png", to: "" }],
+    }),
     new HtmlWebpackPlugin({
       template: process.argv.find((item) => item.startsWith("--template="))
         ? path.join(
