@@ -5,7 +5,7 @@ module Link = {
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
     let url = ReasonReact.Router.useUrl()
     let path = String.concat("/", url.path)
-    let isActive = path ++ ("?" ++ url.search) === href
+    let isActive = (path ++ ("?" ++ url.search))->Js.String2.endsWith(href)
     <a
       href
       onClick={event =>
