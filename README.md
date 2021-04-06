@@ -1,4 +1,4 @@
-# <img src="./src/favicon.png" width="24" height="24" style="width:1em;height:auto;vertical-align:baseline;" alt="" /> Reshowcase
+# Reshowcase
 
 > A tool to create demos for your ReScript React components
 
