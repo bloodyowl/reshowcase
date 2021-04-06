@@ -73,7 +73,6 @@ const compiler = webpack({
   },
   output: {
     path: outputPath,
-    publicPath: "/",
     filename: "reshowcase[fullhash].js",
     globalObject: "this",
     chunkLoadingGlobal: "reshowcase__d",
