@@ -1,3 +1,13 @@
+# 4.0.1
+
+Features:
+
+- Add `options` to string to render handle as select (2191037)
+
+Changes:
+
+- Add favicon (27a1620)
+
 ## 4.0.0
 
 Changes:
