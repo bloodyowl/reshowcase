@@ -1,3 +1,9 @@
+## 4.0.0
+
+Changes:
+
+- Add build command (NOTE: the `start` command changed its signature) (thanks [@denis-ok](https://github.com/denis-ok)) (e942e46)
+
 ## 3.1.0
 
 Features:
