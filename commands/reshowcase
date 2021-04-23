@@ -68,6 +68,7 @@ try {
 }
 
 const compiler = webpack({
+  target: "web",
   mode: "development",
   entry: {
     index: entryPath,
