@@ -1,3 +1,9 @@
+## 4.0.2
+
+Changes:
+
+- Fix webpack issues (thanks [@denis-ok](https://github.com/denis-ok)) (d70e63e, 66ddfd2)
+
 # 4.0.1
 
 Features:
