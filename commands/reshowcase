@@ -82,7 +82,7 @@ const compiler = webpack({
   plugins: [
     ...(config.plugins ? config.plugins : []),
     new CopyWebpackPlugin({
-      patterns: [{ from: "src/favicon.png", to: "" }],
+      patterns: [{ from: path.join(__dirname, "../src/favicon.png"), to: "" }],
     }),
     new HtmlWebpackPlugin({
       template: process.argv.find((item) => item.startsWith("--template="))
