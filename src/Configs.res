@@ -9,7 +9,7 @@ type stringConfig = string
 
 type boolConfig = bool
 
-type demoUnit = {
+type demoUnitProps = {
   string: (string, ~options: array<(string, string)>=?, stringConfig) => string,
   int: (string, numberConfig<int>) => int,
   float: (string, numberConfig<float>) => float,

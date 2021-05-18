@@ -363,7 +363,7 @@ module DemoUnit = {
   }
 
   @react.component
-  let make = (~demoUnit: Configs.demoUnit => React.element) => {
+  let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
     let (state, dispatch) = React.useReducer(
       (state, action) =>
         switch action {
@@ -397,7 +397,7 @@ module DemoUnit = {
         let ints = ref(Map.String.empty)
         let floats = ref(Map.String.empty)
         let bools = ref(Map.String.empty)
-        let props: Configs.demoUnit = {
+        let props: Configs.demoUnitProps = {
           string: (name, ~options=?, config) => {
             strings := strings.contents->Map.String.set(name, (config, config, options))
             config
@@ -424,7 +424,7 @@ module DemoUnit = {
         }
       },
     )
-    let props: Configs.demoUnit = {
+    let props: Configs.demoUnitProps = {
       string: (name, ~options as _=?, _config) => {
         let (_, value, _) = state.strings->Map.String.getExn(name)
         value
