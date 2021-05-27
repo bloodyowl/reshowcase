@@ -1,5 +1,15 @@
 open Belt
 
+module Color = {
+  let white = "#fff"
+  let lightGray = "#f5f6f6"
+  let midGray = "#e0e2e4"
+  let darkGray = "#42484d"
+  let black40a = "rgba(0, 0, 0, 0.4)"
+  let blue = "#0091ff"
+  let transparent = "transparent"
+}
+
 module Link = {
   @react.component
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
@@ -32,7 +42,7 @@ module DemoSidebar = {
     let container =
       ReactDOM.Style.make(
         ~flexGrow="1",
-        ~backgroundColor="#F5F6F6",
+        ~backgroundColor=Color.lightGray,
         ~overflowY="auto",
         (),
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
@@ -45,7 +55,7 @@ module DemoSidebar = {
     )
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
-      ~color="#0091FF",
+      ~color=Color.blue,
       ~display="block",
       ~padding="7px 10px",
       ~margin="0 10px 0 20px",
@@ -53,7 +63,7 @@ module DemoSidebar = {
       ~fontWeight="500",
       (),
     )
-    let activeLink = ReactDOM.Style.make(~backgroundColor="#0091FF", ~color="#fff", ())
+    let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
   }
 
   module MenuItem = {
@@ -89,7 +99,7 @@ module DemoSidebar = {
         ~cursor="pointer",
         ~border="none",
         ~padding="0",
-        ~backgroundColor="transparent",
+        ~backgroundColor=Color.transparent,
         ~top="50%",
         ~transform="translateY(-50%)",
         ~margin="0",
@@ -100,7 +110,7 @@ module DemoSidebar = {
         ~position="relative",
         ~display="flex",
         ~alignItems="center",
-        ~backgroundColor="#E0E2E4",
+        ~backgroundColor=Color.midGray,
         ~borderRadius="7px",
         ~margin="10px",
         (),
@@ -113,7 +123,7 @@ module DemoSidebar = {
         ~fontFamily="inherit",
         ~fontSize="16px",
         ~border="none",
-        ~backgroundColor="transparent",
+        ~backgroundColor=Color.transparent,
         ~borderRadius="7px",
         (),
       )
@@ -193,7 +203,7 @@ module DemoUnitSidebar = {
     let container =
       ReactDOM.Style.make(
         ~flexGrow="1",
-        ~backgroundColor="#F5F6F6",
+        ~backgroundColor=Color.lightGray,
         ~fontSize="16px",
         ~padding="10px",
         ~overflowY="auto",
@@ -203,7 +213,7 @@ module DemoUnitSidebar = {
       ~display="block",
       ~margin="10px",
       ~padding="10px",
-      ~backgroundColor="#fff",
+      ~backgroundColor=Color.white,
       ~borderRadius="7px",
       ~boxShadow="0 5px 10px rgba(0, 0, 0, 0.07)",
       (),
@@ -218,7 +228,7 @@ module DemoUnitSidebar = {
       ~fontSize="16px",
       ~width="100%",
       ~boxSizing="border-box",
-      ~backgroundColor="#f5f6f6",
+      ~backgroundColor=Color.lightGray,
       ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
       ~border="none",
       ~padding="10px",
@@ -230,7 +240,7 @@ module DemoUnitSidebar = {
         ~fontSize="16px",
         ~width="100%",
         ~boxSizing="border-box",
-        ~backgroundColor="#f5f6f6",
+        ~backgroundColor=Color.lightGray,
         ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
         ~border="none",
         ~padding="10px",
@@ -378,7 +388,7 @@ module DemoUnit = {
       ~width="230px",
       ~height="100vh",
       ~overflowY="auto",
-      ~backgroundColor="#F5F6F6",
+      ~backgroundColor=Color.lightGray,
       (),
     )
   }
@@ -500,14 +510,14 @@ module App = {
       ~flexDirection="row",
       ~minHeight="100vh",
       ~alignItems="stretch",
-      ~color="#42484D",
+      ~color=Color.darkGray,
       (),
     )
     let navigation = ReactDOM.Style.make(
       ~width="230px",
       ~height="100vh",
       ~overflowY="auto",
-      ~backgroundColor="#F5F6F6",
+      ~backgroundColor=Color.lightGray,
       (),
     )
     let main = ReactDOM.Style.make(~flexGrow="1", ~display="flex", ~flexDirection="column", ())
@@ -521,7 +531,7 @@ module App = {
     )
     let emptyText = ReactDOM.Style.make(
       ~fontSize="22px",
-      ~color="rgba(0, 0, 0, 0.4)",
+      ~color=Color.black40a,
       ~textAlign="center",
       (),
     )
