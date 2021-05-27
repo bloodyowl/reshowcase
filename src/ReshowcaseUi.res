@@ -365,8 +365,8 @@ module DemoUnit = {
     )
     let contents =
       ReactDOM.Style.make(
+        ~height="100vh",
         ~flexGrow="1",
-        ~padding="10px",
         ~overflowY="auto",
         ~display="flex",
         ~flexDirection="column",
@@ -374,7 +374,13 @@ module DemoUnit = {
         ~justifyContent="center",
         (),
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
-    let sidebar = ReactDOM.Style.make(~width="230px", ~display="flex", ~flexDirection="column", ())
+    let sidebar = ReactDOM.Style.make(
+      ~width="230px",
+      ~height="100vh",
+      ~overflowY="auto",
+      ~backgroundColor="#F5F6F6",
+      (),
+    )
   }
 
   @react.component
@@ -499,8 +505,9 @@ module App = {
     )
     let navigation = ReactDOM.Style.make(
       ~width="230px",
-      ~display="flex",
-      ~flexDirection="column",
+      ~height="100vh",
+      ~overflowY="auto",
+      ~backgroundColor="#F5F6F6",
       (),
     )
     let main = ReactDOM.Style.make(~flexGrow="1", ~display="flex", ~flexDirection="column", ())
