@@ -11,15 +11,18 @@ module Color = {
 }
 
 module PaddedBox = {
-  type padding = Around | LeftRight
+  type padding = Around | LeftRight | TopLeftRight
 
   module Styles = {
     let around = ReactDOM.Style.make(~padding="6px", ())
     let leftRight = ReactDOM.Style.make(~padding="0 6px", ())
+    let topLeftRight = ReactDOM.Style.make(~padding="6px 6px 0", ())
+
     let getPadding = (padding: padding) =>
       switch padding {
       | Around => around
       | LeftRight => leftRight
+      | TopLeftRight => topLeftRight
       }
   }
 
@@ -159,7 +162,7 @@ module DemoSidebar = {
 
     @react.component
     let make = (~value, ~onChange, ~onClear) =>
-      <PaddedBox>
+      <PaddedBox padding=TopLeftRight>
         <div style=Styles.inputWrapper>
           <input style=Styles.input placeholder="Filter" value onChange />
           {value === "" ? React.null : <ClearButton onClear />}
