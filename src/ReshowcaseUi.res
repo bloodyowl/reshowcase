@@ -1,5 +1,23 @@
 open Belt
 
+module ParentWindow = {
+  @val external window: Dom.window = "window"
+
+  @get
+  external getParent: Dom.window => Dom.window = "parent"
+
+  @get
+  external getDocument: Dom.window => Dom.document = "document"
+
+  @send
+  external querySelector: (Dom.document, string) => Js.Nullable.t<Dom.element> = "querySelector"
+
+  let getElementById = (id: string) =>
+    window->getParent->getDocument->querySelector("#" ++ id)->Js.Nullable.toOption
+}
+
+let rightSidebarId = "rightSidebar"
+
 module Color = ReshowcaseUi__Layout.Color
 module Gap = ReshowcaseUi__Layout.Gap
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
@@ -364,6 +382,16 @@ module DemoUnit = {
 
   @react.component
   let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
+    let (parentWindowRightSidebarElem, setParentWindowRightSidebarElem) = React.useState(() => None)
+
+    React.useEffect0(() => {
+      switch ParentWindow.getElementById(rightSidebarId) {
+      | None => ()
+      | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
+      }
+      None
+    })
+
     let (state, dispatch) = React.useReducer(
       (state, action) =>
         switch action {
@@ -444,18 +472,25 @@ module DemoUnit = {
     }
     <div style=Styles.container>
       <div style=Styles.contents> {demoUnit(props)} </div>
-      <Sidebar>
-        <DemoUnitSidebar
-          strings=state.strings
-          ints=state.ints
-          floats=state.floats
-          bools=state.bools
-          onStringChange={(name, value) => dispatch(SetString(name, value))}
-          onIntChange={(name, value) => dispatch(SetInt(name, value))}
-          onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
-          onBoolChange={(name, value) => dispatch(SetBool(name, value))}
-        />
-      </Sidebar>
+      {switch parentWindowRightSidebarElem {
+      | None => React.null
+      | Some(element) =>
+        ReactDOM.createPortal(
+          <Sidebar>
+            <DemoUnitSidebar
+              strings=state.strings
+              ints=state.ints
+              floats=state.floats
+              bools=state.bools
+              onStringChange={(name, value) => dispatch(SetString(name, value))}
+              onIntChange={(name, value) => dispatch(SetInt(name, value))}
+              onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
+              onBoolChange={(name, value) => dispatch(SetBool(name, value))}
+            />
+          </Sidebar>,
+          element,
+        )
+      }}
     </div>
   }
 }
@@ -532,7 +567,9 @@ module App = {
           ->Option.getWithDefault(React.null)}
         </div>
       | Demo(demoName, demoUnitName) => <>
-          <DemoListSidebar demos /> <DemoUnitFrame demoName demoUnitName />
+          <DemoListSidebar demos />
+          <DemoUnitFrame demoName demoUnitName />
+          <div id=rightSidebarId key={Js.Date.now()->Belt.Float.toString} />
         </>
       | Home => <>
           <DemoListSidebar demos />
