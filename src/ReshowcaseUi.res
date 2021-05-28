@@ -10,6 +10,25 @@ module Color = {
   let transparent = "transparent"
 }
 
+module PaddedBox = {
+  type padding = Around | LeftRight
+
+  module Styles = {
+    let around = ReactDOM.Style.make(~padding="6px", ())
+    let leftRight = ReactDOM.Style.make(~padding="0 6px", ())
+    let getPadding = (padding: padding) =>
+      switch padding {
+      | Around => around
+      | LeftRight => leftRight
+      }
+  }
+
+  @react.component
+  let make = (~padding: padding=Around, ~children) => {
+    <div style={Styles.getPadding(padding)}> children </div>
+  }
+}
+
 module Link = {
   @react.component
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
@@ -40,25 +59,17 @@ module Link = {
 module DemoSidebar = {
   module Styles = {
     let container =
-      ReactDOM.Style.make(
-        ~flexGrow="1",
-        ~backgroundColor=Color.lightGray,
-        ~overflowY="auto",
-        (),
-      )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
-    let subList = ReactDOM.Style.make(~fontSize="16px", ())
-    let demoName = ReactDOM.Style.make(
-      ~fontWeight="500",
-      ~padding="10px",
-      ~margin="10px 10px 0",
-      (),
-    )
+      ReactDOM.Style.make(~backgroundColor=Color.lightGray, ())->ReactDOM.Style.unsafeAddProp(
+        "WebkitOverflowScrolling",
+        "touch",
+      )
+
+    let demoName = ReactDOM.Style.make(~fontWeight="500", ())
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
       ~color=Color.blue,
       ~display="block",
       ~padding="7px 10px",
-      ~margin="0 10px 0 20px",
       ~borderRadius="7px",
       ~fontWeight="500",
       (),
@@ -69,30 +80,29 @@ module DemoSidebar = {
   module MenuItem = {
     @react.component
     let make = (~demoName, ~demoUnitNames) =>
-      <div key=demoName>
-        <div style=Styles.demoName> {demoName->React.string} </div>
-        <div style=Styles.subList>
+      <PaddedBox key=demoName>
+        <PaddedBox> <span style=Styles.demoName> {demoName->React.string} </span> </PaddedBox>
+        <PaddedBox padding=LeftRight>
           {demoUnitNames
           ->Array.map(demoUnitName =>
-            <div key=demoUnitName>
-              <Link
-                style=Styles.link
-                activeStyle=Styles.activeLink
-                href={"?demo=" ++
-                (demoName->Js.Global.encodeURIComponent ++
-                ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
-                text=demoUnitName
-              />
-            </div>
+            <Link
+              key=demoUnitName
+              style=Styles.link
+              activeStyle=Styles.activeLink
+              href={"?demo=" ++
+              (demoName->Js.Global.encodeURIComponent ++
+              ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
+              text=demoUnitName
+            />
           )
           ->React.array}
-        </div>
-      </div>
+        </PaddedBox>
+      </PaddedBox>
   }
 
   module SearchInput = {
     module Styles = {
-      let buttonClear = ReactDOM.Style.make(
+      let clearButton = ReactDOM.Style.make(
         ~position="absolute",
         ~right="7px",
         ~display="flex",
@@ -112,7 +122,6 @@ module DemoSidebar = {
         ~alignItems="center",
         ~backgroundColor=Color.midGray,
         ~borderRadius="7px",
-        ~margin="10px",
         (),
       )
 
@@ -145,15 +154,17 @@ module DemoSidebar = {
 
       @react.component
       let make = (~onClear) =>
-        <button style=Styles.buttonClear onClick={_event => onClear()}> iconClose </button>
+        <button style=Styles.clearButton onClick={_event => onClear()}> iconClose </button>
     }
 
     @react.component
     let make = (~value, ~onChange, ~onClear) =>
-      <div style=Styles.inputWrapper>
-        <input style=Styles.input placeholder="Filter" value onChange />
-        {value === "" ? React.null : <ClearButton onClear />}
-      </div>
+      <PaddedBox>
+        <div style=Styles.inputWrapper>
+          <input style=Styles.input placeholder="Filter" value onChange />
+          {value === "" ? React.null : <ClearButton onClear />}
+        </div>
+      </PaddedBox>
   }
 
   @react.component
@@ -161,39 +172,37 @@ module DemoSidebar = {
     let (filterValue, setFilterValue) = React.useState(() => None)
 
     <div style=Styles.container>
-      <div>
-        <SearchInput
-          value={filterValue->Option.getWithDefault("")}
-          onChange={event => {
-            let value = (event->ReactEvent.Form.target)["value"]
-            setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
-          }}
-          onClear={() => setFilterValue(_ => None)}
-        />
-        {demos
-        ->Map.String.toArray
-        ->Array.keepMap(((demoName, demoUnits)) => {
-          let demoUnitNames = demoUnits->Map.String.keysToArray
-          switch filterValue {
-          | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-          | Some(filterValue) =>
-            let search = filterValue->Js.String2.toLowerCase
-            let demoNameHasSubstring = demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-            let filteredDemoUnitNames =
-              demoUnitNames->Array.keep(name =>
-                name->Js.String2.toLowerCase->Js.String2.includes(search)
-              )
-            switch (demoNameHasSubstring, filteredDemoUnitNames) {
-            | (false, []) => None
-            | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-            | (true, _)
-            | (false, _) =>
-              Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
-            }
+      <SearchInput
+        value={filterValue->Option.getWithDefault("")}
+        onChange={event => {
+          let value = (event->ReactEvent.Form.target)["value"]
+          setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
+        }}
+        onClear={() => setFilterValue(_ => None)}
+      />
+      {demos
+      ->Map.String.toArray
+      ->Array.keepMap(((demoName, demoUnits)) => {
+        let demoUnitNames = demoUnits->Map.String.keysToArray
+        switch filterValue {
+        | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
+        | Some(filterValue) =>
+          let search = filterValue->Js.String2.toLowerCase
+          let demoNameHasSubstring = demoName->Js.String2.toLowerCase->Js.String2.includes(search)
+          let filteredDemoUnitNames =
+            demoUnitNames->Array.keep(name =>
+              name->Js.String2.toLowerCase->Js.String2.includes(search)
+            )
+          switch (demoNameHasSubstring, filteredDemoUnitNames) {
+          | (false, []) => None
+          | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
+          | (true, _)
+          | (false, _) =>
+            Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
           }
-        })
-        ->React.array}
-      </div>
+        }
+      })
+      ->React.array}
     </div>
   }
 }
