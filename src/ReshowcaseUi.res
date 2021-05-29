@@ -32,6 +32,17 @@ module PaddedBox = {
   }
 }
 
+module Stack = {
+  module Styles = {
+    let stack = ReactDOM.Style.make(~display="grid", ~gridGap="6px", ())
+  }
+
+  @react.component
+  let make = (~children) => {
+    <div style={Styles.stack}> children </div>
+  }
+}
+
 module Sidebar = {
   module Styles = {
     let sidebar =
@@ -46,7 +57,7 @@ module Sidebar = {
 
   @react.component
   let make = (~children) => {
-    <div style={Styles.sidebar}> children </div>
+    <div style={Styles.sidebar}> <PaddedBox> children </PaddedBox> </div>
   }
 }
 
@@ -95,7 +106,7 @@ module DemoSidebar = {
   module MenuItem = {
     @react.component
     let make = (~demoName, ~demoUnitNames) =>
-      <PaddedBox key=demoName>
+      <div key=demoName>
         <PaddedBox> <span style=Styles.demoName> {demoName->React.string} </span> </PaddedBox>
         <PaddedBox padding=LeftRight>
           {demoUnitNames
@@ -112,7 +123,7 @@ module DemoSidebar = {
           )
           ->React.array}
         </PaddedBox>
-      </PaddedBox>
+      </div>
   }
 
   module SearchInput = {
@@ -185,8 +196,7 @@ module DemoSidebar = {
   @react.component
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
-
-    <>
+    <Stack>
       <SearchInput
         value={filterValue->Option.getWithDefault("")}
         onChange={event => {
@@ -218,7 +228,7 @@ module DemoSidebar = {
         }
       })
       ->React.array}
-    </>
+    </Stack>
   }
 }
 
@@ -226,18 +236,12 @@ module DemoUnitSidebar = {
   module Styles = {
     let label = ReactDOM.Style.make(
       ~display="block",
-      ~padding="10px",
       ~backgroundColor=Color.white,
       ~borderRadius="7px",
       ~boxShadow="0 5px 10px rgba(0, 0, 0, 0.07)",
       (),
     )
-    let labelText = ReactDOM.Style.make(
-      ~fontSize="16px",
-      ~textAlign="center",
-      ~paddingBottom="10px",
-      (),
-    )
+    let labelText = ReactDOM.Style.make(~fontSize="16px", ~textAlign="center", ())
     let textInput = ReactDOM.Style.make(
       ~fontSize="16px",
       ~width="100%",
@@ -281,36 +285,41 @@ module DemoUnitSidebar = {
     ~onBoolChange,
     _,
   ) =>
-    <PaddedBox>
+    <Stack>
       {strings
       ->Map.String.toArray
       ->Array.map(((propName, (_config, value, options))) =>
         <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          {switch options {
-          | None =>
-            <input
-              type_="text"
-              value
-              style=Styles.textInput
-              onChange={event => onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
-            />
-          | Some(options) =>
-            <select
-              style=Styles.select
-              onChange={event => {
-                let value = (event->ReactEvent.Form.target)["value"]
-                onStringChange(propName, value)
-              }}>
-              {options
-              ->Array.map(((key, optionValue)) => {
-                <option key selected={value == optionValue} value={optionValue}>
-                  {key->React.string}
-                </option>
-              })
-              ->React.array}
-            </select>
-          }}
+          <PaddedBox>
+            <Stack>
+              <div style=Styles.labelText> {propName->React.string} </div>
+              {switch options {
+              | None =>
+                <input
+                  type_="text"
+                  value
+                  style=Styles.textInput
+                  onChange={event =>
+                    onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+                />
+              | Some(options) =>
+                <select
+                  style=Styles.select
+                  onChange={event => {
+                    let value = (event->ReactEvent.Form.target)["value"]
+                    onStringChange(propName, value)
+                  }}>
+                  {options
+                  ->Array.map(((key, optionValue)) => {
+                    <option key selected={value == optionValue} value={optionValue}>
+                      {key->React.string}
+                    </option>
+                  })
+                  ->React.array}
+                </select>
+              }}
+            </Stack>
+          </PaddedBox>
         </label>
       )
       ->React.array}
@@ -318,16 +327,20 @@ module DemoUnitSidebar = {
       ->Map.String.toArray
       ->Array.map(((propName, ({min, max}, value))) =>
         <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="number"
-            min=j`$min`
-            max=j`$max`
-            value=j`$value`
-            style=Styles.textInput
-            onChange={event =>
-              onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
-          />
+          <PaddedBox>
+            <Stack>
+              <div style=Styles.labelText> {propName->React.string} </div>
+              <input
+                type_="number"
+                min=j`$min`
+                max=j`$max`
+                value=j`$value`
+                style=Styles.textInput
+                onChange={event =>
+                  onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
+              />
+            </Stack>
+          </PaddedBox>
         </label>
       )
       ->React.array}
@@ -335,16 +348,23 @@ module DemoUnitSidebar = {
       ->Map.String.toArray
       ->Array.map(((propName, ({min, max}, value))) =>
         <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="number"
-            min=j`$min`
-            max=j`$max`
-            value=j`$value`
-            style=Styles.textInput
-            onChange={event =>
-              onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
-          />
+          <PaddedBox>
+            <Stack>
+              <div style=Styles.labelText> {propName->React.string} </div>
+              <input
+                type_="number"
+                min=j`$min`
+                max=j`$max`
+                value=j`$value`
+                style=Styles.textInput
+                onChange={event =>
+                  onFloatChange(
+                    propName,
+                    (event->ReactEvent.Form.target)["value"]->float_of_string,
+                  )}
+              />
+            </Stack>
+          </PaddedBox>
         </label>
       )
       ->React.array}
@@ -352,17 +372,22 @@ module DemoUnitSidebar = {
       ->Map.String.toArray
       ->Array.map(((propName, (_config, checked))) =>
         <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="checkbox"
-            checked
-            style=Styles.checkbox
-            onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
-          />
+          <PaddedBox>
+            <Stack>
+              <div style=Styles.labelText> {propName->React.string} </div>
+              <input
+                type_="checkbox"
+                checked
+                style=Styles.checkbox
+                onChange={event =>
+                  onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
+              />
+            </Stack>
+          </PaddedBox>
         </label>
       )
       ->React.array}
-    </PaddedBox>
+    </Stack>
 }
 
 module DemoUnit = {
