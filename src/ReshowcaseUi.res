@@ -34,13 +34,14 @@ module PaddedBox = {
 
 module Sidebar = {
   module Styles = {
-    let sidebar = ReactDOM.Style.make(
-      ~width="230px",
-      ~height="100vh",
-      ~overflowY="auto",
-      ~backgroundColor=Color.lightGray,
-      (),
-    )
+    let sidebar =
+      ReactDOM.Style.make(
+        ~width="230px",
+        ~height="100vh",
+        ~overflowY="auto",
+        ~backgroundColor=Color.lightGray,
+        (),
+      )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
   }
 
   @react.component
@@ -78,12 +79,6 @@ module Link = {
 
 module DemoSidebar = {
   module Styles = {
-    let container =
-      ReactDOM.Style.make(~backgroundColor=Color.lightGray, ())->ReactDOM.Style.unsafeAddProp(
-        "WebkitOverflowScrolling",
-        "touch",
-      )
-
     let demoName = ReactDOM.Style.make(~fontWeight="500", ())
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
@@ -191,7 +186,7 @@ module DemoSidebar = {
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
 
-    <div style=Styles.container>
+    <>
       <SearchInput
         value={filterValue->Option.getWithDefault("")}
         onChange={event => {
@@ -223,24 +218,14 @@ module DemoSidebar = {
         }
       })
       ->React.array}
-    </div>
+    </>
   }
 }
 
 module DemoUnitSidebar = {
   module Styles = {
-    let container =
-      ReactDOM.Style.make(
-        ~flexGrow="1",
-        ~backgroundColor=Color.lightGray,
-        ~fontSize="16px",
-        ~padding="10px",
-        ~overflowY="auto",
-        (),
-      )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
     let label = ReactDOM.Style.make(
       ~display="block",
-      ~margin="10px",
       ~padding="10px",
       ~backgroundColor=Color.white,
       ~borderRadius="7px",
@@ -296,7 +281,7 @@ module DemoUnitSidebar = {
     ~onBoolChange,
     _,
   ) =>
-    <div style=Styles.container>
+    <PaddedBox>
       {strings
       ->Map.String.toArray
       ->Array.map(((propName, (_config, value, options))) =>
@@ -377,7 +362,7 @@ module DemoUnitSidebar = {
         </label>
       )
       ->React.array}
-    </div>
+    </PaddedBox>
 }
 
 module DemoUnit = {
