@@ -32,6 +32,23 @@ module PaddedBox = {
   }
 }
 
+module Sidebar = {
+  module Styles = {
+    let sidebar = ReactDOM.Style.make(
+      ~width="230px",
+      ~height="100vh",
+      ~overflowY="auto",
+      ~backgroundColor=Color.lightGray,
+      (),
+    )
+  }
+
+  @react.component
+  let make = (~children) => {
+    <div style={Styles.sidebar}> children </div>
+  }
+}
+
 module Link = {
   @react.component
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
@@ -396,13 +413,6 @@ module DemoUnit = {
         ~justifyContent="center",
         (),
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
-    let sidebar = ReactDOM.Style.make(
-      ~width="230px",
-      ~height="100vh",
-      ~overflowY="auto",
-      ~backgroundColor=Color.lightGray,
-      (),
-    )
   }
 
   @react.component
@@ -487,7 +497,7 @@ module DemoUnit = {
     }
     <div style=Styles.container>
       <div style=Styles.contents> {demoUnit(props)} </div>
-      <div style=Styles.sidebar>
+      <Sidebar>
         <DemoUnitSidebar
           strings=state.strings
           ints=state.ints
@@ -498,7 +508,7 @@ module DemoUnit = {
           onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
           onBoolChange={(name, value) => dispatch(SetBool(name, value))}
         />
-      </div>
+      </Sidebar>
     </div>
   }
 }
@@ -523,13 +533,6 @@ module App = {
       ~minHeight="100vh",
       ~alignItems="stretch",
       ~color=Color.darkGray,
-      (),
-    )
-    let navigation = ReactDOM.Style.make(
-      ~width="230px",
-      ~height="100vh",
-      ~overflowY="auto",
-      ~backgroundColor=Color.lightGray,
       (),
     )
     let main = ReactDOM.Style.make(~flexGrow="1", ~display="flex", ~flexDirection="column", ())
@@ -582,11 +585,11 @@ module App = {
           ->Option.getWithDefault(React.null)}
         </div>
       | Demo(demoName, demoUnitName) => <>
-          <div style=Styles.navigation> <DemoSidebar demos /> </div>
+          <Sidebar> <DemoSidebar demos /> </Sidebar>
           <div style=Styles.main> <DemoUnitFrame demoName demoUnitName /> </div>
         </>
       | Home => <>
-          <div style=Styles.navigation> <DemoSidebar demos /> </div>
+          <Sidebar> <DemoSidebar demos /> </Sidebar>
           <div style=Styles.main>
             <div style=Styles.empty>
               <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
