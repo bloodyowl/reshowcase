@@ -1,70 +1,10 @@
 open Belt
 
-module Color = {
-  let white = "#fff"
-  let lightGray = "#f5f6f6"
-  let midGray = "#e0e2e4"
-  let darkGray = "#42484d"
-  let black40a = "rgba(0, 0, 0, 0.4)"
-  let blue = "#0091ff"
-  let transparent = "transparent"
-}
-
-module Gap = {
-  let xs = "7px"
-  let md = "10px"
-}
-
-module PaddedBox = {
-  type padding = Around | LeftRight | TopLeftRight
-
-  module Styles = {
-    let around = ReactDOM.Style.make(~padding=Gap.xs, ())
-    let leftRight = ReactDOM.Style.make(~padding=`0 ${Gap.xs}`, ())
-    let topLeftRight = ReactDOM.Style.make(~padding=`${Gap.xs} ${Gap.xs} 0`, ())
-
-    let getPadding = (padding: padding) =>
-      switch padding {
-      | Around => around
-      | LeftRight => leftRight
-      | TopLeftRight => topLeftRight
-      }
-  }
-
-  @react.component
-  let make = (~padding: padding=Around, ~children) => {
-    <div style={Styles.getPadding(padding)}> children </div>
-  }
-}
-
-module Stack = {
-  module Styles = {
-    let stack = ReactDOM.Style.make(~display="grid", ~gridGap=Gap.xs, ())
-  }
-
-  @react.component
-  let make = (~children) => {
-    <div style={Styles.stack}> children </div>
-  }
-}
-
-module Sidebar = {
-  module Styles = {
-    let sidebar =
-      ReactDOM.Style.make(
-        ~width="230px",
-        ~height="100vh",
-        ~overflowY="auto",
-        ~backgroundColor=Color.lightGray,
-        (),
-      )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
-  }
-
-  @react.component
-  let make = (~children) => {
-    <div style={Styles.sidebar}> <PaddedBox> children </PaddedBox> </div>
-  }
-}
+module Color = Layout.Color
+module Gap = Layout.Gap
+module PaddedBox = Layout.PaddedBox
+module Stack = Layout.Stack
+module Sidebar = Layout.Sidebar
 
 module Link = {
   @react.component
@@ -201,39 +141,41 @@ module DemoSidebar = {
   @react.component
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
-    <Stack>
-      <SearchInput
-        value={filterValue->Option.getWithDefault("")}
-        onChange={event => {
-          let value = (event->ReactEvent.Form.target)["value"]
-          setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
-        }}
-        onClear={() => setFilterValue(_ => None)}
-      />
-      {demos
-      ->Map.String.toArray
-      ->Array.keepMap(((demoName, demoUnits)) => {
-        let demoUnitNames = demoUnits->Map.String.keysToArray
-        switch filterValue {
-        | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-        | Some(filterValue) =>
-          let search = filterValue->Js.String2.toLowerCase
-          let demoNameHasSubstring = demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-          let filteredDemoUnitNames =
-            demoUnitNames->Array.keep(name =>
-              name->Js.String2.toLowerCase->Js.String2.includes(search)
-            )
-          switch (demoNameHasSubstring, filteredDemoUnitNames) {
-          | (false, []) => None
-          | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-          | (true, _)
-          | (false, _) =>
-            Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+    <Sidebar>
+      <Stack>
+        <SearchInput
+          value={filterValue->Option.getWithDefault("")}
+          onChange={event => {
+            let value = (event->ReactEvent.Form.target)["value"]
+            setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
+          }}
+          onClear={() => setFilterValue(_ => None)}
+        />
+        {demos
+        ->Map.String.toArray
+        ->Array.keepMap(((demoName, demoUnits)) => {
+          let demoUnitNames = demoUnits->Map.String.keysToArray
+          switch filterValue {
+          | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
+          | Some(filterValue) =>
+            let search = filterValue->Js.String2.toLowerCase
+            let demoNameHasSubstring = demoName->Js.String2.toLowerCase->Js.String2.includes(search)
+            let filteredDemoUnitNames =
+              demoUnitNames->Array.keep(name =>
+                name->Js.String2.toLowerCase->Js.String2.includes(search)
+              )
+            switch (demoNameHasSubstring, filteredDemoUnitNames) {
+            | (false, []) => None
+            | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
+            | (true, _)
+            | (false, _) =>
+              Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+            }
           }
-        }
-      })
-      ->React.array}
-    </Stack>
+        })
+        ->React.array}
+      </Stack>
+    </Sidebar>
   }
 }
 
@@ -590,11 +532,11 @@ module App = {
           ->Option.getWithDefault(React.null)}
         </div>
       | Demo(demoName, demoUnitName) => <>
-          <Sidebar> <DemoSidebar demos /> </Sidebar>
+          <DemoSidebar demos />
           <div style=Styles.main> <DemoUnitFrame demoName demoUnitName /> </div>
         </>
       | Home => <>
-          <Sidebar> <DemoSidebar demos /> </Sidebar>
+          <DemoSidebar demos />
           <div style=Styles.main>
             <div style=Styles.empty>
               <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
