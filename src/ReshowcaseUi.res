@@ -10,13 +10,18 @@ module Color = {
   let transparent = "transparent"
 }
 
+module Gap = {
+  let xs = "7px"
+  let md = "10px"
+}
+
 module PaddedBox = {
   type padding = Around | LeftRight | TopLeftRight
 
   module Styles = {
-    let around = ReactDOM.Style.make(~padding="6px", ())
-    let leftRight = ReactDOM.Style.make(~padding="0 6px", ())
-    let topLeftRight = ReactDOM.Style.make(~padding="6px 6px 0", ())
+    let around = ReactDOM.Style.make(~padding=Gap.xs, ())
+    let leftRight = ReactDOM.Style.make(~padding=`0 ${Gap.xs}`, ())
+    let topLeftRight = ReactDOM.Style.make(~padding=`${Gap.xs} ${Gap.xs} 0`, ())
 
     let getPadding = (padding: padding) =>
       switch padding {
@@ -34,7 +39,7 @@ module PaddedBox = {
 
 module Stack = {
   module Styles = {
-    let stack = ReactDOM.Style.make(~display="grid", ~gridGap="6px", ())
+    let stack = ReactDOM.Style.make(~display="grid", ~gridGap=Gap.xs, ())
   }
 
   @react.component
@@ -95,7 +100,7 @@ module DemoSidebar = {
       ~textDecoration="none",
       ~color=Color.blue,
       ~display="block",
-      ~padding="7px 10px",
+      ~padding=`${Gap.xs} ${Gap.md}`,
       ~borderRadius="7px",
       ~fontWeight="500",
       (),
@@ -152,7 +157,7 @@ module DemoSidebar = {
       )
 
       let input = ReactDOMRe.Style.make(
-        ~padding="7px 10px",
+        ~padding=`${Gap.xs} ${Gap.md}`,
         ~width="100%",
         ~margin="0",
         ~fontFamily="inherit",
@@ -249,7 +254,7 @@ module DemoUnitSidebar = {
       ~backgroundColor=Color.lightGray,
       ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
       ~border="none",
-      ~padding="10px",
+      ~padding=Gap.md,
       ~borderRadius="7px",
       (),
     )
@@ -261,7 +266,7 @@ module DemoUnitSidebar = {
         ~backgroundColor=Color.lightGray,
         ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
         ~border="none",
-        ~padding="10px",
+        ~padding=Gap.md,
         ~borderRadius="7px",
         ~appearance="none",
         ~paddingRight="30px",
@@ -297,84 +302,87 @@ module DemoUnitSidebar = {
     ~onBoolChange,
     _,
   ) =>
-    <Stack>
-      {strings
-      ->Map.String.toArray
-      ->Array.map(((propName, (_config, value, options))) =>
-        <PropBox key=propName propName>
-          {switch options {
-          | None =>
+    <PaddedBox>
+      <Stack>
+        {strings
+        ->Map.String.toArray
+        ->Array.map(((propName, (_config, value, options))) =>
+          <PropBox key=propName propName>
+            {switch options {
+            | None =>
+              <input
+                type_="text"
+                value
+                style=Styles.textInput
+                onChange={event =>
+                  onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+              />
+            | Some(options) =>
+              <select
+                style=Styles.select
+                onChange={event => {
+                  let value = (event->ReactEvent.Form.target)["value"]
+                  onStringChange(propName, value)
+                }}>
+                {options
+                ->Array.map(((key, optionValue)) => {
+                  <option key selected={value == optionValue} value={optionValue}>
+                    {key->React.string}
+                  </option>
+                })
+                ->React.array}
+              </select>
+            }}
+          </PropBox>
+        )
+        ->React.array}
+        {ints
+        ->Map.String.toArray
+        ->Array.map(((propName, ({min, max}, value))) =>
+          <PropBox key=propName propName>
             <input
-              type_="text"
-              value
+              type_="number"
+              min=j`$min`
+              max=j`$max`
+              value=j`$value`
               style=Styles.textInput
-              onChange={event => onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+              onChange={event =>
+                onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
             />
-          | Some(options) =>
-            <select
-              style=Styles.select
-              onChange={event => {
-                let value = (event->ReactEvent.Form.target)["value"]
-                onStringChange(propName, value)
-              }}>
-              {options
-              ->Array.map(((key, optionValue)) => {
-                <option key selected={value == optionValue} value={optionValue}>
-                  {key->React.string}
-                </option>
-              })
-              ->React.array}
-            </select>
-          }}
-        </PropBox>
-      )
-      ->React.array}
-      {ints
-      ->Map.String.toArray
-      ->Array.map(((propName, ({min, max}, value))) =>
-        <PropBox key=propName propName>
-          <input
-            type_="number"
-            min=j`$min`
-            max=j`$max`
-            value=j`$value`
-            style=Styles.textInput
-            onChange={event =>
-              onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
-          />
-        </PropBox>
-      )
-      ->React.array}
-      {floats
-      ->Map.String.toArray
-      ->Array.map(((propName, ({min, max}, value))) =>
-        <PropBox key=propName propName>
-          <input
-            type_="number"
-            min=j`$min`
-            max=j`$max`
-            value=j`$value`
-            style=Styles.textInput
-            onChange={event =>
-              onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
-          />
-        </PropBox>
-      )
-      ->React.array}
-      {bools
-      ->Map.String.toArray
-      ->Array.map(((propName, (_config, checked))) =>
-        <PropBox key=propName propName>
-          <input
-            type_="checkbox"
-            checked
-            style=Styles.checkbox
-            onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
-          />
-        </PropBox>
-      )
-      ->React.array}
-    </Stack>
+          </PropBox>
+        )
+        ->React.array}
+        {floats
+        ->Map.String.toArray
+        ->Array.map(((propName, ({min, max}, value))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="number"
+              min=j`$min`
+              max=j`$max`
+              value=j`$value`
+              style=Styles.textInput
+              onChange={event =>
+                onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
+            />
+          </PropBox>
+        )
+        ->React.array}
+        {bools
+        ->Map.String.toArray
+        ->Array.map(((propName, (_config, checked))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="checkbox"
+              checked
+              style=Styles.checkbox
+              onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
+            />
+          </PropBox>
+        )
+        ->React.array}
+      </Stack>
+    </PaddedBox>
 }
 
 module DemoUnit = {
