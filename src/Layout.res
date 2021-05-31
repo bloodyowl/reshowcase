@@ -50,6 +50,7 @@ module Sidebar = {
   module Styles = {
     let sidebar =
       ReactDOM.Style.make(
+        ~minWidth="230px",
         ~width="230px",
         ~height="100vh",
         ~overflowY="auto",
