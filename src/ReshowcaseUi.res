@@ -33,7 +33,7 @@ module Link = {
   }
 }
 
-module DemoSidebar = {
+module DemoListSidebar = {
   module Styles = {
     let demoName = ReactDOM.Style.make(~fontWeight="500", ())
     let link = ReactDOM.Style.make(
@@ -532,15 +532,12 @@ module App = {
           ->Option.getWithDefault(React.null)}
         </div>
       | Demo(demoName, demoUnitName) => <>
-          <DemoSidebar demos />
-          <div style=Styles.main> <DemoUnitFrame demoName demoUnitName /> </div>
+          <DemoListSidebar demos /> <DemoUnitFrame demoName demoUnitName />
         </>
       | Home => <>
-          <DemoSidebar demos />
-          <div style=Styles.main>
-            <div style=Styles.empty>
-              <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
-            </div>
+          <DemoListSidebar demos />
+          <div style=Styles.empty>
+            <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
           </div>
         </>
       }}
