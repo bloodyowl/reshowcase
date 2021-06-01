@@ -476,18 +476,16 @@ module DemoUnit = {
       | None => React.null
       | Some(element) =>
         ReactDOM.createPortal(
-          <Sidebar>
-            <DemoUnitSidebar
-              strings=state.strings
-              ints=state.ints
-              floats=state.floats
-              bools=state.bools
-              onStringChange={(name, value) => dispatch(SetString(name, value))}
-              onIntChange={(name, value) => dispatch(SetInt(name, value))}
-              onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
-              onBoolChange={(name, value) => dispatch(SetBool(name, value))}
-            />
-          </Sidebar>,
+          <DemoUnitSidebar
+            strings=state.strings
+            ints=state.ints
+            floats=state.floats
+            bools=state.bools
+            onStringChange={(name, value) => dispatch(SetString(name, value))}
+            onIntChange={(name, value) => dispatch(SetInt(name, value))}
+            onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
+            onBoolChange={(name, value) => dispatch(SetBool(name, value))}
+          />,
           element,
         )
       }}
@@ -568,8 +566,13 @@ module App = {
         </div>
       | Demo(demoName, demoUnitName) => <>
           <DemoListSidebar demos />
-          <DemoUnitFrame demoName demoUnitName />
-          <div id=rightSidebarId key={Js.Date.now()->Belt.Float.toString} />
+          // Force rerender after switching demo to avoid stale iframe and sidebar children
+          <DemoUnitFrame
+            key={"DemoUnitFrame" ++ Js.Date.now()->Belt.Float.toString} demoName demoUnitName
+          />
+          <Sidebar
+            key={"Sidebar" ++ Js.Date.now()->Belt.Float.toString} innerContainerId=rightSidebarId
+          />
         </>
       | Home => <>
           <DemoListSidebar demos />
