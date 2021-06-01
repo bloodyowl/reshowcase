@@ -1,28 +1,14 @@
 open Belt
 
-module ParentWindow = {
-  @val external window: Dom.window = "window"
-
-  @get
-  external getParent: Dom.window => Dom.window = "parent"
-
-  @get
-  external getDocument: Dom.window => Dom.document = "document"
-
-  @send
-  external querySelector: (Dom.document, string) => Js.Nullable.t<Dom.element> = "querySelector"
-
-  let getElementById = (id: string) =>
-    window->getParent->getDocument->querySelector("#" ++ id)->Js.Nullable.toOption
-}
-
-let rightSidebarId = "rightSidebar"
-
 module Color = ReshowcaseUi__Layout.Color
 module Gap = ReshowcaseUi__Layout.Gap
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
+module ParentWindow = ReshowcaseUi__Bindings.ParentWindow
+module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
+
+let rightSidebarId = "rightSidebar"
 
 module Link = {
   @react.component
@@ -531,24 +517,20 @@ module App = {
       (),
     )
   }
+
   type route =
     | Unit(string, string)
     | Demo(string, string)
     | Home
-  type urlSearchParams
-  @new
-  external urlSearchParams: string => urlSearchParams = "URLSearchParams"
-  @return(nullable) @bs.send
-  external get: (urlSearchParams, string) => option<string> = "get"
 
   @react.component
   let make = (~demos) => {
     let url = ReasonReact.Router.useUrl()
-    let queryString = url.search->urlSearchParams
+    let queryString = url.search->URLSearchParams.make
     let route = switch (
-      queryString->get("iframe"),
-      queryString->get("demo"),
-      queryString->get("unit"),
+      queryString->URLSearchParams.get("iframe"),
+      queryString->URLSearchParams.get("demo"),
+      queryString->URLSearchParams.get("unit"),
     ) {
     | (Some("true"), Some(demo), Some(unit)) => Unit(demo, unit)
     | (_, Some(demo), Some(unit)) => Demo(demo, unit)
