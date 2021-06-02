@@ -1,5 +1,11 @@
 open Belt
 
+module Color = ReshowcaseUi__Layout.Color
+module Gap = ReshowcaseUi__Layout.Gap
+module PaddedBox = ReshowcaseUi__Layout.PaddedBox
+module Stack = ReshowcaseUi__Layout.Stack
+module Sidebar = ReshowcaseUi__Layout.Sidebar
+
 module Link = {
   @react.component
   let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
@@ -27,69 +33,54 @@ module Link = {
   }
 }
 
-module DemoSidebar = {
+module DemoListSidebar = {
   module Styles = {
-    let container =
-      ReactDOM.Style.make(
-        ~flexGrow="1",
-        ~backgroundColor="#F5F6F6",
-        ~overflowY="auto",
-        (),
-      )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
-    let subList = ReactDOM.Style.make(~fontSize="16px", ())
-    let demoName = ReactDOM.Style.make(
-      ~fontWeight="500",
-      ~padding="10px",
-      ~margin="10px 10px 0",
-      (),
-    )
+    let demoName = ReactDOM.Style.make(~fontWeight="500", ())
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
-      ~color="#0091FF",
+      ~color=Color.blue,
       ~display="block",
-      ~padding="7px 10px",
-      ~margin="0 10px 0 20px",
+      ~padding=`${Gap.xs} ${Gap.md}`,
       ~borderRadius="7px",
       ~fontWeight="500",
       (),
     )
-    let activeLink = ReactDOM.Style.make(~backgroundColor="#0091FF", ~color="#fff", ())
+    let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
   }
 
   module MenuItem = {
     @react.component
     let make = (~demoName, ~demoUnitNames) =>
       <div key=demoName>
-        <div style=Styles.demoName> {demoName->React.string} </div>
-        <div style=Styles.subList>
+        <PaddedBox> <span style=Styles.demoName> {demoName->React.string} </span> </PaddedBox>
+        <PaddedBox padding=LeftRight>
           {demoUnitNames
           ->Array.map(demoUnitName =>
-            <div key=demoUnitName>
-              <Link
-                style=Styles.link
-                activeStyle=Styles.activeLink
-                href={"?demo=" ++
-                (demoName->Js.Global.encodeURIComponent ++
-                ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
-                text=demoUnitName
-              />
-            </div>
+            <Link
+              key=demoUnitName
+              style=Styles.link
+              activeStyle=Styles.activeLink
+              href={"?demo=" ++
+              (demoName->Js.Global.encodeURIComponent ++
+              ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
+              text=demoUnitName
+            />
           )
           ->React.array}
-        </div>
+        </PaddedBox>
       </div>
   }
 
   module SearchInput = {
     module Styles = {
-      let buttonClear = ReactDOM.Style.make(
+      let clearButton = ReactDOM.Style.make(
         ~position="absolute",
         ~right="7px",
         ~display="flex",
         ~cursor="pointer",
         ~border="none",
         ~padding="0",
-        ~backgroundColor="transparent",
+        ~backgroundColor=Color.transparent,
         ~top="50%",
         ~transform="translateY(-50%)",
         ~margin="0",
@@ -100,20 +91,19 @@ module DemoSidebar = {
         ~position="relative",
         ~display="flex",
         ~alignItems="center",
-        ~backgroundColor="#E0E2E4",
+        ~backgroundColor=Color.midGray,
         ~borderRadius="7px",
-        ~margin="10px",
         (),
       )
 
       let input = ReactDOMRe.Style.make(
-        ~padding="7px 10px",
+        ~padding=`${Gap.xs} ${Gap.md}`,
         ~width="100%",
         ~margin="0",
         ~fontFamily="inherit",
         ~fontSize="16px",
         ~border="none",
-        ~backgroundColor="transparent",
+        ~backgroundColor=Color.transparent,
         ~borderRadius="7px",
         (),
       )
@@ -135,23 +125,24 @@ module DemoSidebar = {
 
       @react.component
       let make = (~onClear) =>
-        <button style=Styles.buttonClear onClick={_event => onClear()}> iconClose </button>
+        <button style=Styles.clearButton onClick={_event => onClear()}> iconClose </button>
     }
 
     @react.component
     let make = (~value, ~onChange, ~onClear) =>
-      <div style=Styles.inputWrapper>
-        <input style=Styles.input placeholder="Filter" value onChange />
-        {value === "" ? React.null : <ClearButton onClear />}
-      </div>
+      <PaddedBox padding=TopLeftRight>
+        <div style=Styles.inputWrapper>
+          <input style=Styles.input placeholder="Filter" value onChange />
+          {value === "" ? React.null : <ClearButton onClear />}
+        </div>
+      </PaddedBox>
   }
 
   @react.component
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
-
-    <div style=Styles.container>
-      <div>
+    <Sidebar>
+      <Stack>
         <SearchInput
           value={filterValue->Option.getWithDefault("")}
           onChange={event => {
@@ -183,45 +174,29 @@ module DemoSidebar = {
           }
         })
         ->React.array}
-      </div>
-    </div>
+      </Stack>
+    </Sidebar>
   }
 }
 
 module DemoUnitSidebar = {
   module Styles = {
-    let container =
-      ReactDOM.Style.make(
-        ~flexGrow="1",
-        ~backgroundColor="#F5F6F6",
-        ~fontSize="16px",
-        ~padding="10px",
-        ~overflowY="auto",
-        (),
-      )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
     let label = ReactDOM.Style.make(
       ~display="block",
-      ~margin="10px",
-      ~padding="10px",
-      ~backgroundColor="#fff",
+      ~backgroundColor=Color.white,
       ~borderRadius="7px",
       ~boxShadow="0 5px 10px rgba(0, 0, 0, 0.07)",
       (),
     )
-    let labelText = ReactDOM.Style.make(
-      ~fontSize="16px",
-      ~textAlign="center",
-      ~paddingBottom="10px",
-      (),
-    )
+    let labelText = ReactDOM.Style.make(~fontSize="16px", ~textAlign="center", ())
     let textInput = ReactDOM.Style.make(
       ~fontSize="16px",
       ~width="100%",
       ~boxSizing="border-box",
-      ~backgroundColor="#f5f6f6",
+      ~backgroundColor=Color.lightGray,
       ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
       ~border="none",
-      ~padding="10px",
+      ~padding=Gap.md,
       ~borderRadius="7px",
       (),
     )
@@ -230,10 +205,10 @@ module DemoUnitSidebar = {
         ~fontSize="16px",
         ~width="100%",
         ~boxSizing="border-box",
-        ~backgroundColor="#f5f6f6",
+        ~backgroundColor=Color.lightGray,
         ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
         ~border="none",
-        ~padding="10px",
+        ~padding=Gap.md,
         ~borderRadius="7px",
         ~appearance="none",
         ~paddingRight="30px",
@@ -245,6 +220,18 @@ module DemoUnitSidebar = {
       )->ReactDOM.Style.unsafeAddProp("WebkitAppearance", "none")
     let checkbox = ReactDOM.Style.make(~fontSize="16px", ~margin="0 auto", ~display="block", ())
   }
+
+  module PropBox = {
+    @react.component
+    let make = (~propName: string, ~children) => {
+      <label style=Styles.label>
+        <PaddedBox>
+          <Stack> <div style=Styles.labelText> {propName->React.string} </div> children </Stack>
+        </PaddedBox>
+      </label>
+    }
+  }
+
   @react.component
   let make = (
     ~strings: Map.String.t<(Configs.stringConfig, string, option<array<(string, string)>>)>,
@@ -257,88 +244,87 @@ module DemoUnitSidebar = {
     ~onBoolChange,
     _,
   ) =>
-    <div style=Styles.container>
-      {strings
-      ->Map.String.toArray
-      ->Array.map(((propName, (_config, value, options))) =>
-        <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          {switch options {
-          | None =>
+    <PaddedBox>
+      <Stack>
+        {strings
+        ->Map.String.toArray
+        ->Array.map(((propName, (_config, value, options))) =>
+          <PropBox key=propName propName>
+            {switch options {
+            | None =>
+              <input
+                type_="text"
+                value
+                style=Styles.textInput
+                onChange={event =>
+                  onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+              />
+            | Some(options) =>
+              <select
+                style=Styles.select
+                onChange={event => {
+                  let value = (event->ReactEvent.Form.target)["value"]
+                  onStringChange(propName, value)
+                }}>
+                {options
+                ->Array.map(((key, optionValue)) => {
+                  <option key selected={value == optionValue} value={optionValue}>
+                    {key->React.string}
+                  </option>
+                })
+                ->React.array}
+              </select>
+            }}
+          </PropBox>
+        )
+        ->React.array}
+        {ints
+        ->Map.String.toArray
+        ->Array.map(((propName, ({min, max}, value))) =>
+          <PropBox key=propName propName>
             <input
-              type_="text"
-              value
+              type_="number"
+              min=j`$min`
+              max=j`$max`
+              value=j`$value`
               style=Styles.textInput
-              onChange={event => onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+              onChange={event =>
+                onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
             />
-          | Some(options) =>
-            <select
-              style=Styles.select
-              onChange={event => {
-                let value = (event->ReactEvent.Form.target)["value"]
-                onStringChange(propName, value)
-              }}>
-              {options
-              ->Array.map(((key, optionValue)) => {
-                <option key selected={value == optionValue} value={optionValue}>
-                  {key->React.string}
-                </option>
-              })
-              ->React.array}
-            </select>
-          }}
-        </label>
-      )
-      ->React.array}
-      {ints
-      ->Map.String.toArray
-      ->Array.map(((propName, ({min, max}, value))) =>
-        <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="number"
-            min=j`$min`
-            max=j`$max`
-            value=j`$value`
-            style=Styles.textInput
-            onChange={event =>
-              onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
-          />
-        </label>
-      )
-      ->React.array}
-      {floats
-      ->Map.String.toArray
-      ->Array.map(((propName, ({min, max}, value))) =>
-        <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="number"
-            min=j`$min`
-            max=j`$max`
-            value=j`$value`
-            style=Styles.textInput
-            onChange={event =>
-              onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
-          />
-        </label>
-      )
-      ->React.array}
-      {bools
-      ->Map.String.toArray
-      ->Array.map(((propName, (_config, checked))) =>
-        <label key=propName style=Styles.label>
-          <div style=Styles.labelText> {propName->React.string} </div>
-          <input
-            type_="checkbox"
-            checked
-            style=Styles.checkbox
-            onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
-          />
-        </label>
-      )
-      ->React.array}
-    </div>
+          </PropBox>
+        )
+        ->React.array}
+        {floats
+        ->Map.String.toArray
+        ->Array.map(((propName, ({min, max}, value))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="number"
+              min=j`$min`
+              max=j`$max`
+              value=j`$value`
+              style=Styles.textInput
+              onChange={event =>
+                onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
+            />
+          </PropBox>
+        )
+        ->React.array}
+        {bools
+        ->Map.String.toArray
+        ->Array.map(((propName, (_config, checked))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="checkbox"
+              checked
+              style=Styles.checkbox
+              onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
+            />
+          </PropBox>
+        )
+        ->React.array}
+      </Stack>
+    </PaddedBox>
 }
 
 module DemoUnit = {
@@ -365,8 +351,8 @@ module DemoUnit = {
     )
     let contents =
       ReactDOM.Style.make(
+        ~height="100vh",
         ~flexGrow="1",
-        ~padding="10px",
         ~overflowY="auto",
         ~display="flex",
         ~flexDirection="column",
@@ -374,7 +360,6 @@ module DemoUnit = {
         ~justifyContent="center",
         (),
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
-    let sidebar = ReactDOM.Style.make(~width="230px", ~display="flex", ~flexDirection="column", ())
   }
 
   @react.component
@@ -459,7 +444,7 @@ module DemoUnit = {
     }
     <div style=Styles.container>
       <div style=Styles.contents> {demoUnit(props)} </div>
-      <div style=Styles.sidebar>
+      <Sidebar>
         <DemoUnitSidebar
           strings=state.strings
           ints=state.ints
@@ -470,7 +455,7 @@ module DemoUnit = {
           onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
           onBoolChange={(name, value) => dispatch(SetBool(name, value))}
         />
-      </div>
+      </Sidebar>
     </div>
   }
 }
@@ -494,13 +479,7 @@ module App = {
       ~flexDirection="row",
       ~minHeight="100vh",
       ~alignItems="stretch",
-      ~color="#42484D",
-      (),
-    )
-    let navigation = ReactDOM.Style.make(
-      ~width="230px",
-      ~display="flex",
-      ~flexDirection="column",
+      ~color=Color.darkGray,
       (),
     )
     let main = ReactDOM.Style.make(~flexGrow="1", ~display="flex", ~flexDirection="column", ())
@@ -514,7 +493,7 @@ module App = {
     )
     let emptyText = ReactDOM.Style.make(
       ~fontSize="22px",
-      ~color="rgba(0, 0, 0, 0.4)",
+      ~color=Color.black40a,
       ~textAlign="center",
       (),
     )
@@ -553,15 +532,12 @@ module App = {
           ->Option.getWithDefault(React.null)}
         </div>
       | Demo(demoName, demoUnitName) => <>
-          <div style=Styles.navigation> <DemoSidebar demos /> </div>
-          <div style=Styles.main> <DemoUnitFrame demoName demoUnitName /> </div>
+          <DemoListSidebar demos /> <DemoUnitFrame demoName demoUnitName />
         </>
       | Home => <>
-          <div style=Styles.navigation> <DemoSidebar demos /> </div>
-          <div style=Styles.main>
-            <div style=Styles.empty>
-              <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
-            </div>
+          <DemoListSidebar demos />
+          <div style=Styles.empty>
+            <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
           </div>
         </>
       }}
