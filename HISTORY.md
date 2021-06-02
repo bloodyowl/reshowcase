@@ -1,3 +1,9 @@
+## 4.0.3
+
+Changes:
+
+- Add separate scrolls to sections, refactor styles (thanks [@denis-ok](https://github.com/denis-ok)) (6e6b561)
+
 ## 4.0.2
 
 Changes:
