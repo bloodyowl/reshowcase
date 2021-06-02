@@ -1,10 +1,10 @@
 open Belt
 
-module Color = Layout.Color
-module Gap = Layout.Gap
-module PaddedBox = Layout.PaddedBox
-module Stack = Layout.Stack
-module Sidebar = Layout.Sidebar
+module Color = ReshowcaseUi__Layout.Color
+module Gap = ReshowcaseUi__Layout.Gap
+module PaddedBox = ReshowcaseUi__Layout.PaddedBox
+module Stack = ReshowcaseUi__Layout.Stack
+module Sidebar = ReshowcaseUi__Layout.Sidebar
 
 module Link = {
   @react.component
