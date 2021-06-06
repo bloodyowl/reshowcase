@@ -30,8 +30,8 @@ module PaddedBox = {
   }
 
   @react.component
-  let make = (~padding: padding=Around, ~children) => {
-    <div style={Styles.getPadding(padding)}> children </div>
+  let make = (~padding: padding=Around, ~id=?, ~children) => {
+    <div ?id style={Styles.getPadding(padding)}> children </div>
   }
 }
 
@@ -60,7 +60,7 @@ module Sidebar = {
   }
 
   @react.component
-  let make = (~children) => {
-    <div style={Styles.sidebar}> <PaddedBox> children </PaddedBox> </div>
+  let make = (~innerContainerId=?, ~children=React.null) => {
+    <div style={Styles.sidebar}> <PaddedBox id=?innerContainerId> children </PaddedBox> </div>
   }
 }

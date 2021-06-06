@@ -5,6 +5,9 @@ module Gap = ReshowcaseUi__Layout.Gap
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
+module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
+
+let rightSidebarId = "rightSidebar"
 
 module Link = {
   @react.component
@@ -362,8 +365,20 @@ module DemoUnit = {
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
   }
 
+  @val external window: {..} = "window"
+
   @react.component
-  let make = (~demoUnit: Configs.demoUnit => React.element) => {
+  let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
+    let (parentWindowRightSidebarElem, setParentWindowRightSidebarElem) = React.useState(() => None)
+
+    React.useEffect0(() => {
+      switch window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption {
+      | None => ()
+      | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
+      }
+      None
+    })
+
     let (state, dispatch) = React.useReducer(
       (state, action) =>
         switch action {
@@ -397,7 +412,7 @@ module DemoUnit = {
         let ints = ref(Map.String.empty)
         let floats = ref(Map.String.empty)
         let bools = ref(Map.String.empty)
-        let props: Configs.demoUnit = {
+        let props: Configs.demoUnitProps = {
           string: (name, ~options=?, config) => {
             strings := strings.contents->Map.String.set(name, (config, config, options))
             config
@@ -424,7 +439,7 @@ module DemoUnit = {
         }
       },
     )
-    let props: Configs.demoUnit = {
+    let props: Configs.demoUnitProps = {
       string: (name, ~options as _=?, _config) => {
         let (_, value, _) = state.strings->Map.String.getExn(name)
         value
@@ -444,18 +459,23 @@ module DemoUnit = {
     }
     <div style=Styles.container>
       <div style=Styles.contents> {demoUnit(props)} </div>
-      <Sidebar>
-        <DemoUnitSidebar
-          strings=state.strings
-          ints=state.ints
-          floats=state.floats
-          bools=state.bools
-          onStringChange={(name, value) => dispatch(SetString(name, value))}
-          onIntChange={(name, value) => dispatch(SetInt(name, value))}
-          onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
-          onBoolChange={(name, value) => dispatch(SetBool(name, value))}
-        />
-      </Sidebar>
+      {switch parentWindowRightSidebarElem {
+      | None => React.null
+      | Some(element) =>
+        ReactDOM.createPortal(
+          <DemoUnitSidebar
+            strings=state.strings
+            ints=state.ints
+            floats=state.floats
+            bools=state.bools
+            onStringChange={(name, value) => dispatch(SetString(name, value))}
+            onIntChange={(name, value) => dispatch(SetInt(name, value))}
+            onFloatChange={(name, value) => dispatch(SetFloat(name, value))}
+            onBoolChange={(name, value) => dispatch(SetBool(name, value))}
+          />,
+          element,
+        )
+      }}
     </div>
   }
 }
@@ -498,24 +518,20 @@ module App = {
       (),
     )
   }
+
   type route =
     | Unit(string, string)
     | Demo(string, string)
     | Home
-  type urlSearchParams
-  @new
-  external urlSearchParams: string => urlSearchParams = "URLSearchParams"
-  @return(nullable) @bs.send
-  external get: (urlSearchParams, string) => option<string> = "get"
 
   @react.component
   let make = (~demos) => {
     let url = ReasonReact.Router.useUrl()
-    let queryString = url.search->urlSearchParams
+    let queryString = url.search->URLSearchParams.make
     let route = switch (
-      queryString->get("iframe"),
-      queryString->get("demo"),
-      queryString->get("unit"),
+      queryString->URLSearchParams.get("iframe"),
+      queryString->URLSearchParams.get("demo"),
+      queryString->URLSearchParams.get("unit"),
     ) {
     | (Some("true"), Some(demo), Some(unit)) => Unit(demo, unit)
     | (_, Some(demo), Some(unit)) => Demo(demo, unit)
@@ -532,7 +548,14 @@ module App = {
           ->Option.getWithDefault(React.null)}
         </div>
       | Demo(demoName, demoUnitName) => <>
-          <DemoListSidebar demos /> <DemoUnitFrame demoName demoUnitName />
+          <DemoListSidebar demos />
+          // Force rerender after switching demo to avoid stale iframe and sidebar children
+          <DemoUnitFrame
+            key={"DemoUnitFrame" ++ Js.Date.now()->Belt.Float.toString} demoName demoUnitName
+          />
+          <Sidebar
+            key={"Sidebar" ++ Js.Date.now()->Belt.Float.toString} innerContainerId=rightSidebarId
+          />
         </>
       | Home => <>
           <DemoListSidebar demos />
