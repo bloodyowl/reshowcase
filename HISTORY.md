@@ -1,3 +1,9 @@
+## 4.0.4
+
+Changes:
+
+- Move right column outside of the demo iframe (thanks [@denis-ok](https://github.com/denis-ok)) (c42bf16)
+
 ## 4.0.3
 
 Changes:
