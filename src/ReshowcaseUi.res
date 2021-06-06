@@ -5,7 +5,6 @@ module Gap = ReshowcaseUi__Layout.Gap
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
-module ParentWindow = ReshowcaseUi__Bindings.ParentWindow
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 
 let rightSidebarId = "rightSidebar"
@@ -366,12 +365,14 @@ module DemoUnit = {
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
   }
 
+  @val external window: {..} = "window"
+
   @react.component
   let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
     let (parentWindowRightSidebarElem, setParentWindowRightSidebarElem) = React.useState(() => None)
 
     React.useEffect0(() => {
-      switch ParentWindow.getElementById(rightSidebarId) {
+      switch window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption {
       | None => ()
       | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
       }
