@@ -7,6 +7,36 @@ module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 
+module TopPanel = {
+  module Styles = {
+    let panel = ReactDOM.Style.make(
+      ~backgroundColor=Color.white,
+      ~borderColor=Color.midGray,
+      ~borderBottomWidth="1px",
+      ~borderBottomStyle="solid",
+      ~display="flex",
+      ~justifyContent="flex-end",
+      (),
+    )
+  }
+  @react.component
+  let make = (~onRightSidebarToggle: unit => unit) => {
+    <div style=Styles.panel>
+      <PaddedBox>
+        <PaddedBox>
+          <button
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onRightSidebarToggle()
+            }}>
+            {"Toggle right sidebar"->React.string}
+          </button>
+        </PaddedBox>
+      </PaddedBox>
+    </div>
+  }
+}
+
 let rightSidebarId = "rightSidebar"
 
 module Link = {
@@ -372,7 +402,9 @@ module DemoUnit = {
     let (parentWindowRightSidebarElem, setParentWindowRightSidebarElem) = React.useState(() => None)
 
     React.useEffect0(() => {
-      switch window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption {
+      switch window["parent"]["document"]["getElementById"](.
+        rightSidebarId,
+      )->Js.Nullable.toOption {
       | None => ()
       | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
       }
@@ -517,6 +549,8 @@ module App = {
       ~textAlign="center",
       (),
     )
+    let right = ReactDOM.Style.make(~display="flex", ~flexDirection="column", ~width="100%", ())
+    let demo = ReactDOM.Style.make(~display="flex", ~flexDirection="row", ())
   }
 
   type route =
@@ -537,6 +571,7 @@ module App = {
     | (_, Some(demo), Some(unit)) => Demo(demo, unit)
     | _ => Home
     }
+    let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => true)
     <div style=Styles.app>
       {switch route {
       | Unit(demoName, demoUnitName) =>
@@ -549,13 +584,21 @@ module App = {
         </div>
       | Demo(demoName, demoUnitName) => <>
           <DemoListSidebar demos />
-          // Force rerender after switching demo to avoid stale iframe and sidebar children
-          <DemoUnitFrame
-            key={"DemoUnitFrame" ++ Js.Date.now()->Belt.Float.toString} demoName demoUnitName
-          />
-          <Sidebar
-            key={"Sidebar" ++ Js.Date.now()->Belt.Float.toString} innerContainerId=rightSidebarId
-          />
+          <div style=Styles.right>
+            <TopPanel onRightSidebarToggle={() => toggleShowRightSidebar(_ => !showRightSidebar)} />
+            <div style=Styles.demo>
+              // Force rerender after switching demo to avoid stale iframe and sidebar children
+              <DemoUnitFrame
+                key={"DemoUnitFrame" ++ Js.Date.now()->Belt.Float.toString} demoName demoUnitName
+              />
+              {showRightSidebar
+                ? <Sidebar
+                    key={"Sidebar" ++ Js.Date.now()->Belt.Float.toString}
+                    innerContainerId=rightSidebarId
+                  />
+                : React.null}
+            </div>
+          </div>
         </>
       | Home => <>
           <DemoListSidebar demos />
