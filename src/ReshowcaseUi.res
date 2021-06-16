@@ -6,6 +6,7 @@ module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
+module PostMessage = ReshowcaseUi__Bindings.PostMessage
 
 module TopPanel = {
   module Styles = {
@@ -571,6 +572,15 @@ module App = {
     | (_, Some(demo), Some(unit)) => Demo(demo, unit)
     | _ => Home
     }
+
+    // Key to force rerender after switching demo to avoid stale iframe and sidebar children
+    let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Belt.Float.toString)
+
+    React.useEffect1(() => {
+      setIframeKey(_ => Js.Date.now()->Belt.Float.toString)
+      None
+    }, [url])
+
     let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => true)
     <div style=Styles.app>
       {switch route {
@@ -587,15 +597,9 @@ module App = {
           <div style=Styles.right>
             <TopPanel onRightSidebarToggle={() => toggleShowRightSidebar(_ => !showRightSidebar)} />
             <div style=Styles.demo>
-              // Force rerender after switching demo to avoid stale iframe and sidebar children
-              <DemoUnitFrame
-                key={"DemoUnitFrame" ++ Js.Date.now()->Belt.Float.toString} demoName demoUnitName
-              />
+              <DemoUnitFrame key={"DemoUnitFrame" ++ iframeKey} demoName demoUnitName />
               {showRightSidebar
-                ? <Sidebar
-                    key={"Sidebar" ++ Js.Date.now()->Belt.Float.toString}
-                    innerContainerId=rightSidebarId
-                  />
+                ? <Sidebar key={"Sidebar" ++ iframeKey} innerContainerId=rightSidebarId />
                 : React.null}
             </div>
           </div>
