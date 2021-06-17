@@ -11,31 +11,35 @@ module Message = ReshowcaseUi__Bindings.Message
 
 module TopPanel = {
   module Styles = {
-    let panel = ReactDOM.Style.make(
-      ~backgroundColor=Color.white,
-      ~borderColor=Color.midGray,
-      ~borderBottomWidth="1px",
-      ~borderBottomStyle="solid",
-      ~display="flex",
-      ~justifyContent="flex-end",
+    let panel = ReactDOM.Style.make(~display="flex", ~justifyContent="flex-end", ())
+    let button = ReactDOM.Style.make(
+      ~height="32px",
+      ~borderRadius="7px",
+      ~border=`1px solid ${Color.midGray}`,
+      ~cursor="pointer",
+      ~fontSize="14px",
+      ~backgroundColor=Color.lightGray,
+      ~color=Color.darkGray,
       (),
     )
   }
+
   @react.component
-  let make = (~onRightSidebarToggle: unit => unit) => {
-    <div style=Styles.panel>
-      <PaddedBox>
+  let make = (~isSidebarHidden: bool, ~onRightSidebarToggle: unit => unit) => {
+    <PaddedBox border=Bottom>
+      <div style=Styles.panel>
         <PaddedBox>
           <button
+            style=Styles.button
             onClick={event => {
               event->ReactEvent.Mouse.preventDefault
               onRightSidebarToggle()
             }}>
-            {"Toggle right sidebar"->React.string}
+            {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
           </button>
         </PaddedBox>
-      </PaddedBox>
-    </div>
+      </div>
+    </PaddedBox>
   }
 }
 
@@ -165,7 +169,7 @@ module DemoListSidebar = {
 
     @react.component
     let make = (~value, ~onChange, ~onClear) =>
-      <PaddedBox padding=TopLeftRight>
+      <PaddedBox padding=Around>
         <div style=Styles.inputWrapper>
           <input style=Styles.input placeholder="Filter" value onChange />
           {value === "" ? React.null : <ClearButton onClear />}
@@ -177,7 +181,7 @@ module DemoListSidebar = {
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar>
-      <Stack>
+      <PaddedBox border=Bottom>
         <SearchInput
           value={filterValue->Option.getWithDefault("")}
           onChange={event => {
@@ -186,30 +190,35 @@ module DemoListSidebar = {
           }}
           onClear={() => setFilterValue(_ => None)}
         />
-        {demos
-        ->Map.String.toArray
-        ->Array.keepMap(((demoName, demoUnits)) => {
-          let demoUnitNames = demoUnits->Map.String.keysToArray
-          switch filterValue {
-          | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-          | Some(filterValue) =>
-            let search = filterValue->Js.String2.toLowerCase
-            let demoNameHasSubstring = demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-            let filteredDemoUnitNames =
-              demoUnitNames->Array.keep(name =>
-                name->Js.String2.toLowerCase->Js.String2.includes(search)
-              )
-            switch (demoNameHasSubstring, filteredDemoUnitNames) {
-            | (false, []) => None
-            | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-            | (true, _)
-            | (false, _) =>
-              Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+      </PaddedBox>
+      <PaddedBox>
+        <Stack>
+          {demos
+          ->Map.String.toArray
+          ->Array.keepMap(((demoName, demoUnits)) => {
+            let demoUnitNames = demoUnits->Map.String.keysToArray
+            switch filterValue {
+            | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
+            | Some(filterValue) =>
+              let search = filterValue->Js.String2.toLowerCase
+              let demoNameHasSubstring =
+                demoName->Js.String2.toLowerCase->Js.String2.includes(search)
+              let filteredDemoUnitNames =
+                demoUnitNames->Array.keep(name =>
+                  name->Js.String2.toLowerCase->Js.String2.includes(search)
+                )
+              switch (demoNameHasSubstring, filteredDemoUnitNames) {
+              | (false, []) => None
+              | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
+              | (true, _)
+              | (false, _) =>
+                Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+              }
             }
-          }
-        })
-        ->React.array}
-      </Stack>
+          })
+          ->React.array}
+        </Stack>
+      </PaddedBox>
     </Sidebar>
   }
 }
@@ -622,6 +631,7 @@ module App = {
           <DemoListSidebar demos />
           <div style=Styles.right>
             <TopPanel
+              isSidebarHidden={!showRightSidebar}
               onRightSidebarToggle={() => {
                 toggleShowRightSidebar(_ => !showRightSidebar)
 

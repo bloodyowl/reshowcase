@@ -16,6 +16,8 @@ module Gap = {
 module PaddedBox = {
   type padding = Around | LeftRight | TopLeftRight
 
+  type border = None | Bottom
+
   module Styles = {
     let around = ReactDOM.Style.make(~padding=Gap.xs, ())
     let leftRight = ReactDOM.Style.make(~padding=`0 ${Gap.xs}`, ())
@@ -27,11 +29,25 @@ module PaddedBox = {
       | LeftRight => leftRight
       | TopLeftRight => topLeftRight
       }
+
+    let getBorder = (border: border) => {
+      let borderValue = `1px solid ${Color.midGray}`
+      switch border {
+      | None => ReactDOM.Style.make()
+      | Bottom => ReactDOM.Style.make(~borderBottom=borderValue, ())
+      }
+    }
+
+    let make = (~padding, ~border) => {
+      let paddingStyles = getPadding(padding)
+      let borderStyles = getBorder(border)
+      ReactDOM.Style.combine(paddingStyles, borderStyles)
+    }
   }
 
   @react.component
-  let make = (~padding: padding=Around, ~id=?, ~children) => {
-    <div ?id style={Styles.getPadding(padding)}> children </div>
+  let make = (~padding: padding=Around, ~border: border=None, ~id=?, ~children) => {
+    <div name="PaddedBox" ?id style={Styles.make(~padding, ~border)}> children </div>
   }
 }
 
@@ -61,6 +77,6 @@ module Sidebar = {
 
   @react.component
   let make = (~innerContainerId=?, ~children=React.null) => {
-    <div style={Styles.sidebar}> <PaddedBox id=?innerContainerId> children </PaddedBox> </div>
+    <div id=?innerContainerId style={Styles.sidebar}> children </div>
   }
 }
