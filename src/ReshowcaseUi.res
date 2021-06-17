@@ -6,7 +6,8 @@ module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
-module PostMessage = ReshowcaseUi__Bindings.PostMessage
+module Window = ReshowcaseUi__Bindings.Window
+module Message = ReshowcaseUi__Bindings.Message
 
 module TopPanel = {
   module Styles = {
@@ -412,6 +413,19 @@ module DemoUnit = {
       None
     })
 
+    React.useEffect0(() => {
+      Window.addMessageListener(event => {
+        if window["parent"] === event["source"] {
+          let message: string = event["data"]
+          switch message->Message.fromStringOpt {
+          | Some(RightSidebarDisplayed) => Js.log("RightSidebarDisplayed")
+          | None => Js.log("Unknown message")
+          }
+        }
+      })
+      None
+    })
+
     let (state, dispatch) = React.useReducer(
       (state, action) =>
         switch action {
@@ -515,8 +529,13 @@ module DemoUnit = {
 
 module DemoUnitFrame = {
   @react.component
-  let make = (~demoName=?, ~demoUnitName=?, _) =>
+  let make = (~demoName=?, ~demoUnitName=?, ~onLoad: Js.t<'a> => unit) =>
     <iframe
+      onLoad={event => {
+        let iframe = event->ReactEvent.Synthetic.target
+        let window = iframe["contentWindow"]
+        onLoad(window)
+      }}
       src={switch (demoName, demoUnitName) {
       | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
       | _ => "?iframe=true"
@@ -573,7 +592,9 @@ module App = {
     | _ => Home
     }
 
-    // Key to force rerender after switching demo to avoid stale iframe and sidebar children
+    let (loadedIframeWindow: option<Js.t<'a>>, setLoadedIframeWindow) = React.useState(() => None)
+
+    // Force rerender after switching demo to avoid stale iframe and sidebar children
     let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Belt.Float.toString)
 
     React.useEffect1(() => {
@@ -595,9 +616,25 @@ module App = {
       | Demo(demoName, demoUnitName) => <>
           <DemoListSidebar demos />
           <div style=Styles.right>
-            <TopPanel onRightSidebarToggle={() => toggleShowRightSidebar(_ => !showRightSidebar)} />
+            <TopPanel
+              onRightSidebarToggle={() => {
+                toggleShowRightSidebar(_ => !showRightSidebar)
+
+                switch loadedIframeWindow {
+                | Some(window) if !showRightSidebar =>
+                  Window.postMessage(window, RightSidebarDisplayed)
+                | None
+                | _ => ()
+                }
+              }}
+            />
             <div style=Styles.demo>
-              <DemoUnitFrame key={"DemoUnitFrame" ++ iframeKey} demoName demoUnitName />
+              <DemoUnitFrame
+                key={"DemoUnitFrame" ++ iframeKey}
+                onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
+                demoName
+                demoUnitName
+              />
               {showRightSidebar
                 ? <Sidebar key={"Sidebar" ++ iframeKey} innerContainerId=rightSidebarId />
                 : React.null}

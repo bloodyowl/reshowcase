@@ -7,3 +7,27 @@ module URLSearchParams = {
   @return(nullable) @bs.send
   external get: (urlSearchParams, string) => option<string> = "get"
 }
+
+module Message = {
+  type t = RightSidebarDisplayed
+
+  let toString = (message: t) =>
+    switch message {
+    | RightSidebarDisplayed => "RightSidebarDisplayed"
+    }
+
+  let fromStringOpt = (string): option<t> =>
+    switch string {
+    | "RightSidebarDisplayed" => Some(RightSidebarDisplayed)
+    | _ => None
+    }
+}
+
+module Window = {
+  @val external window: {..} = "window"
+
+  let addMessageListener = (func: Js.t<'a> => unit): unit =>
+    window["addEventListener"](. "message", func, false)
+
+  let postMessage = (w, message: Message.t) => w["postMessage"](. message->Message.toString, "*")
+}
