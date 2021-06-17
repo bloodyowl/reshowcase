@@ -593,7 +593,7 @@ module App = {
     | Home
 
   @react.component
-  let make = (~demos) => {
+  let make = (~demos, ~showRightSidebar) => {
     let url = ReasonReact.Router.useUrl()
     let queryString = url.search->URLSearchParams.make
     let route = switch (
@@ -616,7 +616,8 @@ module App = {
       None
     }, [url])
 
-    let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => true)
+    let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => showRightSidebar)
+
     <div style=Styles.app>
       {switch route {
       | Unit(demoName, demoUnitName) =>

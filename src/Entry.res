@@ -16,10 +16,10 @@ let demo = (demoName, func) => {
   demos->MutableMap.String.set(demoName, demoUnits->MutableMap.String.toArray->Map.String.fromArray)
 }
 
-let start = () =>
+let start = (~showRightSidebar=true, ()) =>
   switch ReactDOM.querySelector("#root") {
   | Some(root) =>
     let demos = demos->MutableMap.String.toArray->Map.String.fromArray
-    ReactDOM.render(<ReshowcaseUi.App demos />, root)
+    ReactDOM.render(<ReshowcaseUi.App demos showRightSidebar />, root)
   | None => ()
   }
