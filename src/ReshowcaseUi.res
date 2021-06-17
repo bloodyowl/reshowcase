@@ -399,16 +399,17 @@ module DemoUnit = {
 
   @val external window: {..} = "window"
 
+  let getRightSidebarElement = (): option<Dom.element> =>
+    window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption
+
   @react.component
   let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
     let (parentWindowRightSidebarElem, setParentWindowRightSidebarElem) = React.useState(() => None)
 
     React.useEffect0(() => {
-      switch window["parent"]["document"]["getElementById"](.
-        rightSidebarId,
-      )->Js.Nullable.toOption {
-      | None => ()
+      switch getRightSidebarElement() {
       | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
+      | None => ()
       }
       None
     })
@@ -418,8 +419,12 @@ module DemoUnit = {
         if window["parent"] === event["source"] {
           let message: string = event["data"]
           switch message->Message.fromStringOpt {
-          | Some(RightSidebarDisplayed) => Js.log("RightSidebarDisplayed")
-          | None => Js.log("Unknown message")
+          | Some(RightSidebarDisplayed) =>
+            switch getRightSidebarElement() {
+            | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
+            | None => ()
+            }
+          | None => Js.Console.error("Unexpected message received")
           }
         }
       })
