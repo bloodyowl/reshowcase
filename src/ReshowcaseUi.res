@@ -554,7 +554,7 @@ module DemoUnitFrame = {
       | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
       | _ => "?iframe=true"
       }}
-      style={ReactDOM.Style.make(~height="100vh", ~width="100%", ~border="none", ())}
+      style={ReactDOM.Style.make(~height="100%", ~width="100%", ~border="none", ())}
     />
 }
 
@@ -584,7 +584,7 @@ module App = {
       (),
     )
     let right = ReactDOM.Style.make(~display="flex", ~flexDirection="column", ~width="100%", ())
-    let demo = ReactDOM.Style.make(~display="flex", ~flexDirection="row", ())
+    let demo = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="row", ())
   }
 
   type route =
@@ -618,7 +618,7 @@ module App = {
 
     let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => showRightSidebar)
 
-    <div style=Styles.app>
+    <div name="App" style=Styles.app>
       {switch route {
       | Unit(demoName, demoUnitName) =>
         <div style=Styles.main>
@@ -630,7 +630,7 @@ module App = {
         </div>
       | Demo(demoName, demoUnitName) => <>
           <DemoListSidebar demos />
-          <div style=Styles.right>
+          <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
               onRightSidebarToggle={() => {
@@ -644,7 +644,7 @@ module App = {
                 }
               }}
             />
-            <div style=Styles.demo>
+            <div name="Demo" style=Styles.demo>
               <DemoUnitFrame
                 key={"DemoUnitFrame" ++ iframeKey}
                 onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}

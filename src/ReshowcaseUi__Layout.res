@@ -68,7 +68,6 @@ module Sidebar = {
       ReactDOM.Style.make(
         ~minWidth="230px",
         ~width="230px",
-        ~height="100vh",
         ~overflowY="auto",
         ~backgroundColor=Color.lightGray,
         (),
@@ -77,6 +76,6 @@ module Sidebar = {
 
   @react.component
   let make = (~innerContainerId=?, ~children=React.null) => {
-    <div id=?innerContainerId style={Styles.sidebar}> children </div>
+    <div name="Sidebar" id=?innerContainerId style={Styles.sidebar}> children </div>
   }
 }
