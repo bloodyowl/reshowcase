@@ -9,8 +9,18 @@ module Color = {
 }
 
 module Gap = {
+  let xxs = "3px"
   let xs = "7px"
   let md = "10px"
+
+  type t = Xxs | Xs | Md
+
+  let getGap = (gap: t) =>
+    switch gap {
+    | Xxs => xxs
+    | Xs => xs
+    | Md => md
+    }
 }
 
 module Border = {
@@ -23,16 +33,18 @@ module PaddedBox = {
   type border = None | Bottom
 
   module Styles = {
-    let around = ReactDOM.Style.make(~padding=Gap.xs, ())
-    let leftRight = ReactDOM.Style.make(~padding=`0 ${Gap.xs}`, ())
-    let topLeftRight = ReactDOM.Style.make(~padding=`${Gap.xs} ${Gap.xs} 0`, ())
+    let around = gapValue => ReactDOM.Style.make(~padding=gapValue, ())
+    let leftRight = gapValue => ReactDOM.Style.make(~padding=`0 ${gapValue}`, ())
+    let topLeftRight = gapValue => ReactDOM.Style.make(~padding=`${gapValue} ${gapValue} 0`, ())
 
-    let getPadding = (padding: padding) =>
+    let getPadding = (padding: padding, gap: Gap.t) => {
+      let gapValue = Gap.getGap(gap)
       switch padding {
-      | Around => around
-      | LeftRight => leftRight
-      | TopLeftRight => topLeftRight
+      | Around => around(gapValue)
+      | LeftRight => leftRight(gapValue)
+      | TopLeftRight => topLeftRight(gapValue)
       }
+    }
 
     let getBorder = (border: border) => {
       switch border {
@@ -41,16 +53,16 @@ module PaddedBox = {
       }
     }
 
-    let make = (~padding, ~border) => {
-      let paddingStyles = getPadding(padding)
+    let make = (~padding, ~gap, ~border) => {
+      let paddingStyles = getPadding(padding, gap)
       let borderStyles = getBorder(border)
       ReactDOM.Style.combine(paddingStyles, borderStyles)
     }
   }
 
   @react.component
-  let make = (~padding: padding=Around, ~border: border=None, ~id=?, ~children) => {
-    <div name="PaddedBox" ?id style={Styles.make(~padding, ~border)}> children </div>
+  let make = (~gap: Gap.t=Xs, ~padding: padding=Around, ~border: border=None, ~id=?, ~children) => {
+    <div name="PaddedBox" ?id style={Styles.make(~padding, ~border, ~gap)}> children </div>
   }
 }
 

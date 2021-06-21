@@ -54,31 +54,27 @@ module TopPanel = {
   ) => {
     <div style=Styles.panel>
       <div style=Styles.middleSection>
-        <PaddedBox>
-          <PaddedBox>
-            <button
-              style=Styles.button
-              onClick={event => {
-                event->ReactEvent.Mouse.preventDefault
-                onMobileViewToggle()
-              }}>
-              {(isMobileView ? "To desktop view" : "To mobile view")->React.string}
-            </button>
-          </PaddedBox>
+        <PaddedBox gap=Md>
+          <button
+            style=Styles.button
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onMobileViewToggle()
+            }}>
+            {(isMobileView ? "To desktop view" : "To mobile view")->React.string}
+          </button>
         </PaddedBox>
       </div>
       <div style=Styles.rightSection>
-        <PaddedBox>
-          <PaddedBox>
-            <button
-              style=Styles.button
-              onClick={event => {
-                event->ReactEvent.Mouse.preventDefault
-                onRightSidebarToggle()
-              }}>
-              {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
-            </button>
-          </PaddedBox>
+        <PaddedBox gap=Md>
+          <button
+            style=Styles.button
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onRightSidebarToggle()
+            }}>
+            {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
+          </button>
         </PaddedBox>
       </div>
     </div>
@@ -211,19 +207,17 @@ module DemoListSidebar = {
 
     @react.component
     let make = (~value, ~onChange, ~onClear) =>
-      <PaddedBox padding=Around>
-        <div style=Styles.inputWrapper>
-          <input style=Styles.input placeholder="Filter" value onChange />
-          {value === "" ? React.null : <ClearButton onClear />}
-        </div>
-      </PaddedBox>
+      <div style=Styles.inputWrapper>
+        <input style=Styles.input placeholder="Filter" value onChange />
+        {value === "" ? React.null : <ClearButton onClear />}
+      </div>
   }
 
   @react.component
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar>
-      <PaddedBox border=Bottom>
+      <PaddedBox gap=Md border=Bottom>
         <SearchInput
           value={filterValue->Option.getWithDefault("")}
           onChange={event => {
@@ -233,7 +227,7 @@ module DemoListSidebar = {
           onClear={() => setFilterValue(_ => None)}
         />
       </PaddedBox>
-      <PaddedBox>
+      <PaddedBox gap=Xxs>
         <Stack>
           {demos
           ->Map.String.toArray
@@ -330,92 +324,86 @@ module DemoUnitSidebar = {
     ~onBoolChange,
     _,
   ) =>
-    <PaddedBox>
-      <PaddedBox>
-        <Stack>
-          {strings
-          ->Map.String.toArray
-          ->Array.map(((propName, (_config, value, options))) =>
-            <PropBox key=propName propName>
-              {switch options {
-              | None =>
-                <input
-                  type_="text"
-                  value
-                  style=Styles.textInput
-                  onChange={event =>
-                    onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
-                />
-              | Some(options) =>
-                <select
-                  style=Styles.select
-                  onChange={event => {
-                    let value = (event->ReactEvent.Form.target)["value"]
-                    onStringChange(propName, value)
-                  }}>
-                  {options
-                  ->Array.map(((key, optionValue)) => {
-                    <option key selected={value == optionValue} value={optionValue}>
-                      {key->React.string}
-                    </option>
-                  })
-                  ->React.array}
-                </select>
-              }}
-            </PropBox>
-          )
-          ->React.array}
-          {ints
-          ->Map.String.toArray
-          ->Array.map(((propName, ({min, max}, value))) =>
-            <PropBox key=propName propName>
+    <PaddedBox gap=Md>
+      <Stack>
+        {strings
+        ->Map.String.toArray
+        ->Array.map(((propName, (_config, value, options))) =>
+          <PropBox key=propName propName>
+            {switch options {
+            | None =>
               <input
-                type_="number"
-                min=j`$min`
-                max=j`$max`
-                value=j`$value`
+                type_="text"
+                value
                 style=Styles.textInput
                 onChange={event =>
-                  onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
+                  onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
               />
-            </PropBox>
-          )
-          ->React.array}
-          {floats
-          ->Map.String.toArray
-          ->Array.map(((propName, ({min, max}, value))) =>
-            <PropBox key=propName propName>
-              <input
-                type_="number"
-                min=j`$min`
-                max=j`$max`
-                value=j`$value`
-                style=Styles.textInput
-                onChange={event =>
-                  onFloatChange(
-                    propName,
-                    (event->ReactEvent.Form.target)["value"]->float_of_string,
-                  )}
-              />
-            </PropBox>
-          )
-          ->React.array}
-          {bools
-          ->Map.String.toArray
-          ->Array.map(((propName, (_config, checked))) =>
-            <PropBox key=propName propName>
-              <input
-                type_="checkbox"
-                checked
-                style=Styles.checkbox
-                onChange={event =>
-                  onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
-              />
-            </PropBox>
-          )
-          ->React.array}
-        </Stack>
-      </PaddedBox>
+            | Some(options) =>
+              <select
+                style=Styles.select
+                onChange={event => {
+                  let value = (event->ReactEvent.Form.target)["value"]
+                  onStringChange(propName, value)
+                }}>
+                {options
+                ->Array.map(((key, optionValue)) => {
+                  <option key selected={value == optionValue} value={optionValue}>
+                    {key->React.string}
+                  </option>
+                })
+                ->React.array}
+              </select>
+            }}
+          </PropBox>
+        )
+        ->React.array}
+        {ints
+        ->Map.String.toArray
+        ->Array.map(((propName, ({min, max}, value))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="number"
+              min=j`$min`
+              max=j`$max`
+              value=j`$value`
+              style=Styles.textInput
+              onChange={event =>
+                onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
+            />
+          </PropBox>
+        )
+        ->React.array}
+        {floats
+        ->Map.String.toArray
+        ->Array.map(((propName, ({min, max}, value))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="number"
+              min=j`$min`
+              max=j`$max`
+              value=j`$value`
+              style=Styles.textInput
+              onChange={event =>
+                onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
+            />
+          </PropBox>
+        )
+        ->React.array}
+        {bools
+        ->Map.String.toArray
+        ->Array.map(((propName, (_config, checked))) =>
+          <PropBox key=propName propName>
+            <input
+              type_="checkbox"
+              checked
+              style=Styles.checkbox
+              onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
+            />
+          </PropBox>
+        )
+        ->React.array}
+      </Stack>
     </PaddedBox>
 }
 
