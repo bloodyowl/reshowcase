@@ -2,6 +2,7 @@ open Belt
 
 module Color = ReshowcaseUi__Layout.Color
 module Gap = ReshowcaseUi__Layout.Gap
+module Border = ReshowcaseUi__Layout.Border
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
@@ -11,7 +12,13 @@ module Message = ReshowcaseUi__Bindings.Message
 
 module TopPanel = {
   module Styles = {
-    let panel = ReactDOM.Style.make(~display="flex", ~justifyContent="flex-end", ())
+    let panel = ReactDOM.Style.make(
+      ~display="flex",
+      ~justifyContent="flex-end",
+      ~borderBottom=Border.default,
+      (),
+    )
+
     let button = ReactDOM.Style.make(
       ~height="32px",
       ~borderRadius="7px",
@@ -22,24 +29,59 @@ module TopPanel = {
       ~color=Color.darkGray,
       (),
     )
+
+    let middleSection = ReactDOM.Style.make(
+      ~display="flex",
+      ~flex="1",
+      ~justifyContent="center",
+      (),
+    )
+
+    let rightSection = ReactDOM.Style.make(
+      ~width=Sidebar.Styles.width,
+      ~display="flex",
+      ~justifyContent="flex-end",
+      (),
+    )
   }
 
   @react.component
-  let make = (~isSidebarHidden: bool, ~onRightSidebarToggle: unit => unit) => {
-    <PaddedBox border=Bottom>
-      <div style=Styles.panel>
+  let make = (
+    ~isSidebarHidden: bool,
+    ~isMobileView: bool,
+    ~onRightSidebarToggle: unit => unit,
+    ~onMobileViewToggle: unit => unit,
+  ) => {
+    <div style=Styles.panel>
+      <div style=Styles.middleSection>
         <PaddedBox>
-          <button
-            style=Styles.button
-            onClick={event => {
-              event->ReactEvent.Mouse.preventDefault
-              onRightSidebarToggle()
-            }}>
-            {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
-          </button>
+          <PaddedBox>
+            <button
+              style=Styles.button
+              onClick={event => {
+                event->ReactEvent.Mouse.preventDefault
+                onMobileViewToggle()
+              }}>
+              {(isMobileView ? "To desktop view" : "To mobile view")->React.string}
+            </button>
+          </PaddedBox>
         </PaddedBox>
       </div>
-    </PaddedBox>
+      <div style=Styles.rightSection>
+        <PaddedBox>
+          <PaddedBox>
+            <button
+              style=Styles.button
+              onClick={event => {
+                event->ReactEvent.Mouse.preventDefault
+                onRightSidebarToggle()
+              }}>
+              {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
+            </button>
+          </PaddedBox>
+        </PaddedBox>
+      </div>
+    </div>
   }
 }
 
@@ -289,85 +331,91 @@ module DemoUnitSidebar = {
     _,
   ) =>
     <PaddedBox>
-      <Stack>
-        {strings
-        ->Map.String.toArray
-        ->Array.map(((propName, (_config, value, options))) =>
-          <PropBox key=propName propName>
-            {switch options {
-            | None =>
+      <PaddedBox>
+        <Stack>
+          {strings
+          ->Map.String.toArray
+          ->Array.map(((propName, (_config, value, options))) =>
+            <PropBox key=propName propName>
+              {switch options {
+              | None =>
+                <input
+                  type_="text"
+                  value
+                  style=Styles.textInput
+                  onChange={event =>
+                    onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+                />
+              | Some(options) =>
+                <select
+                  style=Styles.select
+                  onChange={event => {
+                    let value = (event->ReactEvent.Form.target)["value"]
+                    onStringChange(propName, value)
+                  }}>
+                  {options
+                  ->Array.map(((key, optionValue)) => {
+                    <option key selected={value == optionValue} value={optionValue}>
+                      {key->React.string}
+                    </option>
+                  })
+                  ->React.array}
+                </select>
+              }}
+            </PropBox>
+          )
+          ->React.array}
+          {ints
+          ->Map.String.toArray
+          ->Array.map(((propName, ({min, max}, value))) =>
+            <PropBox key=propName propName>
               <input
-                type_="text"
-                value
+                type_="number"
+                min=j`$min`
+                max=j`$max`
+                value=j`$value`
                 style=Styles.textInput
                 onChange={event =>
-                  onStringChange(propName, (event->ReactEvent.Form.target)["value"])}
+                  onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
               />
-            | Some(options) =>
-              <select
-                style=Styles.select
-                onChange={event => {
-                  let value = (event->ReactEvent.Form.target)["value"]
-                  onStringChange(propName, value)
-                }}>
-                {options
-                ->Array.map(((key, optionValue)) => {
-                  <option key selected={value == optionValue} value={optionValue}>
-                    {key->React.string}
-                  </option>
-                })
-                ->React.array}
-              </select>
-            }}
-          </PropBox>
-        )
-        ->React.array}
-        {ints
-        ->Map.String.toArray
-        ->Array.map(((propName, ({min, max}, value))) =>
-          <PropBox key=propName propName>
-            <input
-              type_="number"
-              min=j`$min`
-              max=j`$max`
-              value=j`$value`
-              style=Styles.textInput
-              onChange={event =>
-                onIntChange(propName, (event->ReactEvent.Form.target)["value"]->int_of_string)}
-            />
-          </PropBox>
-        )
-        ->React.array}
-        {floats
-        ->Map.String.toArray
-        ->Array.map(((propName, ({min, max}, value))) =>
-          <PropBox key=propName propName>
-            <input
-              type_="number"
-              min=j`$min`
-              max=j`$max`
-              value=j`$value`
-              style=Styles.textInput
-              onChange={event =>
-                onFloatChange(propName, (event->ReactEvent.Form.target)["value"]->float_of_string)}
-            />
-          </PropBox>
-        )
-        ->React.array}
-        {bools
-        ->Map.String.toArray
-        ->Array.map(((propName, (_config, checked))) =>
-          <PropBox key=propName propName>
-            <input
-              type_="checkbox"
-              checked
-              style=Styles.checkbox
-              onChange={event => onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
-            />
-          </PropBox>
-        )
-        ->React.array}
-      </Stack>
+            </PropBox>
+          )
+          ->React.array}
+          {floats
+          ->Map.String.toArray
+          ->Array.map(((propName, ({min, max}, value))) =>
+            <PropBox key=propName propName>
+              <input
+                type_="number"
+                min=j`$min`
+                max=j`$max`
+                value=j`$value`
+                style=Styles.textInput
+                onChange={event =>
+                  onFloatChange(
+                    propName,
+                    (event->ReactEvent.Form.target)["value"]->float_of_string,
+                  )}
+              />
+            </PropBox>
+          )
+          ->React.array}
+          {bools
+          ->Map.String.toArray
+          ->Array.map(((propName, (_config, checked))) =>
+            <PropBox key=propName propName>
+              <input
+                type_="checkbox"
+                checked
+                style=Styles.checkbox
+                onChange={event =>
+                  onBoolChange(propName, (event->ReactEvent.Form.target)["checked"])}
+              />
+            </PropBox>
+          )
+          ->React.array}
+        </Stack>
+      </PaddedBox>
     </PaddedBox>
 }
 
@@ -542,20 +590,38 @@ module DemoUnit = {
 }
 
 module DemoUnitFrame = {
+  let container = isMobileView =>
+    ReactDOM.Style.make(
+      ~flex="1",
+      ~display="flex",
+      ~justifyContent="center",
+      ~alignItems="center",
+      ~backgroundColor={isMobileView ? Color.midGray : Color.white},
+      (),
+    )
+
   @react.component
-  let make = (~demoName=?, ~demoUnitName=?, ~onLoad: Js.t<'a> => unit) =>
-    <iframe
-      onLoad={event => {
-        let iframe = event->ReactEvent.Synthetic.target
-        let window = iframe["contentWindow"]
-        onLoad(window)
-      }}
-      src={switch (demoName, demoUnitName) {
-      | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
-      | _ => "?iframe=true"
-      }}
-      style={ReactDOM.Style.make(~height="100%", ~width="100%", ~border="none", ())}
-    />
+  let make = (~demoName=?, ~demoUnitName=?, ~isMobileView, ~onLoad: Js.t<'a> => unit) => {
+    <div name="DemoUnitFrame" style={container(isMobileView)}>
+      <iframe
+        onLoad={event => {
+          let iframe = event->ReactEvent.Synthetic.target
+          let window = iframe["contentWindow"]
+          onLoad(window)
+        }}
+        src={switch (demoName, demoUnitName) {
+        | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
+        | _ => "?iframe=true"
+        }}
+        style={ReactDOM.Style.make(
+          ~height={isMobileView ? "667px" : "100%"},
+          ~width={isMobileView ? "365px" : "100%"},
+          ~border="none",
+          (),
+        )}
+      />
+    </div>
+  }
 }
 
 module App = {
@@ -610,13 +676,13 @@ module App = {
 
     // Force rerender after switching demo to avoid stale iframe and sidebar children
     let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Belt.Float.toString)
-
     React.useEffect1(() => {
       setIframeKey(_ => Js.Date.now()->Belt.Float.toString)
       None
     }, [url])
 
     let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => showRightSidebar)
+    let (isMobileView, toggleIsMobileView) = React.useState(() => false)
 
     <div name="App" style=Styles.app>
       {switch route {
@@ -633,9 +699,9 @@ module App = {
           <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
+              isMobileView
               onRightSidebarToggle={() => {
                 toggleShowRightSidebar(_ => !showRightSidebar)
-
                 switch loadedIframeWindow {
                 | Some(window) if !showRightSidebar =>
                   Window.postMessage(window, RightSidebarDisplayed)
@@ -643,13 +709,15 @@ module App = {
                 | _ => ()
                 }
               }}
+              onMobileViewToggle={() => toggleIsMobileView(_ => !isMobileView)}
             />
             <div name="Demo" style=Styles.demo>
               <DemoUnitFrame
                 key={"DemoUnitFrame" ++ iframeKey}
-                onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
                 demoName
                 demoUnitName
+                isMobileView
+                onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
               />
               {showRightSidebar
                 ? <Sidebar key={"Sidebar" ++ iframeKey} innerContainerId=rightSidebarId />

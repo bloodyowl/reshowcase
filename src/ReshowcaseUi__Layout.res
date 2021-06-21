@@ -13,6 +13,10 @@ module Gap = {
   let md = "10px"
 }
 
+module Border = {
+  let default = `1px solid ${Color.midGray}`
+}
+
 module PaddedBox = {
   type padding = Around | LeftRight | TopLeftRight
 
@@ -31,10 +35,9 @@ module PaddedBox = {
       }
 
     let getBorder = (border: border) => {
-      let borderValue = `1px solid ${Color.midGray}`
       switch border {
       | None => ReactDOM.Style.make()
-      | Bottom => ReactDOM.Style.make(~borderBottom=borderValue, ())
+      | Bottom => ReactDOM.Style.make(~borderBottom=Border.default, ())
       }
     }
 
@@ -64,10 +67,12 @@ module Stack = {
 
 module Sidebar = {
   module Styles = {
+    let width = "230px"
+
     let sidebar =
       ReactDOM.Style.make(
-        ~minWidth="230px",
-        ~width="230px",
+        ~minWidth=width,
+        ~width,
         ~overflowY="auto",
         ~backgroundColor=Color.lightGray,
         (),
