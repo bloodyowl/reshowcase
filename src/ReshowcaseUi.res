@@ -8,7 +8,6 @@ module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
-module Message = ReshowcaseUi__Bindings.Message
 
 module TopPanel = {
   module Styles = {
@@ -216,7 +215,7 @@ module DemoListSidebar = {
   @react.component
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
-    <Sidebar>
+    <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
         <SearchInput
           value={filterValue->Option.getWithDefault("")}
@@ -431,7 +430,6 @@ module DemoUnit = {
     )
     let contents =
       ReactDOM.Style.make(
-        ~height="100vh",
         ~flexGrow="1",
         ~overflowY="auto",
         ~display="flex",
@@ -442,10 +440,8 @@ module DemoUnit = {
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
   }
 
-  @val external window: {..} = "window"
-
   let getRightSidebarElement = (): option<Dom.element> =>
-    window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption
+    Window.window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption
 
   @react.component
   let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
@@ -461,9 +457,9 @@ module DemoUnit = {
 
     React.useEffect0(() => {
       Window.addMessageListener(event => {
-        if window["parent"] === event["source"] {
+        if Window.window["parent"] === event["source"] {
           let message: string = event["data"]
-          switch message->Message.fromStringOpt {
+          switch message->Window.Message.fromStringOpt {
           | Some(RightSidebarDisplayed) =>
             switch getRightSidebarElement() {
             | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
@@ -554,7 +550,7 @@ module DemoUnit = {
         value
       },
     }
-    <div style=Styles.container>
+    <div name="DemoUnit" style=Styles.container>
       <div style=Styles.contents> {demoUnit(props)} </div>
       {switch parentWindowRightSidebarElem {
       | None => React.null

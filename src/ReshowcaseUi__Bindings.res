@@ -8,26 +8,27 @@ module URLSearchParams = {
   external get: (urlSearchParams, string) => option<string> = "get"
 }
 
-module Message = {
-  type t = RightSidebarDisplayed
-
-  let toString = (message: t) =>
-    switch message {
-    | RightSidebarDisplayed => "RightSidebarDisplayed"
-    }
-
-  let fromStringOpt = (string): option<t> =>
-    switch string {
-    | "RightSidebarDisplayed" => Some(RightSidebarDisplayed)
-    | _ => None
-    }
-}
-
 module Window = {
+  module Message = {
+    type t = RightSidebarDisplayed
+
+    let toString = (message: t) =>
+      switch message {
+      | RightSidebarDisplayed => "RightSidebarDisplayed"
+      }
+
+    let fromStringOpt = (string): option<t> =>
+      switch string {
+      | "RightSidebarDisplayed" => Some(RightSidebarDisplayed)
+      | _ => None
+      }
+  }
+
   @val external window: {..} = "window"
 
   let addMessageListener = (func: Js.t<'a> => unit): unit =>
     window["addEventListener"](. "message", func, false)
 
-  let postMessage = (w, message: Message.t) => w["postMessage"](. message->Message.toString, "*")
+  let postMessage = (window, message: Message.t) =>
+    window["postMessage"](. message->Message.toString, "*")
 }
