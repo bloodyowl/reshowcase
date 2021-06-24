@@ -1,3 +1,9 @@
+## 4.1.1
+
+Fixes:
+
+- Fix mobile viewport width (51f55f5)
+
 ## 4.1.0
 
 Changes:
