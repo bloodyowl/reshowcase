@@ -9,6 +9,39 @@ module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 
+type responsiveMode =
+  | Mobile
+  | Desktop
+
+let desktopIcon =
+  <svg width="32" height="32">
+    <g transform="translate(5 8)" fill="none" fillRule="evenodd">
+      <rect stroke="currentColor" x="2" width="18" height="13" rx="1" />
+      <rect fill="currentColor" y="13" width="22" height="2" rx="1" />
+    </g>
+  </svg>
+
+let mobileIcon =
+  <svg width="32" height="32">
+    <g transform="translate(11 7)" fill="none" fillRule="evenodd">
+      <rect stroke="currentColor" width="10" height="18" rx="2" />
+      <path d="M2 0h6v1a1 1 0 01-1 1H3a1 1 0 01-1-1V0z" fill="currentColor" />
+    </g>
+  </svg>
+
+let sidebarIcon =
+  <svg width="32" height="32">
+    <g
+      stroke="currentColor"
+      strokeWidth="1.5"
+      fill="none"
+      fillRule="evenodd"
+      strokeLinecap="round"
+      strokeLinejoin="round">
+      <path d="M25.438 17H12.526M19 10.287L12.287 17 19 23.713M8.699 7.513v17.2" />
+    </g>
+  </svg>
+
 module TopPanel = {
   module Styles = {
     let panel = ReactDOM.Style.make(
@@ -18,16 +51,37 @@ module TopPanel = {
       (),
     )
 
+    let buttonGroup = ReactDOM.Style.make(
+      ~overflow="hidden",
+      ~display="flex",
+      ~flexDirection="row",
+      ~alignItems="stretch",
+      ~borderRadius="7px",
+      (),
+    )
+
     let button = ReactDOM.Style.make(
       ~height="32px",
-      ~borderRadius="7px",
-      ~border=`1px solid ${Color.midGray}`,
+      ~width="48px",
       ~cursor="pointer",
       ~fontSize="14px",
       ~backgroundColor=Color.lightGray,
       ~color=Color.darkGray,
+      ~border="none",
+      ~margin="0",
+      ~padding="0",
+      ~display="flex",
+      ~alignItems="center",
+      ~justifyContent="center",
       (),
     )
+
+    let squareButton = button->ReactDOM.Style.combine(ReactDOM.Style.make(~width="32px", ()))
+
+    let activeButton =
+      button->ReactDOM.Style.combine(
+        ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ()),
+      )
 
     let middleSection = ReactDOM.Style.make(
       ~display="flex",
@@ -37,7 +91,7 @@ module TopPanel = {
     )
 
     let rightSection = ReactDOM.Style.make(
-      ~width=Sidebar.Styles.width,
+      ~width="32px",
       ~display="flex",
       ~justifyContent="flex-end",
       (),
@@ -47,33 +101,56 @@ module TopPanel = {
   @react.component
   let make = (
     ~isSidebarHidden: bool,
-    ~isMobileView: bool,
+    ~responsiveMode: responsiveMode,
     ~onRightSidebarToggle: unit => unit,
-    ~onMobileViewToggle: unit => unit,
+    ~setResponsiveMode: (responsiveMode => responsiveMode) => unit,
   ) => {
     <div style=Styles.panel>
+      <div style=Styles.rightSection />
       <div style=Styles.middleSection>
         <PaddedBox gap=Md>
-          <button
-            style=Styles.button
-            onClick={event => {
-              event->ReactEvent.Mouse.preventDefault
-              onMobileViewToggle()
-            }}>
-            {(isMobileView ? "To desktop view" : "To mobile view")->React.string}
-          </button>
+          <div style=Styles.buttonGroup>
+            <button
+              title={"Show in desktop mode"}
+              style={responsiveMode == Desktop ? Styles.activeButton : Styles.button}
+              onClick={event => {
+                event->ReactEvent.Mouse.preventDefault
+                setResponsiveMode(_ => Desktop)
+              }}>
+              {desktopIcon}
+            </button>
+            <button
+              title={"Show in mobile mode"}
+              style={responsiveMode == Mobile ? Styles.activeButton : Styles.button}
+              onClick={event => {
+                event->ReactEvent.Mouse.preventDefault
+                setResponsiveMode(_ => Mobile)
+              }}>
+              {mobileIcon}
+            </button>
+          </div>
         </PaddedBox>
       </div>
       <div style=Styles.rightSection>
         <PaddedBox gap=Md>
-          <button
-            style=Styles.button
-            onClick={event => {
-              event->ReactEvent.Mouse.preventDefault
-              onRightSidebarToggle()
-            }}>
-            {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
-          </button>
+          <div style=Styles.buttonGroup>
+            <button
+              title={isSidebarHidden ? "Show sidebar" : "Hide sidebar"}
+              style=Styles.squareButton
+              onClick={event => {
+                event->ReactEvent.Mouse.preventDefault
+                onRightSidebarToggle()
+              }}>
+              <div
+                style={ReactDOM.Style.make(
+                  ~transition="200ms ease-in-out transform",
+                  ~transform=isSidebarHidden ? "rotate(0)" : "rotate(180deg)",
+                  (),
+                )}>
+                {sidebarIcon}
+              </div>
+            </button>
+          </div>
         </PaddedBox>
       </div>
     </div>
@@ -574,19 +651,26 @@ module DemoUnit = {
 }
 
 module DemoUnitFrame = {
-  let container = isMobileView =>
+  let container = responsiveMode =>
     ReactDOM.Style.make(
       ~flex="1",
       ~display="flex",
       ~justifyContent="center",
       ~alignItems="center",
-      ~backgroundColor={isMobileView ? Color.midGray : Color.white},
+      ~backgroundColor={
+        switch responsiveMode {
+        | Mobile => Color.midGray
+        | Desktop => Color.white
+        }
+      },
+      ~height="1px",
+      ~overflowY="auto",
       (),
     )
 
   @react.component
-  let make = (~demoName=?, ~demoUnitName=?, ~isMobileView, ~onLoad: Js.t<'a> => unit) => {
-    <div name="DemoUnitFrame" style={container(isMobileView)}>
+  let make = (~demoName=?, ~demoUnitName=?, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
+    <div name="DemoUnitFrame" style={container(responsiveMode)}>
       <iframe
         onLoad={event => {
           let iframe = event->ReactEvent.Synthetic.target
@@ -598,8 +682,18 @@ module DemoUnitFrame = {
         | _ => "?iframe=true"
         }}
         style={ReactDOM.Style.make(
-          ~height={isMobileView ? "667px" : "100%"},
-          ~width={isMobileView ? "365px" : "100%"},
+          ~height={
+            switch responsiveMode {
+            | Mobile => "667px"
+            | Desktop => "100%"
+            }
+          },
+          ~width={
+            switch responsiveMode {
+            | Mobile => "365px"
+            | Desktop => "100%"
+            }
+          },
           ~border="none",
           (),
         )}
@@ -634,7 +728,14 @@ module App = {
       (),
     )
     let right = ReactDOM.Style.make(~display="flex", ~flexDirection="column", ~width="100%", ())
-    let demo = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="row", ())
+    let demo = ReactDOM.Style.make(
+      ~display="flex",
+      ~flex="1",
+      ~flexDirection="row",
+      ~alignItems="stretch",
+      (),
+    )
+    let demoContents = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="column", ())
   }
 
   type route =
@@ -665,8 +766,21 @@ module App = {
       None
     }, [url])
 
-    let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => showRightSidebar)
-    let (isMobileView, toggleIsMobileView) = React.useState(() => false)
+    let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => {
+      open ReshowcaseUi__Bindings
+      localStorage->LocalStorage.getItem("sidebar")->Option.isSome
+    })
+    let (responsiveMode, setResponsiveMode) = React.useState(() => Desktop)
+
+    React.useEffect1(() => {
+      open ReshowcaseUi__Bindings
+      if showRightSidebar {
+        localStorage->LocalStorage.setItem("sidebar", "1")
+      } else {
+        localStorage->LocalStorage.removeItem("sidebar")
+      }
+      None
+    }, [showRightSidebar])
 
     <div name="App" style=Styles.app>
       {switch route {
@@ -683,7 +797,7 @@ module App = {
           <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
-              isMobileView
+              responsiveMode
               onRightSidebarToggle={() => {
                 toggleShowRightSidebar(_ => !showRightSidebar)
                 switch loadedIframeWindow {
@@ -693,16 +807,18 @@ module App = {
                 | _ => ()
                 }
               }}
-              onMobileViewToggle={() => toggleIsMobileView(_ => !isMobileView)}
+              setResponsiveMode
             />
             <div name="Demo" style=Styles.demo>
-              <DemoUnitFrame
-                key={"DemoUnitFrame" ++ iframeKey}
-                demoName
-                demoUnitName
-                isMobileView
-                onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
-              />
+              <div style=Styles.demoContents>
+                <DemoUnitFrame
+                  key={"DemoUnitFrame" ++ iframeKey}
+                  demoName
+                  demoUnitName
+                  responsiveMode
+                  onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
+                />
+              </div>
               {showRightSidebar
                 ? <Sidebar key={"Sidebar" ++ iframeKey} innerContainerId=rightSidebarId />
                 : React.null}

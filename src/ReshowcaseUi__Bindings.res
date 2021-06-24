@@ -32,3 +32,12 @@ module Window = {
   let postMessage = (window, message: Message.t) =>
     window["postMessage"](. message->Message.toString, "*")
 }
+
+module LocalStorage = {
+  type t
+  @return(nullable) @send external getItem: (t, string) => option<string> = "getItem"
+  @send external setItem: (t, string, string) => unit = "setItem"
+  @send external removeItem: (t, string) => unit = "removeItem"
+}
+
+@val external localStorage: LocalStorage.t = "localStorage"
