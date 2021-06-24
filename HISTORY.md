@@ -1,3 +1,10 @@
+## 4.1.2
+
+Fixes:
+
+- Raise warning to errors (thanks [@denis-ok](https://github.com/denis-ok)) (d8a06de)
+- Remove esy (thanks [@denis-ok](https://github.com/denis-ok)) (d8a06de)
+
 ## 4.1.1
 
 Fixes:
