@@ -2,10 +2,83 @@ open Belt
 
 module Color = ReshowcaseUi__Layout.Color
 module Gap = ReshowcaseUi__Layout.Gap
+module Border = ReshowcaseUi__Layout.Border
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
+module Window = ReshowcaseUi__Bindings.Window
+
+module TopPanel = {
+  module Styles = {
+    let panel = ReactDOM.Style.make(
+      ~display="flex",
+      ~justifyContent="flex-end",
+      ~borderBottom=Border.default,
+      (),
+    )
+
+    let button = ReactDOM.Style.make(
+      ~height="32px",
+      ~borderRadius="7px",
+      ~border=`1px solid ${Color.midGray}`,
+      ~cursor="pointer",
+      ~fontSize="14px",
+      ~backgroundColor=Color.lightGray,
+      ~color=Color.darkGray,
+      (),
+    )
+
+    let middleSection = ReactDOM.Style.make(
+      ~display="flex",
+      ~flex="1",
+      ~justifyContent="center",
+      (),
+    )
+
+    let rightSection = ReactDOM.Style.make(
+      ~width=Sidebar.Styles.width,
+      ~display="flex",
+      ~justifyContent="flex-end",
+      (),
+    )
+  }
+
+  @react.component
+  let make = (
+    ~isSidebarHidden: bool,
+    ~isMobileView: bool,
+    ~onRightSidebarToggle: unit => unit,
+    ~onMobileViewToggle: unit => unit,
+  ) => {
+    <div style=Styles.panel>
+      <div style=Styles.middleSection>
+        <PaddedBox gap=Md>
+          <button
+            style=Styles.button
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onMobileViewToggle()
+            }}>
+            {(isMobileView ? "To desktop view" : "To mobile view")->React.string}
+          </button>
+        </PaddedBox>
+      </div>
+      <div style=Styles.rightSection>
+        <PaddedBox gap=Md>
+          <button
+            style=Styles.button
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onRightSidebarToggle()
+            }}>
+            {(isSidebarHidden ? "Show sidebar" : "Hide sidebar")->React.string}
+          </button>
+        </PaddedBox>
+      </div>
+    </div>
+  }
+}
 
 let rightSidebarId = "rightSidebar"
 
@@ -133,19 +206,17 @@ module DemoListSidebar = {
 
     @react.component
     let make = (~value, ~onChange, ~onClear) =>
-      <PaddedBox padding=TopLeftRight>
-        <div style=Styles.inputWrapper>
-          <input style=Styles.input placeholder="Filter" value onChange />
-          {value === "" ? React.null : <ClearButton onClear />}
-        </div>
-      </PaddedBox>
+      <div style=Styles.inputWrapper>
+        <input style=Styles.input placeholder="Filter" value onChange />
+        {value === "" ? React.null : <ClearButton onClear />}
+      </div>
   }
 
   @react.component
   let make = (~demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
-    <Sidebar>
-      <Stack>
+    <Sidebar fullHeight=true>
+      <PaddedBox gap=Md border=Bottom>
         <SearchInput
           value={filterValue->Option.getWithDefault("")}
           onChange={event => {
@@ -154,30 +225,35 @@ module DemoListSidebar = {
           }}
           onClear={() => setFilterValue(_ => None)}
         />
-        {demos
-        ->Map.String.toArray
-        ->Array.keepMap(((demoName, demoUnits)) => {
-          let demoUnitNames = demoUnits->Map.String.keysToArray
-          switch filterValue {
-          | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-          | Some(filterValue) =>
-            let search = filterValue->Js.String2.toLowerCase
-            let demoNameHasSubstring = demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-            let filteredDemoUnitNames =
-              demoUnitNames->Array.keep(name =>
-                name->Js.String2.toLowerCase->Js.String2.includes(search)
-              )
-            switch (demoNameHasSubstring, filteredDemoUnitNames) {
-            | (false, []) => None
-            | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-            | (true, _)
-            | (false, _) =>
-              Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+      </PaddedBox>
+      <PaddedBox gap=Xxs>
+        <Stack>
+          {demos
+          ->Map.String.toArray
+          ->Array.keepMap(((demoName, demoUnits)) => {
+            let demoUnitNames = demoUnits->Map.String.keysToArray
+            switch filterValue {
+            | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
+            | Some(filterValue) =>
+              let search = filterValue->Js.String2.toLowerCase
+              let demoNameHasSubstring =
+                demoName->Js.String2.toLowerCase->Js.String2.includes(search)
+              let filteredDemoUnitNames =
+                demoUnitNames->Array.keep(name =>
+                  name->Js.String2.toLowerCase->Js.String2.includes(search)
+                )
+              switch (demoNameHasSubstring, filteredDemoUnitNames) {
+              | (false, []) => None
+              | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
+              | (true, _)
+              | (false, _) =>
+                Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+              }
             }
-          }
-        })
-        ->React.array}
-      </Stack>
+          })
+          ->React.array}
+        </Stack>
+      </PaddedBox>
     </Sidebar>
   }
 }
@@ -247,7 +323,7 @@ module DemoUnitSidebar = {
     ~onBoolChange,
     _,
   ) =>
-    <PaddedBox>
+    <PaddedBox gap=Md>
       <Stack>
         {strings
         ->Map.String.toArray
@@ -354,7 +430,6 @@ module DemoUnit = {
     )
     let contents =
       ReactDOM.Style.make(
-        ~height="100vh",
         ~flexGrow="1",
         ~overflowY="auto",
         ~display="flex",
@@ -365,17 +440,35 @@ module DemoUnit = {
       )->ReactDOM.Style.unsafeAddProp("WebkitOverflowScrolling", "touch")
   }
 
-  @val external window: {..} = "window"
+  let getRightSidebarElement = (): option<Dom.element> =>
+    Window.window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption
 
   @react.component
   let make = (~demoUnit: Configs.demoUnitProps => React.element) => {
     let (parentWindowRightSidebarElem, setParentWindowRightSidebarElem) = React.useState(() => None)
 
     React.useEffect0(() => {
-      switch window["parent"]["document"]["getElementById"](. rightSidebarId)->Js.Nullable.toOption {
-      | None => ()
+      switch getRightSidebarElement() {
       | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
+      | None => ()
       }
+      None
+    })
+
+    React.useEffect0(() => {
+      Window.addMessageListener(event => {
+        if Window.window["parent"] === event["source"] {
+          let message: string = event["data"]
+          switch message->Window.Message.fromStringOpt {
+          | Some(RightSidebarDisplayed) =>
+            switch getRightSidebarElement() {
+            | Some(elem) => setParentWindowRightSidebarElem(_ => Some(elem))
+            | None => ()
+            }
+          | None => Js.Console.error("Unexpected message received")
+          }
+        }
+      })
       None
     })
 
@@ -457,7 +550,7 @@ module DemoUnit = {
         value
       },
     }
-    <div style=Styles.container>
+    <div name="DemoUnit" style=Styles.container>
       <div style=Styles.contents> {demoUnit(props)} </div>
       {switch parentWindowRightSidebarElem {
       | None => React.null
@@ -481,15 +574,38 @@ module DemoUnit = {
 }
 
 module DemoUnitFrame = {
+  let container = isMobileView =>
+    ReactDOM.Style.make(
+      ~flex="1",
+      ~display="flex",
+      ~justifyContent="center",
+      ~alignItems="center",
+      ~backgroundColor={isMobileView ? Color.midGray : Color.white},
+      (),
+    )
+
   @react.component
-  let make = (~demoName=?, ~demoUnitName=?, _) =>
-    <iframe
-      src={switch (demoName, demoUnitName) {
-      | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
-      | _ => "?iframe=true"
-      }}
-      style={ReactDOM.Style.make(~height="100vh", ~width="100%", ~border="none", ())}
-    />
+  let make = (~demoName=?, ~demoUnitName=?, ~isMobileView, ~onLoad: Js.t<'a> => unit) => {
+    <div name="DemoUnitFrame" style={container(isMobileView)}>
+      <iframe
+        onLoad={event => {
+          let iframe = event->ReactEvent.Synthetic.target
+          let window = iframe["contentWindow"]
+          onLoad(window)
+        }}
+        src={switch (demoName, demoUnitName) {
+        | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
+        | _ => "?iframe=true"
+        }}
+        style={ReactDOM.Style.make(
+          ~height={isMobileView ? "667px" : "100%"},
+          ~width={isMobileView ? "365px" : "100%"},
+          ~border="none",
+          (),
+        )}
+      />
+    </div>
+  }
 }
 
 module App = {
@@ -517,6 +633,8 @@ module App = {
       ~textAlign="center",
       (),
     )
+    let right = ReactDOM.Style.make(~display="flex", ~flexDirection="column", ~width="100%", ())
+    let demo = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="row", ())
   }
 
   type route =
@@ -525,7 +643,7 @@ module App = {
     | Home
 
   @react.component
-  let make = (~demos) => {
+  let make = (~demos, ~showRightSidebar) => {
     let url = ReasonReact.Router.useUrl()
     let queryString = url.search->URLSearchParams.make
     let route = switch (
@@ -537,7 +655,20 @@ module App = {
     | (_, Some(demo), Some(unit)) => Demo(demo, unit)
     | _ => Home
     }
-    <div style=Styles.app>
+
+    let (loadedIframeWindow: option<Js.t<'a>>, setLoadedIframeWindow) = React.useState(() => None)
+
+    // Force rerender after switching demo to avoid stale iframe and sidebar children
+    let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Belt.Float.toString)
+    React.useEffect1(() => {
+      setIframeKey(_ => Js.Date.now()->Belt.Float.toString)
+      None
+    }, [url])
+
+    let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => showRightSidebar)
+    let (isMobileView, toggleIsMobileView) = React.useState(() => false)
+
+    <div name="App" style=Styles.app>
       {switch route {
       | Unit(demoName, demoUnitName) =>
         <div style=Styles.main>
@@ -549,13 +680,34 @@ module App = {
         </div>
       | Demo(demoName, demoUnitName) => <>
           <DemoListSidebar demos />
-          // Force rerender after switching demo to avoid stale iframe and sidebar children
-          <DemoUnitFrame
-            key={"DemoUnitFrame" ++ Js.Date.now()->Belt.Float.toString} demoName demoUnitName
-          />
-          <Sidebar
-            key={"Sidebar" ++ Js.Date.now()->Belt.Float.toString} innerContainerId=rightSidebarId
-          />
+          <div name="Content" style=Styles.right>
+            <TopPanel
+              isSidebarHidden={!showRightSidebar}
+              isMobileView
+              onRightSidebarToggle={() => {
+                toggleShowRightSidebar(_ => !showRightSidebar)
+                switch loadedIframeWindow {
+                | Some(window) if !showRightSidebar =>
+                  Window.postMessage(window, RightSidebarDisplayed)
+                | None
+                | _ => ()
+                }
+              }}
+              onMobileViewToggle={() => toggleIsMobileView(_ => !isMobileView)}
+            />
+            <div name="Demo" style=Styles.demo>
+              <DemoUnitFrame
+                key={"DemoUnitFrame" ++ iframeKey}
+                demoName
+                demoUnitName
+                isMobileView
+                onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
+              />
+              {showRightSidebar
+                ? <Sidebar key={"Sidebar" ++ iframeKey} innerContainerId=rightSidebarId />
+                : React.null}
+            </div>
+          </div>
         </>
       | Home => <>
           <DemoListSidebar demos />
