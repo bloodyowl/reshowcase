@@ -13,4 +13,4 @@ type demo = {add: (string, Configs.demoUnitProps => React.element) => unit}
 
 let demo: (Belt.MutableMap.String.key, demo => unit) => unit
 
-let start: (~showRightSidebar: bool=?, unit) => unit
+let start: unit => unit

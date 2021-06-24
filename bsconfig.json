@@ -22,5 +22,9 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": ["reason-react"],
-  "refmt": 3
+  "warnings": {
+    "number": "+A-4-9-20",
+    "error": "+A"
+  },
+  "refmt": 3,
 }

@@ -744,7 +744,7 @@ module App = {
     | Home
 
   @react.component
-  let make = (~demos, ~showRightSidebar) => {
+  let make = (~demos) => {
     let url = ReasonReact.Router.useUrl()
     let queryString = url.search->URLSearchParams.make
     let route = switch (
