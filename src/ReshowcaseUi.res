@@ -690,7 +690,7 @@ module DemoUnitFrame = {
           },
           ~width={
             switch responsiveMode {
-            | Mobile => "365px"
+            | Mobile => "375px"
             | Desktop => "100%"
             }
           },
