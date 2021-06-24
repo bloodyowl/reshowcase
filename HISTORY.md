@@ -1,3 +1,10 @@
+## 4.1.0
+
+Changes:
+
+- Add responsive mode (thanks [@denis-ok](https://github.com/denis-ok)) (4e0ff65)
+- Add ability to hide sidebar (thanks [@denis-ok](https://github.com/denis-ok)) (4e0ff65)
+
 ## 4.0.4
 
 Changes:
