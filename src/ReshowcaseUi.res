@@ -305,25 +305,44 @@ module DemoListSidebar = {
     })
   }
 
-  let rec renderMenu = (entityMap: entityMap, ~filterValue) => {
+  let rec renderMenu = (~filterValue, ~level=(0, ""), entityMap: entityMap) => {
     let demos = entityMap->MutableMap.String.toArray
     let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
+    let (level, categoryQuery) = level
+    let levelStr = Int.toString(level)
+
     demos
     ->Belt.Array.map(((entityName, entity)) => {
       let entityNameHasSubstring =
         entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+
       switch entity {
       | Demo(_name, _propsApi) =>
         if entityNameHasSubstring {
-          <PaddedBox key={entityName ++ "demo"}> <a> {entityName->React.string} </a> </PaddedBox>
+          <Link
+            key={entityName}
+            style=Styles.link
+            activeStyle=Styles.activeLink
+            href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
+            text=entityName
+          />
         } else {
           React.null
         }
       | Category(entityMap) =>
         if entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring) {
-          <PaddedBox key={entityName ++ "category"}>
+          <PaddedBox key={entityName}>
             <PaddedBox> <strong> {entityName->React.string} </strong> </PaddedBox>
-            {renderMenu(entityMap, ~filterValue)}
+            {renderMenu(
+              ~filterValue,
+              ~level=(
+                level + 1,
+                `&category${levelStr}=` ++
+                entityName->Js.Global.encodeURIComponent ++
+                categoryQuery,
+              ),
+              entityMap,
+            )}
           </PaddedBox>
         } else {
           React.null
