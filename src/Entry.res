@@ -2,24 +2,44 @@ open Belt
 
 include Configs
 
-type demo = {add: (string, Configs.demoUnitProps => React.element) => unit}
+open EntryT
 
-let demos = MutableMap.String.make()
+let rootCategory: entityMap = MutableMap.String.make()
 
-let demo = (demoName, func) => {
-  let demoUnits = MutableMap.String.make()
-  let demo = {
-    add: (demoUnitName, demo: Configs.demoUnitProps => React.element) =>
-      demoUnits->MutableMap.String.set(demoUnitName, demo),
+let demo = (f): unit => {
+  let internalAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
+    rootCategory->MutableMap.String.set(demoName, Demo(demoName, demoUnit))
   }
-  func(demo)
-  demos->MutableMap.String.set(demoName, demoUnits->MutableMap.String.toArray->Map.String.fromArray)
+
+  let rec internalAddCategory = (categoryName: string, func, ~prevMap) => {
+    let newCategory = MutableMap.String.make()
+
+    prevMap->MutableMap.String.set(categoryName, Category(newCategory))
+
+    let newAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
+      newCategory->MutableMap.String.set(demoName, Demo(demoName, demoUnit))
+    }
+
+    let newFunctions = {
+      addDemo: newAddDemo,
+      addCategory: internalAddCategory(~prevMap=newCategory),
+    }
+
+    func(newFunctions)
+  }
+
+  let addFunctions = {
+    addDemo: internalAddDemo,
+    addCategory: internalAddCategory(~prevMap=rootCategory),
+  }
+
+  f(addFunctions)
 }
 
 let start = () =>
   switch ReactDOM.querySelector("#root") {
   | Some(root) =>
-    let demos = demos->MutableMap.String.toArray->Map.String.fromArray
+    let demos = rootCategory
     ReactDOM.render(<ReshowcaseUi.App demos />, root)
   | None => ()
   }

@@ -9,6 +9,8 @@ module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 
+type entityMap = Belt.MutableMap.String.t<EntryT.entity>
+
 type responsiveMode =
   | Mobile
   | Desktop
@@ -289,8 +291,50 @@ module DemoListSidebar = {
       </div>
   }
 
+  let rec hasNestedEntityWithSubstring = (entityMap: entityMap, substring) => {
+    entityMap
+    ->MutableMap.String.toArray
+    ->Array.some(((entityName, entity)) => {
+      let entityNameHasSubstring =
+        entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+      switch entity {
+      | Demo(_) => entityNameHasSubstring
+      | Category(entityMap) =>
+        entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring)
+      }
+    })
+  }
+
+  let rec renderMenu = (entityMap: entityMap, ~filterValue) => {
+    let demos = entityMap->MutableMap.String.toArray
+    let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
+    demos
+    ->Belt.Array.map(((entityName, entity)) => {
+      let entityNameHasSubstring =
+        entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+      switch entity {
+      | Demo(_name, _propsApi) =>
+        if entityNameHasSubstring {
+          <PaddedBox key={entityName ++ "demo"}> <a> {entityName->React.string} </a> </PaddedBox>
+        } else {
+          React.null
+        }
+      | Category(entityMap) =>
+        if entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring) {
+          <PaddedBox key={entityName ++ "category"}>
+            <PaddedBox> <strong> {entityName->React.string} </strong> </PaddedBox>
+            {renderMenu(entityMap, ~filterValue)}
+          </PaddedBox>
+        } else {
+          React.null
+        }
+      }
+    })
+    ->React.array
+  }
+
   @react.component
-  let make = (~demos) => {
+  let make = (~demos: entityMap) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
@@ -305,30 +349,35 @@ module DemoListSidebar = {
       </PaddedBox>
       <PaddedBox gap=Xxs>
         <Stack>
-          {demos
-          ->Map.String.toArray
-          ->Array.keepMap(((demoName, demoUnits)) => {
-            let demoUnitNames = demoUnits->Map.String.keysToArray
-            switch filterValue {
-            | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-            | Some(filterValue) =>
-              let search = filterValue->Js.String2.toLowerCase
-              let demoNameHasSubstring =
-                demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-              let filteredDemoUnitNames =
-                demoUnitNames->Array.keep(name =>
-                  name->Js.String2.toLowerCase->Js.String2.includes(search)
-                )
-              switch (demoNameHasSubstring, filteredDemoUnitNames) {
-              | (false, []) => None
-              | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-              | (true, _)
-              | (false, _) =>
-                Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
-              }
-            }
-          })
-          ->React.array}
+          {
+            let filterValue = filterValue->Option.map(s => s->Js.String2.toLowerCase)
+            renderMenu(demos, ~filterValue)
+          }
+
+          // {demos
+          // ->Map.String.toArray
+          // ->Array.keepMap(((demoName, demoUnits)) => {
+          //   let demoUnitNames = demoUnits->Map.String.keysToArray
+          //   switch filterValue {
+          //   | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
+          //   | Some(filterValue) =>
+          //     let search = filterValue->Js.String2.toLowerCase
+          //     let demoNameHasSubstring =
+          //       demoName->Js.String2.toLowerCase->Js.String2.includes(search)
+          //     let filteredDemoUnitNames =
+          //       demoUnitNames->Array.keep(name =>
+          //         name->Js.String2.toLowerCase->Js.String2.includes(search)
+          //       )
+          //     switch (demoNameHasSubstring, filteredDemoUnitNames) {
+          //     | (false, []) => None
+          //     | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
+          //     | (true, _)
+          //     | (false, _) =>
+          //       Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
+          //     }
+          //   }
+          // })
+          // ->React.array}
         </Stack>
       </PaddedBox>
     </Sidebar>
@@ -744,7 +793,7 @@ module App = {
     | Home
 
   @react.component
-  let make = (~demos) => {
+  let make = (~demos: entityMap) => {
     let url = ReasonReact.Router.useUrl()
     let queryString = url.search->URLSearchParams.make
     let route = switch (
@@ -784,14 +833,7 @@ module App = {
 
     <div name="App" style=Styles.app>
       {switch route {
-      | Unit(demoName, demoUnitName) =>
-        <div style=Styles.main>
-          {demos
-          ->Map.String.get(demoName)
-          ->Option.flatMap(demo => demo->Map.String.get(demoUnitName))
-          ->Option.map(demoUnit => <DemoUnit demoUnit key={demoName ++ ("$$" ++ demoUnitName)} />)
-          ->Option.getWithDefault(React.null)}
-        </div>
+      | Unit(_demoName, _demoUnitName) => <div style=Styles.main />
       | Demo(demoName, demoUnitName) => <>
           <DemoListSidebar demos />
           <div name="Content" style=Styles.right>
