@@ -8,6 +8,8 @@ module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
+module Array = Js.Array2
+module Option = Belt.Option
 
 type entityMap = Belt.MutableMap.String.t<EntryT.entity>
 
@@ -372,31 +374,6 @@ module DemoListSidebar = {
             let filterValue = filterValue->Option.map(s => s->Js.String2.toLowerCase)
             renderMenu(demos, ~filterValue)
           }
-
-          // {demos
-          // ->Map.String.toArray
-          // ->Array.keepMap(((demoName, demoUnits)) => {
-          //   let demoUnitNames = demoUnits->Map.String.keysToArray
-          //   switch filterValue {
-          //   | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-          //   | Some(filterValue) =>
-          //     let search = filterValue->Js.String2.toLowerCase
-          //     let demoNameHasSubstring =
-          //       demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-          //     let filteredDemoUnitNames =
-          //       demoUnitNames->Array.keep(name =>
-          //         name->Js.String2.toLowerCase->Js.String2.includes(search)
-          //       )
-          //     switch (demoNameHasSubstring, filteredDemoUnitNames) {
-          //     | (false, []) => None
-          //     | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-          //     | (true, _)
-          //     | (false, _) =>
-          //       Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
-          //     }
-          //   }
-          // })
-          // ->React.array}
         </Stack>
       </PaddedBox>
     </Sidebar>
@@ -737,7 +714,7 @@ module DemoUnitFrame = {
     )
 
   @react.component
-  let make = (~demoName=?, ~demoUnitName=?, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
+  let make = (~queryString: string, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
     <div name="DemoUnitFrame" style={container(responsiveMode)}>
       <iframe
         onLoad={event => {
@@ -745,10 +722,7 @@ module DemoUnitFrame = {
           let window = iframe["contentWindow"]
           onLoad(window)
         }}
-        src={switch (demoName, demoUnitName) {
-        | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
-        | _ => "?iframe=true"
-        }}
+        src={`?iframe=true&${queryString}`}
         style={ReactDOM.Style.make(
           ~height={
             switch responsiveMode {
@@ -806,22 +780,56 @@ module App = {
     let demoContents = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="column", ())
   }
 
+  let findDemoUnit = (urlSearchParams, demoName, entityMap: entityMap) => {
+    let categoryPath =
+      urlSearchParams
+      ->URLSearchParams.toArray()
+      ->Array.filter(((k, _v)) => k != "demo" && k != "iframe")
+      ->Array.copy
+      ->Array.sortInPlaceWith(((k1, _), (k2, _)) => String.compare(k1, k2))
+      ->Belt.List.fromArray
+
+    let rec find = (categoryPath, entityMap: entityMap) => {
+      switch categoryPath {
+      | list{} =>
+        entityMap
+        ->Belt.MutableMap.String.get(demoName)
+        ->Option.flatMap(entity =>
+          switch entity {
+          | Demo(_, demoUnit) => Some(demoUnit)
+          | Category(_) => None
+          }
+        )
+      | list{(_categoryNumber, categoryName), ...categoryPath} =>
+        entityMap
+        ->Belt.MutableMap.String.get(categoryName)
+        ->Option.flatMap(entity =>
+          switch entity {
+          | Category(entityMap) => find(categoryPath, entityMap)
+          | Demo(_, _) => None
+          }
+        )
+      }
+    }
+
+    find(categoryPath, entityMap)
+  }
+
   type route =
-    | Unit(string, string)
-    | Demo(string, string)
+    | Unit(URLSearchParams.urlSearchParams, string)
+    | Demo(string)
     | Home
 
   @react.component
   let make = (~demos: entityMap) => {
     let url = ReasonReact.Router.useUrl()
-    let queryString = url.search->URLSearchParams.make
+    let urlSearchParams = url.search->URLSearchParams.make
     let route = switch (
-      queryString->URLSearchParams.get("iframe"),
-      queryString->URLSearchParams.get("demo"),
-      queryString->URLSearchParams.get("unit"),
+      urlSearchParams->URLSearchParams.get("iframe"),
+      urlSearchParams->URLSearchParams.get("demo"),
     ) {
-    | (Some("true"), Some(demo), Some(unit)) => Unit(demo, unit)
-    | (_, Some(demo), Some(unit)) => Demo(demo, unit)
+    | (Some("true"), Some(demoName)) => Unit(urlSearchParams, demoName)
+    | (_, Some(_)) => Demo(url.search)
     | _ => Home
     }
 
@@ -852,8 +860,15 @@ module App = {
 
     <div name="App" style=Styles.app>
       {switch route {
-      | Unit(_demoName, _demoUnitName) => <div style=Styles.main />
-      | Demo(demoName, demoUnitName) => <>
+      | Unit(urlSearchParams, demoName) => {
+          let demoUnit = findDemoUnit(urlSearchParams, demoName, demos)
+          <div style=Styles.main>
+            {demoUnit
+            ->Option.map(demoUnit => <DemoUnit demoUnit />)
+            ->Option.getWithDefault("Demo not found"->React.string)}
+          </div>
+        }
+      | Demo(queryString) => <>
           <DemoListSidebar demos />
           <div name="Content" style=Styles.right>
             <TopPanel
@@ -874,8 +889,7 @@ module App = {
               <div style=Styles.demoContents>
                 <DemoUnitFrame
                   key={"DemoUnitFrame" ++ iframeKey}
-                  demoName
-                  demoUnitName
+                  queryString
                   responsiveMode
                   onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
                 />

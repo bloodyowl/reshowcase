@@ -6,6 +6,15 @@ module URLSearchParams = {
 
   @return(nullable) @bs.send
   external get: (urlSearchParams, string) => option<string> = "get"
+
+  @bs.send
+  external forEach: (urlSearchParams, (string, string) => unit) => unit = "forEach"
+
+  let toArray = (urlSearchParams, ()) => {
+    let array = []
+    urlSearchParams->forEach((value, key) => Js.Array2.push(array, (key, value))->ignore)
+    array
+  }
 }
 
 module Window = {
