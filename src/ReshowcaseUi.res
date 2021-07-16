@@ -319,7 +319,7 @@ module DemoListSidebar = {
         entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
 
       switch entity {
-      | Demo(_name, _propsApi) =>
+      | Demo(_) =>
         if entityNameHasSubstring {
           <Link
             key={entityName}
@@ -443,7 +443,6 @@ module DemoUnitSidebar = {
     ~onIntChange,
     ~onFloatChange,
     ~onBoolChange,
-    _,
   ) =>
     <PaddedBox gap=Md>
       <Stack>
@@ -796,7 +795,7 @@ module App = {
         ->Belt.MutableMap.String.get(demoName)
         ->Option.flatMap(entity =>
           switch entity {
-          | Demo(_, demoUnit) => Some(demoUnit)
+          | Demo(demoUnit) => Some(demoUnit)
           | Category(_) => None
           }
         )
@@ -806,7 +805,7 @@ module App = {
         ->Option.flatMap(entity =>
           switch entity {
           | Category(entityMap) => find(categoryPath, entityMap)
-          | Demo(_, _) => None
+          | Demo(_) => None
           }
         )
       }
@@ -816,7 +815,7 @@ module App = {
   }
 
   type route =
-    | Unit(URLSearchParams.urlSearchParams, string)
+    | Unit(URLSearchParams.t, string)
     | Demo(string)
     | Home
 

@@ -8,7 +8,7 @@ let rootCategory: entityMap = MutableMap.String.make()
 
 let demo = (f): unit => {
   let internalAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
-    rootCategory->MutableMap.String.set(demoName, Demo(demoName, demoUnit))
+    rootCategory->MutableMap.String.set(demoName, Demo(demoUnit))
   }
 
   let rec internalAddCategory = (categoryName: string, func, ~prevMap) => {
@@ -17,7 +17,7 @@ let demo = (f): unit => {
     prevMap->MutableMap.String.set(categoryName, Category(newCategory))
 
     let newAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
-      newCategory->MutableMap.String.set(demoName, Demo(demoName, demoUnit))
+      newCategory->MutableMap.String.set(demoName, Demo(demoUnit))
     }
 
     let newFunctions = {
