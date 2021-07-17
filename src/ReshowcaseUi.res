@@ -164,7 +164,7 @@ module Link = {
 
 module DemoListSidebar = {
   module Styles = {
-    let demoName = ReactDOM.Style.make(~fontWeight="500", ())
+    let categoryName = ReactDOM.Style.make(~fontWeight="500", ~padding=`${Gap.xs} ${Gap.xxs}`, ())
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
       ~color=Color.blue,
@@ -243,14 +243,13 @@ module DemoListSidebar = {
     })
   }
 
-  let rec renderMenu = (~filterValue, ~level=(0, ""), entityMap: entityMap) => {
+  let rec renderMenu = (~filterValue, ~nesting=(0, ""), entityMap: entityMap) => {
     let demos = entityMap->MutableMap.String.toArray
     let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
-    let (level, categoryQuery) = level
-    let levelStr = Int.toString(level)
+    let (level, categoryQuery) = nesting
 
     demos
-    ->Belt.Array.map(((entityName, entity)) => {
+    ->Array.map(((entityName, entity)) => {
       let entityNameHasSubstring =
         entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
 
@@ -269,11 +268,13 @@ module DemoListSidebar = {
         }
       | Category(entityMap) =>
         if entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring) {
+          let levelStr = Int.toString(level)
+
           <PaddedBox key={entityName}>
-            <PaddedBox><div style=Styles.demoName> {entityName->React.string} </div></PaddedBox>
+            <div style=Styles.categoryName> {entityName->React.string} </div>
             {renderMenu(
               ~filterValue,
-              ~level=(
+              ~nesting=(
                 level + 1,
                 `&category${levelStr}=` ++
                 entityName->Js.Global.encodeURIComponent ++
@@ -304,12 +305,7 @@ module DemoListSidebar = {
           onClear={() => setFilterValue(_ => None)}
         />
       </PaddedBox>
-      <PaddedBox gap=Xxs>
-        {
-          let filterValue = filterValue->Option.map(s => s->Js.String2.toLowerCase)
-          renderMenu(demos, ~filterValue)
-        }
-      </PaddedBox>
+      <PaddedBox gap=Xxs> {renderMenu(demos, ~filterValue)} </PaddedBox>
     </Sidebar>
   }
 }
