@@ -6,6 +6,7 @@ module Border = ReshowcaseUi__Layout.Border
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
+module Icon = ReshowcaseUi__Layout.Icon
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 module Array = Js.Array2
@@ -16,35 +17,6 @@ type entityMap = Belt.MutableMap.String.t<EntryT.entity>
 type responsiveMode =
   | Mobile
   | Desktop
-
-let desktopIcon =
-  <svg width="32" height="32">
-    <g transform="translate(5 8)" fill="none" fillRule="evenodd">
-      <rect stroke="currentColor" x="2" width="18" height="13" rx="1" />
-      <rect fill="currentColor" y="13" width="22" height="2" rx="1" />
-    </g>
-  </svg>
-
-let mobileIcon =
-  <svg width="32" height="32">
-    <g transform="translate(11 7)" fill="none" fillRule="evenodd">
-      <rect stroke="currentColor" width="10" height="18" rx="2" />
-      <path d="M2 0h6v1a1 1 0 01-1 1H3a1 1 0 01-1-1V0z" fill="currentColor" />
-    </g>
-  </svg>
-
-let sidebarIcon =
-  <svg width="32" height="32">
-    <g
-      stroke="currentColor"
-      strokeWidth="1.5"
-      fill="none"
-      fillRule="evenodd"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <path d="M25.438 17H12.526M19 10.287L12.287 17 19 23.713M8.699 7.513v17.2" />
-    </g>
-  </svg>
 
 module TopPanel = {
   module Styles = {
@@ -121,7 +93,7 @@ module TopPanel = {
                 event->ReactEvent.Mouse.preventDefault
                 setResponsiveMode(_ => Desktop)
               }}>
-              {desktopIcon}
+              {Icon.desktop}
             </button>
             <button
               title={"Show in mobile mode"}
@@ -130,7 +102,7 @@ module TopPanel = {
                 event->ReactEvent.Mouse.preventDefault
                 setResponsiveMode(_ => Mobile)
               }}>
-              {mobileIcon}
+              {Icon.mobile}
             </button>
           </div>
         </PaddedBox>
@@ -151,7 +123,7 @@ module TopPanel = {
                   ~transform=isSidebarHidden ? "rotate(0)" : "rotate(180deg)",
                   (),
                 )}>
-                {sidebarIcon}
+                {Icon.sidebar}
               </div>
             </button>
           </div>
@@ -205,29 +177,6 @@ module DemoListSidebar = {
     let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
   }
 
-  module MenuItem = {
-    @react.component
-    let make = (~demoName, ~demoUnitNames) =>
-      <div key=demoName>
-        <PaddedBox> <span style=Styles.demoName> {demoName->React.string} </span> </PaddedBox>
-        <PaddedBox padding=LeftRight>
-          {demoUnitNames
-          ->Array.map(demoUnitName =>
-            <Link
-              key=demoUnitName
-              style=Styles.link
-              activeStyle=Styles.activeLink
-              href={"?demo=" ++
-              (demoName->Js.Global.encodeURIComponent ++
-              ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
-              text=demoUnitName
-            />
-          )
-          ->React.array}
-        </PaddedBox>
-      </div>
-  }
-
   module SearchInput = {
     module Styles = {
       let clearButton = ReactDOM.Style.make(
@@ -267,22 +216,9 @@ module DemoListSidebar = {
     }
 
     module ClearButton = {
-      let iconClose =
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          style={ReactDOM.Style.make(~display="block", ())}>
-          <path
-            fill="gray"
-            d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"
-          />
-        </svg>
-
       @react.component
       let make = (~onClear) =>
-        <button style=Styles.clearButton onClick={_event => onClear()}> iconClose </button>
+        <button style=Styles.clearButton onClick={_event => onClear()}> Icon.close </button>
     }
 
     @react.component
@@ -334,7 +270,7 @@ module DemoListSidebar = {
       | Category(entityMap) =>
         if entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring) {
           <PaddedBox key={entityName}>
-            <PaddedBox> <strong> {entityName->React.string} </strong> </PaddedBox>
+            <PaddedBox><div style=Styles.demoName> {entityName->React.string} </div></PaddedBox>
             {renderMenu(
               ~filterValue,
               ~level=(
@@ -369,12 +305,10 @@ module DemoListSidebar = {
         />
       </PaddedBox>
       <PaddedBox gap=Xxs>
-        <Stack>
-          {
-            let filterValue = filterValue->Option.map(s => s->Js.String2.toLowerCase)
-            renderMenu(demos, ~filterValue)
-          }
-        </Stack>
+        {
+          let filterValue = filterValue->Option.map(s => s->Js.String2.toLowerCase)
+          renderMenu(demos, ~filterValue)
+        }
       </PaddedBox>
     </Sidebar>
   }
