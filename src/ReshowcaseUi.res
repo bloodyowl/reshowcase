@@ -10,9 +10,10 @@ module Icon = ReshowcaseUi__Layout.Icon
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 module Array = Js.Array2
+module List = Belt.List
 module Option = Belt.Option
 
-type entityMap = Belt.MutableMap.String.t<EntryT.entity>
+type entityMap = Entity.mutableEntityMap
 
 type responsiveMode =
   | Mobile
@@ -252,7 +253,6 @@ module DemoListSidebar = {
     ->Array.map(((entityName, entity)) => {
       let entityNameHasSubstring =
         entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
-
       switch entity {
       | Demo(_) =>
         if entityNameHasSubstring {
@@ -269,7 +269,6 @@ module DemoListSidebar = {
       | Category(entityMap) =>
         if entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring) {
           let levelStr = Int.toString(level)
-
           <PaddedBox key={entityName}>
             <div style=Styles.categoryName> {entityName->React.string} </div>
             {renderMenu(
@@ -709,14 +708,14 @@ module App = {
     let demoContents = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="column", ())
   }
 
-  let findDemoUnit = (urlSearchParams, demoName, entityMap: entityMap) => {
+  let findDemo = (urlSearchParams, demoName, entityMap: entityMap) => {
     let categoryPath =
       urlSearchParams
       ->URLSearchParams.toArray()
       ->Array.filter(((k, _v)) => k != "demo" && k != "iframe")
       ->Array.copy
       ->Array.sortInPlaceWith(((k1, _), (k2, _)) => String.compare(k1, k2))
-      ->Belt.List.fromArray
+      ->List.fromArray
 
     let rec find = (categoryPath, entityMap: entityMap) => {
       switch categoryPath {
@@ -790,7 +789,7 @@ module App = {
     <div name="App" style=Styles.app>
       {switch route {
       | Unit(urlSearchParams, demoName) => {
-          let demoUnit = findDemoUnit(urlSearchParams, demoName, demos)
+          let demoUnit = findDemo(urlSearchParams, demoName, demos)
           <div style=Styles.main>
             {demoUnit
             ->Option.map(demoUnit => <DemoUnit demoUnit />)
