@@ -10,10 +10,6 @@ module Icon = ReshowcaseUi__Layout.Icon
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 module Array = Js.Array2
-module List = Belt.List
-module Option = Belt.Option
-
-type entityMap = Entity.mutableEntityMap
 
 type responsiveMode =
   | Mobile
@@ -230,22 +226,21 @@ module DemoListSidebar = {
       </div>
   }
 
-  let rec hasNestedEntityWithSubstring = (entityMap: entityMap, substring) => {
-    entityMap
+  let rec hasNestedEntityWithSubstring = (demos: Entity.demos, substring) => {
+    demos
     ->MutableMap.String.toArray
     ->Array.some(((entityName, entity)) => {
       let entityNameHasSubstring =
         entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
       switch entity {
       | Demo(_) => entityNameHasSubstring
-      | Category(entityMap) =>
-        entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring)
+      | Category(demos) => entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring)
       }
     })
   }
 
-  let rec renderMenu = (~filterValue, ~nesting=(0, ""), entityMap: entityMap) => {
-    let demos = entityMap->MutableMap.String.toArray
+  let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Entity.demos) => {
+    let demos = demos->MutableMap.String.toArray
     let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
     let (level, categoryQuery) = nesting
 
@@ -266,8 +261,8 @@ module DemoListSidebar = {
         } else {
           React.null
         }
-      | Category(entityMap) =>
-        if entityNameHasSubstring || hasNestedEntityWithSubstring(entityMap, substring) {
+      | Category(demos) =>
+        if entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring) {
           let levelStr = Int.toString(level)
           <PaddedBox key={entityName}>
             <div style=Styles.categoryName> {entityName->React.string} </div>
@@ -279,7 +274,7 @@ module DemoListSidebar = {
                 entityName->Js.Global.encodeURIComponent ++
                 categoryQuery,
               ),
-              entityMap,
+              demos,
             )}
           </PaddedBox>
         } else {
@@ -291,7 +286,7 @@ module DemoListSidebar = {
   }
 
   @react.component
-  let make = (~demos: entityMap) => {
+  let make = (~demos: Entity.demos) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
@@ -708,7 +703,7 @@ module App = {
     let demoContents = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="column", ())
   }
 
-  let findDemo = (urlSearchParams, demoName, entityMap: entityMap) => {
+  let findDemo = (urlSearchParams, demoName, demos: Entity.demos) => {
     let categoryPath =
       urlSearchParams
       ->URLSearchParams.toArray()
@@ -717,11 +712,11 @@ module App = {
       ->Array.sortInPlaceWith(((k1, _), (k2, _)) => String.compare(k1, k2))
       ->List.fromArray
 
-    let rec find = (categoryPath, entityMap: entityMap) => {
+    let rec find = (categoryPath, demos: Entity.demos) => {
       switch categoryPath {
       | list{} =>
-        entityMap
-        ->Belt.MutableMap.String.get(demoName)
+        demos
+        ->MutableMap.String.get(demoName)
         ->Option.flatMap(entity =>
           switch entity {
           | Demo(demoUnit) => Some(demoUnit)
@@ -729,18 +724,18 @@ module App = {
           }
         )
       | list{(_categoryNumber, categoryName), ...categoryPath} =>
-        entityMap
-        ->Belt.MutableMap.String.get(categoryName)
+        demos
+        ->MutableMap.String.get(categoryName)
         ->Option.flatMap(entity =>
           switch entity {
-          | Category(entityMap) => find(categoryPath, entityMap)
+          | Category(demos) => find(categoryPath, demos)
           | Demo(_) => None
           }
         )
       }
     }
 
-    find(categoryPath, entityMap)
+    find(categoryPath, demos)
   }
 
   type route =
@@ -749,7 +744,7 @@ module App = {
     | Home
 
   @react.component
-  let make = (~demos: entityMap) => {
+  let make = (~demos: Entity.demos) => {
     let url = ReasonReact.Router.useUrl()
     let urlSearchParams = url.search->URLSearchParams.make
     let route = switch (
@@ -764,9 +759,9 @@ module App = {
     let (loadedIframeWindow: option<Js.t<'a>>, setLoadedIframeWindow) = React.useState(() => None)
 
     // Force rerender after switching demo to avoid stale iframe and sidebar children
-    let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Belt.Float.toString)
+    let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Float.toString)
     React.useEffect1(() => {
-      setIframeKey(_ => Js.Date.now()->Belt.Float.toString)
+      setIframeKey(_ => Js.Date.now()->Float.toString)
       None
     }, [url])
 
