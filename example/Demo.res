@@ -77,4 +77,46 @@ demo(({addDemo: _, addCategory}) => {
   })
 })
 
+demo(({addDemo, addCategory: _}) => {
+  addDemo("1. How to use", _propsApi =>
+    <code
+      style={ReactDOM.Style.make(
+        ~whiteSpace="pre",
+        ~padding="0",
+        ~backgroundColor=ReshowcaseUi__Layout.Color.lightGray,
+        (),
+      )}>
+      {"
+demo(({addDemo: _, addCategory}) => {
+  addCategory(\"Typography\", ({addDemo: _, addCategory}) => {
+    addCategory(\"Headings\", ({addDemo, addCategory: _}) => {
+      addDemo(\"H1\", ({string, int}) =>
+        <h1
+          style={ReactDOMRe.Style.make(
+            ~fontSize={
+              let size = int(\"Font size\", {min: 0, max: 100, initial: 30, step: 1})
+              j`$(size)px`
+            },
+            (),
+          )}>
+          {string(\"Text\", \"hello\")->React.string}
+        </h1>
+      )
+      addDemo(\"H2\", ({string}) => <h2> {string(\"Text\", \"hello\")->React.string} </h2>)
+    })
+
+    addCategory(\"Text\", ({addDemo, addCategory: _}) => {
+      addDemo(\"Paragraph\", ({string}) => <p> {string(\"Text\", \"hello\")->React.string} </p>)
+      addDemo(\"Italic\", ({string}) => <i> {string(\"Text\", \"hello\")->React.string} </i>)
+    })
+  })
+})
+
+start()
+
+"->React.string}
+    </code>
+  )
+})
+
 start()

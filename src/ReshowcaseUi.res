@@ -251,7 +251,7 @@ module DemoListSidebar = {
       | Category(demos) =>
         if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
           let levelStr = Int.toString(level)
-          <PaddedBox key={entityName}>
+          <PaddedBox key={entityName} padding=LeftRight>
             <div style=Styles.categoryName> {entityName->React.string} </div>
             {renderMenu(
               ~filterValue,
