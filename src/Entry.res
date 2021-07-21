@@ -5,7 +5,7 @@ type rec addFunctions = {
   addCategory: (string, addFunctions => unit) => unit,
 }
 
-let rootMap: Entity.demos = MutableMap.String.make()
+let rootMap: Demos.t = MutableMap.String.make()
 
 let demo = (f): unit => {
   let internalAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
@@ -15,7 +15,7 @@ let demo = (f): unit => {
   let rec internalAddCategory = (
     categoryName: string,
     func: addFunctions => unit,
-    ~prevMap: Entity.demos,
+    ~prevMap: Demos.t,
   ) => {
     let newCategory = MutableMap.String.make()
 

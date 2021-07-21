@@ -226,20 +226,7 @@ module DemoListSidebar = {
       </div>
   }
 
-  let rec hasNestedEntityWithSubstring = (demos: Entity.demos, substring) => {
-    demos
-    ->MutableMap.String.toArray
-    ->Array.some(((entityName, entity)) => {
-      let entityNameHasSubstring =
-        entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
-      switch entity {
-      | Demo(_) => entityNameHasSubstring
-      | Category(demos) => entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring)
-      }
-    })
-  }
-
-  let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Entity.demos) => {
+  let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Demos.t) => {
     let demos = demos->MutableMap.String.toArray
     let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
     let (level, categoryQuery) = nesting
@@ -262,7 +249,7 @@ module DemoListSidebar = {
           React.null
         }
       | Category(demos) =>
-        if entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring) {
+        if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
           let levelStr = Int.toString(level)
           <PaddedBox key={entityName}>
             <div style=Styles.categoryName> {entityName->React.string} </div>
@@ -286,7 +273,7 @@ module DemoListSidebar = {
   }
 
   @react.component
-  let make = (~demos: Entity.demos) => {
+  let make = (~demos: Demos.t) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
@@ -703,48 +690,13 @@ module App = {
     let demoContents = ReactDOM.Style.make(~display="flex", ~flex="1", ~flexDirection="column", ())
   }
 
-  let findDemo = (urlSearchParams, demoName, demos: Entity.demos) => {
-    let categoryPath =
-      urlSearchParams
-      ->URLSearchParams.toArray()
-      ->Array.filter(((k, _v)) => k != "demo" && k != "iframe")
-      ->Array.copy
-      ->Array.sortInPlaceWith(((k1, _), (k2, _)) => String.compare(k1, k2))
-      ->List.fromArray
-
-    let rec find = (categoryPath, demos: Entity.demos) => {
-      switch categoryPath {
-      | list{} =>
-        demos
-        ->MutableMap.String.get(demoName)
-        ->Option.flatMap(entity =>
-          switch entity {
-          | Demo(demoUnit) => Some(demoUnit)
-          | Category(_) => None
-          }
-        )
-      | list{(_categoryNumber, categoryName), ...categoryPath} =>
-        demos
-        ->MutableMap.String.get(categoryName)
-        ->Option.flatMap(entity =>
-          switch entity {
-          | Category(demos) => find(categoryPath, demos)
-          | Demo(_) => None
-          }
-        )
-      }
-    }
-
-    find(categoryPath, demos)
-  }
-
   type route =
     | Unit(URLSearchParams.t, string)
     | Demo(string)
     | Home
 
   @react.component
-  let make = (~demos: Entity.demos) => {
+  let make = (~demos: Demos.t) => {
     let url = ReasonReact.Router.useUrl()
     let urlSearchParams = url.search->URLSearchParams.make
     let route = switch (
@@ -784,7 +736,7 @@ module App = {
     <div name="App" style=Styles.app>
       {switch route {
       | Unit(urlSearchParams, demoName) => {
-          let demoUnit = findDemo(urlSearchParams, demoName, demos)
+          let demoUnit = Demos.findDemo(urlSearchParams, demoName, demos)
           <div style=Styles.main>
             {demoUnit
             ->Option.map(demoUnit => <DemoUnit demoUnit />)
