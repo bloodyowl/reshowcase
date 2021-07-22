@@ -1,15 +1,13 @@
-open Belt
-
 type rec addFunctions = {
   addDemo: (string, Configs.demoUnitProps => React.element) => unit,
   addCategory: (string, addFunctions => unit) => unit,
 }
 
-let rootMap: Demos.t = MutableMap.String.make()
+let rootMap: Demos.t = Js.Dict.empty()
 
 let demo = (f): unit => {
   let internalAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
-    rootMap->MutableMap.String.set(demoName, Demo(demoUnit))
+    rootMap->Js.Dict.set(demoName, Demo(demoUnit))
   }
 
   let rec internalAddCategory = (
@@ -17,12 +15,12 @@ let demo = (f): unit => {
     func: addFunctions => unit,
     ~prevMap: Demos.t,
   ) => {
-    let newCategory = MutableMap.String.make()
+    let newCategory = Js.Dict.empty()
 
-    prevMap->MutableMap.String.set(categoryName, Category(newCategory))
+    prevMap->Js.Dict.set(categoryName, Category(newCategory))
 
     let newAddDemo = (demoName: string, demoUnit: Configs.demoUnitProps => React.element) => {
-      newCategory->MutableMap.String.set(demoName, Demo(demoUnit))
+      newCategory->Js.Dict.set(demoName, Demo(demoUnit))
     }
 
     let newFunctions = {

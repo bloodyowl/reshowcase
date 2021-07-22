@@ -78,7 +78,7 @@ demo(({addDemo: _, addCategory}) => {
 })
 
 demo(({addDemo, addCategory: _}) => {
-  addDemo("1. How to use", _propsApi =>
+  addDemo("Code example", _propsApi =>
     <code
       style={ReactDOM.Style.make(
         ~whiteSpace="pre",

@@ -3,13 +3,13 @@ module BeltArray = Array
 module Array = Js.Array2
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 
-type t = Belt.MutableMap.String.t<Entity.t>
+type t = Js.Dict.t<Entity.t>
 
 let rec dig = (demos: t, categories: list<string>, demoName: string) => {
   switch categories {
   | list{} =>
     demos
-    ->MutableMap.String.get(demoName)
+    ->Js.Dict.get(demoName)
     ->Option.flatMap(entity =>
       switch entity {
       | Demo(demoUnit) => Some(demoUnit)
@@ -18,7 +18,7 @@ let rec dig = (demos: t, categories: list<string>, demoName: string) => {
     )
   | list{categoryName, ...categories} =>
     demos
-    ->MutableMap.String.get(categoryName)
+    ->Js.Dict.get(categoryName)
     ->Option.flatMap(entity =>
       switch entity {
       | Category(demos) => dig(demos, categories, demoName)
@@ -44,7 +44,7 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
 
 let rec hasNestedEntityWithSubstring = (demos: t, substring) => {
   demos
-  ->MutableMap.String.toArray
+  ->Js.Dict.entries
   ->Array.some(((entityName, entity)) => {
     let entityNameHasSubstring = entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
     switch entity {

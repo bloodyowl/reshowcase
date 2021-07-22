@@ -1,2 +1,1 @@
-type rec t =
-  Demo(Configs.demoUnitProps => React.element) | Category(Belt.MutableMap.String.t<t>)
+type rec t = Demo(Configs.demoUnitProps => React.element) | Category(Js.Dict.t<t>)

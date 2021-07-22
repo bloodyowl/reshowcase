@@ -227,7 +227,7 @@ module DemoListSidebar = {
   }
 
   let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Demos.t) => {
-    let demos = demos->MutableMap.String.toArray
+    let demos = demos->Js.Dict.entries
     let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
     let (level, categoryQuery) = nesting
 
