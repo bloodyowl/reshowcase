@@ -1,3 +1,9 @@
+## 4.2.0
+
+Features:
+
+- Allow subcategories (thanks [@denis-ok](https://github.com/denis-ok)) (241924b)
+
 ## 4.1.2
 
 Fixes:
