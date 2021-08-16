@@ -6,41 +6,14 @@ module Border = ReshowcaseUi__Layout.Border
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
+module Icon = ReshowcaseUi__Layout.Icon
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
+module Array = Js.Array2
 
 type responsiveMode =
   | Mobile
   | Desktop
-
-let desktopIcon =
-  <svg width="32" height="32">
-    <g transform="translate(5 8)" fill="none" fillRule="evenodd">
-      <rect stroke="currentColor" x="2" width="18" height="13" rx="1" />
-      <rect fill="currentColor" y="13" width="22" height="2" rx="1" />
-    </g>
-  </svg>
-
-let mobileIcon =
-  <svg width="32" height="32">
-    <g transform="translate(11 7)" fill="none" fillRule="evenodd">
-      <rect stroke="currentColor" width="10" height="18" rx="2" />
-      <path d="M2 0h6v1a1 1 0 01-1 1H3a1 1 0 01-1-1V0z" fill="currentColor" />
-    </g>
-  </svg>
-
-let sidebarIcon =
-  <svg width="32" height="32">
-    <g
-      stroke="currentColor"
-      strokeWidth="1.5"
-      fill="none"
-      fillRule="evenodd"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <path d="M25.438 17H12.526M19 10.287L12.287 17 19 23.713M8.699 7.513v17.2" />
-    </g>
-  </svg>
 
 module TopPanel = {
   module Styles = {
@@ -117,7 +90,7 @@ module TopPanel = {
                 event->ReactEvent.Mouse.preventDefault
                 setResponsiveMode(_ => Desktop)
               }}>
-              {desktopIcon}
+              {Icon.desktop}
             </button>
             <button
               title={"Show in mobile mode"}
@@ -126,7 +99,7 @@ module TopPanel = {
                 event->ReactEvent.Mouse.preventDefault
                 setResponsiveMode(_ => Mobile)
               }}>
-              {mobileIcon}
+              {Icon.mobile}
             </button>
           </div>
         </PaddedBox>
@@ -147,7 +120,7 @@ module TopPanel = {
                   ~transform=isSidebarHidden ? "rotate(0)" : "rotate(180deg)",
                   (),
                 )}>
-                {sidebarIcon}
+                {Icon.sidebar}
               </div>
             </button>
           </div>
@@ -188,7 +161,7 @@ module Link = {
 
 module DemoListSidebar = {
   module Styles = {
-    let demoName = ReactDOM.Style.make(~fontWeight="500", ())
+    let categoryName = ReactDOM.Style.make(~fontWeight="500", ~padding=`${Gap.xs} ${Gap.xxs}`, ())
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
       ~color=Color.blue,
@@ -199,29 +172,6 @@ module DemoListSidebar = {
       (),
     )
     let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
-  }
-
-  module MenuItem = {
-    @react.component
-    let make = (~demoName, ~demoUnitNames) =>
-      <div key=demoName>
-        <PaddedBox> <span style=Styles.demoName> {demoName->React.string} </span> </PaddedBox>
-        <PaddedBox padding=LeftRight>
-          {demoUnitNames
-          ->Array.map(demoUnitName =>
-            <Link
-              key=demoUnitName
-              style=Styles.link
-              activeStyle=Styles.activeLink
-              href={"?demo=" ++
-              (demoName->Js.Global.encodeURIComponent ++
-              ("&unit=" ++ demoUnitName->Js.Global.encodeURIComponent))}
-              text=demoUnitName
-            />
-          )
-          ->React.array}
-        </PaddedBox>
-      </div>
   }
 
   module SearchInput = {
@@ -263,22 +213,9 @@ module DemoListSidebar = {
     }
 
     module ClearButton = {
-      let iconClose =
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          style={ReactDOM.Style.make(~display="block", ())}>
-          <path
-            fill="gray"
-            d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"
-          />
-        </svg>
-
       @react.component
       let make = (~onClear) =>
-        <button style=Styles.clearButton onClick={_event => onClear()}> iconClose </button>
+        <button style=Styles.clearButton onClick={_event => onClear()}> Icon.close </button>
     }
 
     @react.component
@@ -289,8 +226,54 @@ module DemoListSidebar = {
       </div>
   }
 
+  let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Demos.t) => {
+    let demos = demos->Js.Dict.entries
+    let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
+    let (level, categoryQuery) = nesting
+
+    demos
+    ->Array.map(((entityName, entity)) => {
+      let entityNameHasSubstring =
+        entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+      switch entity {
+      | Demo(_) =>
+        if entityNameHasSubstring {
+          <Link
+            key={entityName}
+            style=Styles.link
+            activeStyle=Styles.activeLink
+            href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
+            text=entityName
+          />
+        } else {
+          React.null
+        }
+      | Category(demos) =>
+        if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
+          let levelStr = Int.toString(level)
+          <PaddedBox key={entityName} padding=LeftRight>
+            <div style=Styles.categoryName> {entityName->React.string} </div>
+            {renderMenu(
+              ~filterValue,
+              ~nesting=(
+                level + 1,
+                `&category${levelStr}=` ++
+                entityName->Js.Global.encodeURIComponent ++
+                categoryQuery,
+              ),
+              demos,
+            )}
+          </PaddedBox>
+        } else {
+          React.null
+        }
+      }
+    })
+    ->React.array
+  }
+
   @react.component
-  let make = (~demos) => {
+  let make = (~demos: Demos.t) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
@@ -303,34 +286,7 @@ module DemoListSidebar = {
           onClear={() => setFilterValue(_ => None)}
         />
       </PaddedBox>
-      <PaddedBox gap=Xxs>
-        <Stack>
-          {demos
-          ->Map.String.toArray
-          ->Array.keepMap(((demoName, demoUnits)) => {
-            let demoUnitNames = demoUnits->Map.String.keysToArray
-            switch filterValue {
-            | None => Some(<MenuItem key=demoName demoName demoUnitNames />)
-            | Some(filterValue) =>
-              let search = filterValue->Js.String2.toLowerCase
-              let demoNameHasSubstring =
-                demoName->Js.String2.toLowerCase->Js.String2.includes(search)
-              let filteredDemoUnitNames =
-                demoUnitNames->Array.keep(name =>
-                  name->Js.String2.toLowerCase->Js.String2.includes(search)
-                )
-              switch (demoNameHasSubstring, filteredDemoUnitNames) {
-              | (false, []) => None
-              | (true, []) => Some(<MenuItem key=demoName demoName demoUnitNames />)
-              | (true, _)
-              | (false, _) =>
-                Some(<MenuItem key=demoName demoName demoUnitNames=filteredDemoUnitNames />)
-              }
-            }
-          })
-          ->React.array}
-        </Stack>
-      </PaddedBox>
+      <PaddedBox gap=Xxs> {renderMenu(demos, ~filterValue)} </PaddedBox>
     </Sidebar>
   }
 }
@@ -398,7 +354,6 @@ module DemoUnitSidebar = {
     ~onIntChange,
     ~onFloatChange,
     ~onBoolChange,
-    _,
   ) =>
     <PaddedBox gap=Md>
       <Stack>
@@ -669,7 +624,7 @@ module DemoUnitFrame = {
     )
 
   @react.component
-  let make = (~demoName=?, ~demoUnitName=?, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
+  let make = (~queryString: string, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
     <div name="DemoUnitFrame" style={container(responsiveMode)}>
       <iframe
         onLoad={event => {
@@ -677,10 +632,7 @@ module DemoUnitFrame = {
           let window = iframe["contentWindow"]
           onLoad(window)
         }}
-        src={switch (demoName, demoUnitName) {
-        | (Some(demo), Some(unit)) => j`?iframe=true&demo=$demo&unit=$unit`
-        | _ => "?iframe=true"
-        }}
+        src={`?iframe=true&${queryString}`}
         style={ReactDOM.Style.make(
           ~height={
             switch responsiveMode {
@@ -739,30 +691,29 @@ module App = {
   }
 
   type route =
-    | Unit(string, string)
-    | Demo(string, string)
+    | Unit(URLSearchParams.t, string)
+    | Demo(string)
     | Home
 
   @react.component
-  let make = (~demos) => {
+  let make = (~demos: Demos.t) => {
     let url = ReasonReact.Router.useUrl()
-    let queryString = url.search->URLSearchParams.make
+    let urlSearchParams = url.search->URLSearchParams.make
     let route = switch (
-      queryString->URLSearchParams.get("iframe"),
-      queryString->URLSearchParams.get("demo"),
-      queryString->URLSearchParams.get("unit"),
+      urlSearchParams->URLSearchParams.get("iframe"),
+      urlSearchParams->URLSearchParams.get("demo"),
     ) {
-    | (Some("true"), Some(demo), Some(unit)) => Unit(demo, unit)
-    | (_, Some(demo), Some(unit)) => Demo(demo, unit)
+    | (Some("true"), Some(demoName)) => Unit(urlSearchParams, demoName)
+    | (_, Some(_)) => Demo(url.search)
     | _ => Home
     }
 
     let (loadedIframeWindow: option<Js.t<'a>>, setLoadedIframeWindow) = React.useState(() => None)
 
     // Force rerender after switching demo to avoid stale iframe and sidebar children
-    let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Belt.Float.toString)
+    let (iframeKey, setIframeKey) = React.useState(() => Js.Date.now()->Float.toString)
     React.useEffect1(() => {
-      setIframeKey(_ => Js.Date.now()->Belt.Float.toString)
+      setIframeKey(_ => Js.Date.now()->Float.toString)
       None
     }, [url])
 
@@ -784,15 +735,15 @@ module App = {
 
     <div name="App" style=Styles.app>
       {switch route {
-      | Unit(demoName, demoUnitName) =>
-        <div style=Styles.main>
-          {demos
-          ->Map.String.get(demoName)
-          ->Option.flatMap(demo => demo->Map.String.get(demoUnitName))
-          ->Option.map(demoUnit => <DemoUnit demoUnit key={demoName ++ ("$$" ++ demoUnitName)} />)
-          ->Option.getWithDefault(React.null)}
-        </div>
-      | Demo(demoName, demoUnitName) => <>
+      | Unit(urlSearchParams, demoName) => {
+          let demoUnit = Demos.findDemo(urlSearchParams, demoName, demos)
+          <div style=Styles.main>
+            {demoUnit
+            ->Option.map(demoUnit => <DemoUnit demoUnit />)
+            ->Option.getWithDefault("Demo not found"->React.string)}
+          </div>
+        }
+      | Demo(queryString) => <>
           <DemoListSidebar demos />
           <div name="Content" style=Styles.right>
             <TopPanel
@@ -813,8 +764,7 @@ module App = {
               <div style=Styles.demoContents>
                 <DemoUnitFrame
                   key={"DemoUnitFrame" ++ iframeKey}
-                  demoName
-                  demoUnitName
+                  queryString
                   responsiveMode
                   onLoad={iframeWindow => setLoadedIframeWindow(_ => Some(iframeWindow))}
                 />

@@ -1,16 +1,8 @@
-type numberConfig<'a> = {
-  min: 'a,
-  max: 'a,
-  initial: 'a,
-  step: 'a,
+type rec addFunctions = {
+  addDemo: (string, Configs.demoUnitProps => React.element) => unit,
+  addCategory: (string, addFunctions => unit) => unit,
 }
 
-type stringConfig = string
-
-type boolConfig = bool
-
-type demo = {add: (string, Configs.demoUnitProps => React.element) => unit}
-
-let demo: (Belt.MutableMap.String.key, demo => unit) => unit
+let demo: (addFunctions => unit) => unit
 
 let start: unit => unit

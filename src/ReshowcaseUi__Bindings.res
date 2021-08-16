@@ -1,11 +1,20 @@
 module URLSearchParams = {
-  type urlSearchParams
+  type t
 
   @new
-  external make: string => urlSearchParams = "URLSearchParams"
+  external make: string => t = "URLSearchParams"
 
   @return(nullable) @bs.send
-  external get: (urlSearchParams, string) => option<string> = "get"
+  external get: (t, string) => option<string> = "get"
+
+  @bs.send
+  external forEach: (t, (string, string) => unit) => unit = "forEach"
+
+  let toArray = (t, ()) => {
+    let array = []
+    t->forEach((value, key) => Js.Array2.push(array, (key, value))->ignore)
+    array
+  }
 }
 
 module Window = {
