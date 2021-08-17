@@ -5,6 +5,7 @@ module Color = {
   let darkGray = "#42484d"
   let black40a = "rgba(0, 0, 0, 0.4)"
   let blue = "#0091ff"
+  let orange = "#ffae4b"
   let transparent = "transparent"
 }
 
@@ -140,4 +141,33 @@ module Icon = {
         d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"
       />
     </svg>
+}
+
+module HighlightSubstring = {
+  @react.component
+  let make = (~text, ~substring) =>
+    switch substring {
+    | "" => text->React.string
+    | _ => {
+        let indexFrom = Js.String2.indexOf(
+          Js.String2.toLowerCase(text),
+          Js.String2.toLowerCase(substring),
+        )
+        switch indexFrom {
+        | -1 => text->React.string
+        | _ =>
+          let indexTo = indexFrom + Js.String2.length(substring)
+          let leftPart = Js.String2.slice(text, ~from=0, ~to_=indexFrom)
+          let markedPart = Js.String2.slice(text, ~from=indexFrom, ~to_=indexTo)
+          let rightPart = Js.String2.slice(text, ~from=indexTo, ~to_=Js.String2.length(text))
+          <>
+            {leftPart->React.string}
+            <mark style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
+              {markedPart->React.string}
+            </mark>
+            {rightPart->React.string}
+          </>
+        }
+      }
+    }
 }

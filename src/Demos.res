@@ -1,6 +1,5 @@
 open Belt
-module BeltArray = Array
-module Array = Js.Array2
+
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 
 type t = Js.Dict.t<Entity.t>

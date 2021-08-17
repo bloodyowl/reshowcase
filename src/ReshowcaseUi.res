@@ -7,6 +7,7 @@ module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module Icon = ReshowcaseUi__Layout.Icon
+module HighlightSubstring = ReshowcaseUi__Layout.HighlightSubstring
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 module Array = Js.Array2
@@ -134,7 +135,7 @@ let rightSidebarId = "rightSidebar"
 
 module Link = {
   @react.component
-  let make = (~href, ~text, ~style=?, ~activeStyle=?) => {
+  let make = (~href, ~text: React.element, ~style=?, ~activeStyle=?) => {
     let url = ReasonReact.Router.useUrl()
     let path = String.concat("/", url.path)
     let isActive = (path ++ ("?" ++ url.search))->Js.String2.endsWith(href)
@@ -154,7 +155,7 @@ module Link = {
       | (_, Some(activeStyle), true) => Some(activeStyle)
       | _ => None
       }}>
-      {text->React.string}
+      text
     </a>
   }
 }
@@ -243,7 +244,7 @@ module DemoListSidebar = {
             style=Styles.link
             activeStyle=Styles.activeLink
             href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
-            text=entityName
+            text=<HighlightSubstring text=entityName substring />
           />
         } else {
           React.null
@@ -252,7 +253,7 @@ module DemoListSidebar = {
         if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
           let levelStr = Int.toString(level)
           <PaddedBox key={entityName} padding=LeftRight>
-            <div style=Styles.categoryName> {entityName->React.string} </div>
+            <div style=Styles.categoryName> <HighlightSubstring text=entityName substring />  </div>
             {renderMenu(
               ~filterValue,
               ~nesting=(
