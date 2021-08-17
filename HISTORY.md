@@ -1,3 +1,9 @@
+## 4.3.0
+
+Features:
+
+- Highlight search match substring in sidebar (thanks [@denis-ok](https://github.com/denis-ok)) (858c58c)
+
 ## 4.2.0
 
 Features:
