@@ -127,6 +127,7 @@ if (isBuild) {
       index: "/index.html",
     },
     stats: "errors-only",
+    ...(config.devServer || {})
   });
 
   server.listen(port, "0.0.0.0");
