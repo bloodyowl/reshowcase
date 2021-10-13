@@ -1,3 +1,9 @@
+## 4.3.1
+
+Features:
+
+- Add devServer config override (thanks [@denis-ok](https://github.com/denis-ok)) (73b4c0d)
+
 ## 4.3.0
 
 Features:
