@@ -171,3 +171,37 @@ module HighlightSubstring = {
       }
     }
 }
+
+module Collapsible = {
+  module Styles = {
+    let clickableArea = ReactDOM.Style.make(
+      ~display="flex",
+      ~cursor="pointer",
+      ~gridGap="2px",
+      ~alignItems="center",
+      (),
+    )
+  }
+
+  let triangleIcon = isOpen =>
+    <svg width="10" height="6" transform={isOpen ? "" : "rotate(-90)"}>
+      <polygon points="0,0  10,0  5,6" fill=Color.darkGray />
+    </svg>
+
+  @react.component
+  let make = (~title: React.element, ~isDefaultOpen: bool=false, ~children) => {
+    let (isOpen, setIsOpen) = React.useState(() => isDefaultOpen)
+
+    React.useEffect1(() => {
+      setIsOpen(_ => isDefaultOpen)
+      None
+    }, [isDefaultOpen])
+
+    <div>
+      <div style=Styles.clickableArea onClick={_event => setIsOpen(isOpen => !isOpen)}>
+        {triangleIcon(isOpen)} title
+      </div>
+      {isOpen ? children : React.null}
+    </div>
+  }
+}

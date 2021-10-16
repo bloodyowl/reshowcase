@@ -7,6 +7,7 @@ module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module Icon = ReshowcaseUi__Layout.Icon
+module Collapsible = ReshowcaseUi__Layout.Collapsible
 module HighlightSubstring = ReshowcaseUi__Layout.HighlightSubstring
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
@@ -244,7 +245,7 @@ module DemoListSidebar = {
             style=Styles.link
             activeStyle=Styles.activeLink
             href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
-            text=<HighlightSubstring text=entityName substring />
+            text={<HighlightSubstring text=entityName substring />}
           />
         } else {
           React.null
@@ -253,17 +254,22 @@ module DemoListSidebar = {
         if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
           let levelStr = Int.toString(level)
           <PaddedBox key={entityName} padding=LeftRight>
-            <div style=Styles.categoryName> <HighlightSubstring text=entityName substring />  </div>
-            {renderMenu(
-              ~filterValue,
-              ~nesting=(
-                level + 1,
-                `&category${levelStr}=` ++
-                entityName->Js.Global.encodeURIComponent ++
-                categoryQuery,
-              ),
-              demos,
-            )}
+            <Collapsible
+              title={<div style=Styles.categoryName>
+                <HighlightSubstring text=entityName substring />
+              </div>}
+              isDefaultOpen=false>
+              {renderMenu(
+                ~filterValue,
+                ~nesting=(
+                  level + 1,
+                  `&category${levelStr}=` ++
+                  entityName->Js.Global.encodeURIComponent ++
+                  categoryQuery,
+                ),
+                demos,
+              )}
+            </Collapsible>
           </PaddedBox>
         } else {
           React.null
