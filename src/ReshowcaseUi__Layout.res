@@ -192,11 +192,6 @@ module Collapsible = {
   let make = (~title: React.element, ~isDefaultOpen: bool=false, ~children) => {
     let (isOpen, setIsOpen) = React.useState(() => isDefaultOpen)
 
-    React.useEffect1(() => {
-      setIsOpen(_ => isDefaultOpen)
-      None
-    }, [isDefaultOpen])
-
     <div>
       <div style=Styles.clickableArea onClick={_event => setIsOpen(isOpen => !isOpen)}>
         {triangleIcon(isOpen)} title

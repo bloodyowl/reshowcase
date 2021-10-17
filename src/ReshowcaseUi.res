@@ -228,59 +228,66 @@ module DemoListSidebar = {
       </div>
   }
 
-  let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Demos.t) => {
-    let demos = demos->Js.Dict.entries
-    let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
-    let (level, categoryQuery) = nesting
+  let renderMenu = (~urlSearchParams: URLSearchParams.t, ~filterValue, demos: Demos.t) => {
+    let rec renderMenu = (~filterValue, ~nestingLevel, ~categoryQuery, demos: Demos.t) => {
+      let demos = demos->Js.Dict.entries
+      let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
 
-    demos
-    ->Array.map(((entityName, entity)) => {
-      let entityNameHasSubstring =
-        entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
-      switch entity {
-      | Demo(_) =>
-        if entityNameHasSubstring {
-          <Link
-            key={entityName}
-            style=Styles.link
-            activeStyle=Styles.activeLink
-            href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
-            text={<HighlightSubstring text=entityName substring />}
-          />
-        } else {
-          React.null
-        }
-      | Category(demos) =>
-        if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
-          let levelStr = Int.toString(level)
-          <PaddedBox key={entityName} padding=LeftRight>
-            <Collapsible
-              title={<div style=Styles.categoryName>
-                <HighlightSubstring text=entityName substring />
-              </div>}
-              isDefaultOpen=false>
-              {renderMenu(
-                ~filterValue,
-                ~nesting=(
-                  level + 1,
-                  `&category${levelStr}=` ++
+      demos
+      ->Array.map(((entityName, entity)) => {
+        let entityNameHasSubstring =
+          entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+        switch entity {
+        | Demo(_) =>
+          if entityNameHasSubstring {
+            <Link
+              key={entityName}
+              style=Styles.link
+              activeStyle=Styles.activeLink
+              href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
+              text={<HighlightSubstring text=entityName substring />}
+            />
+          } else {
+            React.null
+          }
+        | Category(demos) =>
+          if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
+            let levelStr = Int.toString(nestingLevel)
+            let categoryQueryKey = `category${levelStr}`
+            let isCategoryInQuery = switch urlSearchParams->URLSearchParams.get(categoryQueryKey) {
+            | Some(value) if value->Js.Global.decodeURIComponent == entityName => true
+            | Some(_) | None => false
+            }
+
+            <PaddedBox key={entityName} padding=LeftRight>
+              <Collapsible
+                title={<div style=Styles.categoryName>
+                  <HighlightSubstring text=entityName substring />
+                </div>}
+                isDefaultOpen=isCategoryInQuery>
+                {renderMenu(
+                  ~filterValue,
+                  ~nestingLevel=nestingLevel + 1,
+                  ~categoryQuery=`&category${levelStr}=` ++
                   entityName->Js.Global.encodeURIComponent ++
                   categoryQuery,
-                ),
-                demos,
-              )}
-            </Collapsible>
-          </PaddedBox>
-        } else {
-          React.null
+                  demos,
+                )}
+              </Collapsible>
+            </PaddedBox>
+          } else {
+            React.null
+          }
         }
-      }
-    })
-    ->React.array
+      })
+      ->React.array
+    }
+
+    renderMenu(~filterValue, ~nestingLevel=0, ~categoryQuery="", (demos: Demos.t))
   }
 
   @react.component
-  let make = (~demos: Demos.t) => {
+  let make = (~urlSearchParams: URLSearchParams.t, ~demos: Demos.t) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
@@ -293,7 +300,7 @@ module DemoListSidebar = {
           onClear={() => setFilterValue(_ => None)}
         />
       </PaddedBox>
-      <PaddedBox gap=Xxs> {renderMenu(demos, ~filterValue)} </PaddedBox>
+      <PaddedBox gap=Xxs> {renderMenu(~filterValue, ~urlSearchParams, demos)} </PaddedBox>
     </Sidebar>
   }
 }
@@ -751,7 +758,7 @@ module App = {
           </div>
         }
       | Demo(queryString) => <>
-          <DemoListSidebar demos />
+          <DemoListSidebar demos urlSearchParams />
           <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
@@ -783,7 +790,7 @@ module App = {
           </div>
         </>
       | Home => <>
-          <DemoListSidebar demos />
+          <DemoListSidebar demos urlSearchParams />
           <div style=Styles.empty>
             <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
           </div>
