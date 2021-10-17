@@ -47,6 +47,5 @@ module LocalStorage = {
   @return(nullable) @send external getItem: (t, string) => option<string> = "getItem"
   @send external setItem: (t, string, string) => unit = "setItem"
   @send external removeItem: (t, string) => unit = "removeItem"
+  @val external localStorage: t = "localStorage"
 }
-
-@val external localStorage: LocalStorage.t = "localStorage"
