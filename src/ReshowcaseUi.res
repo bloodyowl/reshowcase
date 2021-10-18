@@ -246,7 +246,13 @@ module DemoListSidebar = {
     ~filterValue,
     demos: Demos.t,
   ) => {
-    let rec renderMenu = (~filterValue, ~nestingLevel, ~categoryQuery, demos: Demos.t) => {
+    let rec renderMenu = (
+      ~parentCategoryHasSubstring: bool,
+      ~filterValue,
+      ~nestingLevel,
+      ~categoryQuery,
+      demos: Demos.t,
+    ) => {
       let demos = demos->Js.Dict.entries
       let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
 
@@ -256,7 +262,7 @@ module DemoListSidebar = {
           entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
         switch entity {
         | Demo(_) =>
-          if entityNameHasSubstring {
+          if entityNameHasSubstring || parentCategoryHasSubstring {
             <Link
               key={entityName}
               style=Styles.link
@@ -268,7 +274,11 @@ module DemoListSidebar = {
             React.null
           }
         | Category(demos) =>
-          if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
+          if (
+            entityNameHasSubstring ||
+            Demos.hasNestedEntityWithSubstring(demos, substring) ||
+            parentCategoryHasSubstring
+          ) {
             let levelStr = Int.toString(nestingLevel)
             let categoryQueryKey = `category${levelStr}`
             let isCategoryInQuery = switch urlSearchParams->URLSearchParams.get(categoryQueryKey) {
@@ -283,6 +293,7 @@ module DemoListSidebar = {
                 </div>}
                 isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsed}>
                 {renderMenu(
+                  ~parentCategoryHasSubstring=entityNameHasSubstring || parentCategoryHasSubstring,
                   ~filterValue,
                   ~nestingLevel=nestingLevel + 1,
                   ~categoryQuery=`&category${levelStr}=` ++
@@ -300,7 +311,13 @@ module DemoListSidebar = {
       ->React.array
     }
 
-    renderMenu(~filterValue, ~nestingLevel=0, ~categoryQuery="", (demos: Demos.t))
+    renderMenu(
+      ~parentCategoryHasSubstring=false,
+      ~filterValue,
+      ~nestingLevel=0,
+      ~categoryQuery="",
+      (demos: Demos.t),
+    )
   }
 
   @react.component
