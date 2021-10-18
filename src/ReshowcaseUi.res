@@ -71,29 +71,13 @@ module TopPanel = {
 
   @react.component
   let make = (
-    ~isCategoriesCollapsed: bool,
     ~isSidebarHidden: bool,
     ~responsiveMode: responsiveMode,
     ~onRightSidebarToggle: unit => unit,
-    ~onToggleCollapseCategories: unit => unit,
     ~onSetResponsiveMode: (responsiveMode => responsiveMode) => unit,
   ) => {
     <div style=Styles.panel>
-      <div style=Styles.rightSection>
-        <PaddedBox gap=Md>
-          <div style=Styles.buttonGroup>
-            <button
-              style={Styles.squareButton}
-              title={"Toggle default collapsed categories"}
-              onClick={event => {
-                event->ReactEvent.Mouse.preventDefault
-                onToggleCollapseCategories()
-              }}>
-              {isCategoriesCollapsed ? `–`->React.string : `☰`->React.string}
-            </button>
-          </div>
-        </PaddedBox>
-      </div>
+      <div style=Styles.rightSection />
       <div style=Styles.middleSection>
         <PaddedBox gap=Md>
           <div style=Styles.buttonGroup>
@@ -325,18 +309,46 @@ module DemoListSidebar = {
     ~urlSearchParams: URLSearchParams.t,
     ~demos: Demos.t,
     ~isCategoriesCollapsed: bool,
+    ~onToggleCollapseCategories: unit => unit,
   ) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
-        <SearchInput
-          value={filterValue->Option.getWithDefault("")}
-          onChange={event => {
-            let value = (event->ReactEvent.Form.target)["value"]
-            setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
-          }}
-          onClear={() => setFilterValue(_ => None)}
-        />
+        <div style={ReactDOM.Style.make(~display="flex", ~alignItems="center", ~gridGap="5px", ())}>
+          <button
+            style={ReactDOM.Style.make(
+              ~height="32px",
+              ~minWidth="32px",
+              ~width="32px",
+              ~cursor="pointer",
+              ~fontSize="14px",
+              ~backgroundColor=Color.white,
+              ~color=Color.darkGray,
+              ~border=Border.default,
+              ~borderRadius="7px",
+              ~margin="0",
+              ~padding="0",
+              ~display="flex",
+              ~alignItems="center",
+              ~justifyContent="center",
+              (),
+            )}
+            title={"Toggle default collapsed categories"}
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onToggleCollapseCategories()
+            }}>
+            {Collapsible.triangleIcon(!isCategoriesCollapsed)}
+          </button>
+          <SearchInput
+            value={filterValue->Option.getWithDefault("")}
+            onChange={event => {
+              let value = (event->ReactEvent.Form.target)["value"]
+              setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
+            }}
+            onClear={() => setFilterValue(_ => None)}
+          />
+        </div>
       </PaddedBox>
       <PaddedBox gap=Xxs>
         {renderMenu(~isCategoriesCollapsed, ~filterValue, ~urlSearchParams, demos)}
@@ -793,6 +805,14 @@ module App = {
       }
     })
 
+    let onToggleCollapseCategories = () => {
+      toggleIsCategoriesCollapsed(_ => !isCategoriesCollapsed)
+      LocalStorage.localStorage->LocalStorage.setItem(
+        "isCategoriesCollapsed",
+        !isCategoriesCollapsed ? "true" : "false",
+      )
+    }
+
     <div name="App" style=Styles.app>
       {switch route {
       | Unit(urlSearchParams, demoName) => {
@@ -804,11 +824,10 @@ module App = {
           </div>
         }
       | Demo(queryString) => <>
-          <DemoListSidebar demos urlSearchParams isCategoriesCollapsed />
+          <DemoListSidebar demos urlSearchParams isCategoriesCollapsed onToggleCollapseCategories />
           <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
-              isCategoriesCollapsed
               responsiveMode
               onRightSidebarToggle={() => {
                 toggleShowRightSidebar(_ => !showRightSidebar)
@@ -818,13 +837,6 @@ module App = {
                 | None
                 | _ => ()
                 }
-              }}
-              onToggleCollapseCategories={() => {
-                toggleIsCategoriesCollapsed(_ => !isCategoriesCollapsed)
-                LocalStorage.localStorage->LocalStorage.setItem(
-                  "isCategoriesCollapsed",
-                  !isCategoriesCollapsed ? "true" : "false",
-                )
               }}
               onSetResponsiveMode
             />
@@ -844,7 +856,7 @@ module App = {
           </div>
         </>
       | Home => <>
-          <DemoListSidebar demos urlSearchParams isCategoriesCollapsed />
+          <DemoListSidebar demos urlSearchParams isCategoriesCollapsed onToggleCollapseCategories />
           <div style=Styles.empty>
             <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
           </div>
