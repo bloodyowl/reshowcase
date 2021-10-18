@@ -304,6 +304,33 @@ module DemoListSidebar = {
     )
   }
 
+  let collapsedIcon =
+    <svg
+      width="20"
+      height="17"
+      viewBox="0 0 20 17"
+      fill=Color.darkGray
+      xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="1" width="16" height="2" />
+      <rect x="2" y="7" width="16" height="2" />
+      <rect x="2" y="13" width="16" height="2" />
+    </svg>
+
+  let expandedIcon =
+    <svg
+      width="26"
+      height="17"
+      viewBox="0 0 26 17"
+      fill=Color.darkGray
+      xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="1" width="16" height="2" />
+      <rect x="2" y="1" width="2" height="2" />
+      <rect x="10" y="7" width="12" height="2" />
+      <rect x="6" y="7" width="2" height="2" />
+      <rect x="10" y="13" width="12" height="2" />
+      <rect x="6" y="13" width="2" height="2" />
+    </svg>
+
   @react.component
   let make = (
     ~urlSearchParams: URLSearchParams.t,
@@ -338,7 +365,7 @@ module DemoListSidebar = {
               event->ReactEvent.Mouse.preventDefault
               onToggleCollapseCategories()
             }}>
-            {Collapsible.triangleIcon(!isCategoriesCollapsed)}
+            {isCategoriesCollapsed ? collapsedIcon : expandedIcon}
           </button>
           <SearchInput
             value={filterValue->Option.getWithDefault("")}
