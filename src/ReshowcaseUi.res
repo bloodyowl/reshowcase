@@ -3,6 +3,8 @@ open Belt
 module Color = ReshowcaseUi__Layout.Color
 module Gap = ReshowcaseUi__Layout.Gap
 module Border = ReshowcaseUi__Layout.Border
+module BorderRadius = ReshowcaseUi__Layout.BorderRadius
+module FontSize = ReshowcaseUi__Layout.FontSize
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
@@ -32,7 +34,7 @@ module TopPanel = {
       ~display="flex",
       ~flexDirection="row",
       ~alignItems="stretch",
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
       (),
     )
 
@@ -40,7 +42,7 @@ module TopPanel = {
       ~height="32px",
       ~width="48px",
       ~cursor="pointer",
-      ~fontSize="14px",
+      ~fontSize=FontSize.sm,
       ~backgroundColor=Color.lightGray,
       ~color=Color.darkGray,
       ~border="none",
@@ -159,16 +161,24 @@ module Link = {
 
 module DemoListSidebar = {
   module Styles = {
-    let categoryName = ReactDOM.Style.make(~fontWeight="500", ~padding=`${Gap.xs} ${Gap.xxs}`, ())
+    let categoryName = ReactDOM.Style.make(
+      ~padding=`${Gap.xs} ${Gap.xxs}`,
+      ~fontSize=FontSize.md,
+      ~fontWeight="500",
+      (),
+    )
+
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
       ~color=Color.blue,
       ~display="block",
       ~padding=`${Gap.xs} ${Gap.md}`,
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
+      ~fontSize=FontSize.md,
       ~fontWeight="500",
       (),
     )
+
     let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
   }
 
@@ -193,7 +203,7 @@ module DemoListSidebar = {
         ~display="flex",
         ~alignItems="center",
         ~backgroundColor=Color.midGray,
-        ~borderRadius="7px",
+        ~borderRadius=BorderRadius.default,
         (),
       )
 
@@ -201,11 +211,13 @@ module DemoListSidebar = {
         ~padding=`${Gap.xs} ${Gap.md}`,
         ~width="100%",
         ~margin="0",
+        ~height="32px",
+        ~boxSizing="border-box",
         ~fontFamily="inherit",
-        ~fontSize="16px",
+        ~fontSize=FontSize.md,
         ~border="none",
         ~backgroundColor=Color.transparent,
-        ~borderRadius="7px",
+        ~borderRadius=BorderRadius.default,
         (),
       )
     }
@@ -220,7 +232,7 @@ module DemoListSidebar = {
     let make = (~value, ~onChange, ~onClear) =>
       <div style=Styles.inputWrapper>
         <input style=Styles.input placeholder="Filter" value onChange />
-        {value === "" ? React.null : <ClearButton onClear />}
+        {value == "" ? React.null : <ClearButton onClear />}
       </div>
   }
 
@@ -277,15 +289,18 @@ module DemoListSidebar = {
                 </div>}
                 isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsed}
                 isForceOpen={substring != ""}>
-                {renderMenu(
-                  ~parentCategoryHasSubstring=entityNameHasSubstring || parentCategoryHasSubstring,
-                  ~filterValue,
-                  ~nestingLevel=nestingLevel + 1,
-                  ~categoryQuery=`&category${levelStr}=` ++
-                  entityName->Js.Global.encodeURIComponent ++
-                  categoryQuery,
-                  demos,
-                )}
+                <PaddedBox padding=LeftRight>
+                  {renderMenu(
+                    ~parentCategoryHasSubstring=entityNameHasSubstring ||
+                    parentCategoryHasSubstring,
+                    ~filterValue,
+                    ~nestingLevel=nestingLevel + 1,
+                    ~categoryQuery=`&category${levelStr}=` ++
+                    entityName->Js.Global.encodeURIComponent ++
+                    categoryQuery,
+                    demos,
+                  )}
+                </PaddedBox>
               </Collapsible>
             </PaddedBox>
           } else {
@@ -305,32 +320,7 @@ module DemoListSidebar = {
     )
   }
 
-  let collapsedIcon =
-    <svg
-      width="20"
-      height="17"
-      viewBox="0 0 20 17"
-      fill=Color.darkGray
-      xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="1" width="16" height="2" />
-      <rect x="2" y="7" width="16" height="2" />
-      <rect x="2" y="13" width="16" height="2" />
-    </svg>
 
-  let expandedIcon =
-    <svg
-      width="26"
-      height="17"
-      viewBox="0 0 26 17"
-      fill=Color.darkGray
-      xmlns="http://www.w3.org/2000/svg">
-      <rect x="6" y="1" width="16" height="2" />
-      <rect x="2" y="1" width="2" height="2" />
-      <rect x="10" y="7" width="12" height="2" />
-      <rect x="6" y="7" width="2" height="2" />
-      <rect x="10" y="13" width="12" height="2" />
-      <rect x="6" y="13" width="2" height="2" />
-    </svg>
 
   @react.component
   let make = (
@@ -349,11 +339,11 @@ module DemoListSidebar = {
               ~minWidth="32px",
               ~width="32px",
               ~cursor="pointer",
-              ~fontSize="14px",
+              ~fontSize=FontSize.sm,
               ~backgroundColor=Color.white,
               ~color=Color.darkGray,
               ~border=Border.default,
-              ~borderRadius="7px",
+              ~borderRadius=BorderRadius.default,
               ~margin="0",
               ~padding="0",
               ~display="flex",
@@ -366,13 +356,13 @@ module DemoListSidebar = {
               event->ReactEvent.Mouse.preventDefault
               onToggleCollapseCategories()
             }}>
-            {isCategoriesCollapsed ? collapsedIcon : expandedIcon}
+            {isCategoriesCollapsed ? Icon.categoryCollapsed : Icon.categoryExpanded}
           </button>
           <SearchInput
             value={filterValue->Option.getWithDefault("")}
             onChange={event => {
               let value = (event->ReactEvent.Form.target)["value"]
-              setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
+              setFilterValue(_ => value->Js.String2.trim == "" ? None : Some(value))
             }}
             onClear={() => setFilterValue(_ => None)}
           />
@@ -390,32 +380,35 @@ module DemoUnitSidebar = {
     let label = ReactDOM.Style.make(
       ~display="block",
       ~backgroundColor=Color.white,
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
       ~boxShadow="0 5px 10px rgba(0, 0, 0, 0.07)",
       (),
     )
-    let labelText = ReactDOM.Style.make(~fontSize="16px", ~textAlign="center", ())
+
+    let labelText = ReactDOM.Style.make(~fontSize=FontSize.md, ~textAlign="center", ())
+
     let textInput = ReactDOM.Style.make(
-      ~fontSize="16px",
+      ~fontSize=FontSize.md,
       ~width="100%",
       ~boxSizing="border-box",
       ~backgroundColor=Color.lightGray,
       ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
       ~border="none",
       ~padding=Gap.md,
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
       (),
     )
+
     let select =
       ReactDOM.Style.make(
-        ~fontSize="16px",
+        ~fontSize=FontSize.md,
         ~width="100%",
         ~boxSizing="border-box",
         ~backgroundColor=Color.lightGray,
         ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
         ~border="none",
         ~padding=Gap.md,
-        ~borderRadius="7px",
+        ~borderRadius=BorderRadius.default,
         ~appearance="none",
         ~paddingRight="30px",
         ~backgroundImage=`url("data:image/svg+xml,%3Csvg width='36' height='36' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%2342484E' stroke-width='2' d='M12.246 14.847l5.826 5.826 5.827-5.826' fill='none' fill-rule='evenodd' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
@@ -424,7 +417,13 @@ module DemoUnitSidebar = {
         ~backgroundRepeat="no-repeat",
         (),
       )->ReactDOM.Style.unsafeAddProp("WebkitAppearance", "none")
-    let checkbox = ReactDOM.Style.make(~fontSize="16px", ~margin="0 auto", ~display="block", ())
+
+    let checkbox = ReactDOM.Style.make(
+      ~fontSize=FontSize.md,
+      ~margin="0 auto",
+      ~display="block",
+      (),
+    )
   }
 
   module PropBox = {
@@ -768,7 +767,7 @@ module App = {
       (),
     )
     let emptyText = ReactDOM.Style.make(
-      ~fontSize="22px",
+      ~fontSize=FontSize.lg,
       ~color=Color.black40a,
       ~textAlign="center",
       (),

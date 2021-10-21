@@ -10,9 +10,9 @@ module Color = {
 }
 
 module Gap = {
-  let xxs = "3px"
-  let xs = "7px"
-  let md = "10px"
+  let xxs = "2px"
+  let xs = "5px"
+  let md = "8px"
 
   type t = Xxs | Xs | Md
 
@@ -26,6 +26,16 @@ module Gap = {
 
 module Border = {
   let default = `1px solid ${Color.midGray}`
+}
+
+module BorderRadius = {
+  let default = "5px"
+}
+
+module FontSize = {
+  let sm = "12px"
+  let md = "14px"
+  let lg = "20px"
 }
 
 module PaddedBox = {
@@ -140,6 +150,33 @@ module Icon = {
         fill="gray"
         d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"
       />
+    </svg>
+
+  let categoryCollapsed =
+    <svg
+      width="20"
+      height="17"
+      viewBox="0 0 20 17"
+      fill=Color.darkGray
+      xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="1" width="16" height="2" />
+      <rect x="2" y="7" width="16" height="2" />
+      <rect x="2" y="13" width="16" height="2" />
+    </svg>
+
+  let categoryExpanded =
+    <svg
+      width="26"
+      height="17"
+      viewBox="0 0 26 17"
+      fill=Color.darkGray
+      xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="1" width="16" height="2" />
+      <rect x="2" y="1" width="2" height="2" />
+      <rect x="10" y="7" width="12" height="2" />
+      <rect x="6" y="7" width="2" height="2" />
+      <rect x="10" y="13" width="12" height="2" />
+      <rect x="6" y="13" width="2" height="2" />
     </svg>
 }
 
