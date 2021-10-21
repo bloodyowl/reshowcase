@@ -130,7 +130,10 @@ if (isBuild) {
     ...(config.devServer || {})
   });
 
-  server.listen(port, "0.0.0.0");
-
-  child_process.exec("open http://localhost:" + port, () => {});
+  if (config.devServer && config.devServer.socket) {
+    server.listen(config.devServer.socket);
+  } else {
+    server.listen(port, "0.0.0.0");
+    child_process.exec("open http://localhost:" + port, () => {});
+  }
 }
