@@ -237,7 +237,7 @@ module DemoListSidebar = {
   }
 
   let renderMenu = (
-    ~isCategoriesCollapsed: bool,
+    ~isCategoriesCollapsedByDefault: bool,
     ~urlSearchParams: URLSearchParams.t,
     ~filterValue,
     demos: Demos.t,
@@ -287,7 +287,7 @@ module DemoListSidebar = {
                 title={<div style=Styles.categoryName>
                   <HighlightSubstring text=entityName substring />
                 </div>}
-                isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsed}
+                isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsedByDefault}
                 isForceOpen={substring != ""}>
                 <PaddedBox padding=LeftRight>
                   {renderMenu(
@@ -324,8 +324,8 @@ module DemoListSidebar = {
   let make = (
     ~urlSearchParams: URLSearchParams.t,
     ~demos: Demos.t,
-    ~isCategoriesCollapsed: bool,
-    ~onToggleCollapsedCategories: unit => unit,
+    ~isCategoriesCollapsedByDefault: bool,
+    ~onToggleCollapsedCategoriesByDefault: unit => unit,
   ) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
@@ -352,9 +352,9 @@ module DemoListSidebar = {
             title={"Toggle default collapsed categories"}
             onClick={event => {
               event->ReactEvent.Mouse.preventDefault
-              onToggleCollapsedCategories()
+              onToggleCollapsedCategoriesByDefault()
             }}>
-            {isCategoriesCollapsed ? Icon.categoryCollapsed : Icon.categoryExpanded}
+            {isCategoriesCollapsedByDefault ? Icon.categoryCollapsed : Icon.categoryExpanded}
           </button>
           <SearchInput
             value={filterValue->Option.getWithDefault("")}
@@ -367,7 +367,7 @@ module DemoListSidebar = {
         </div>
       </PaddedBox>
       <PaddedBox gap=Xxs>
-        {renderMenu(~isCategoriesCollapsed, ~filterValue, ~urlSearchParams, demos)}
+        {renderMenu(~isCategoriesCollapsedByDefault, ~filterValue, ~urlSearchParams, demos)}
       </PaddedBox>
     </Sidebar>
   }
@@ -823,18 +823,18 @@ module App = {
       None
     }, [showRightSidebar])
 
-    let (isCategoriesCollapsed, toggleIsCategoriesCollapsed) = React.useState(() => {
-      switch LocalStorage.localStorage->LocalStorage.getItem("isCategoriesCollapsed") {
+    let (isCategoriesCollapsedByDefault, toggleIsCategoriesCollapsed) = React.useState(() => {
+      switch LocalStorage.localStorage->LocalStorage.getItem("isCategoriesCollapsedByDefault") {
       | Some("true") => true
       | _ => false
       }
     })
 
-    let onToggleCollapsedCategories = () => {
-      toggleIsCategoriesCollapsed(_ => !isCategoriesCollapsed)
+    let onToggleCollapsedCategoriesByDefault = () => {
+      toggleIsCategoriesCollapsed(_ => !isCategoriesCollapsedByDefault)
       LocalStorage.localStorage->LocalStorage.setItem(
-        "isCategoriesCollapsed",
-        !isCategoriesCollapsed ? "true" : "false",
+        "isCategoriesCollapsedByDefault",
+        !isCategoriesCollapsedByDefault ? "true" : "false",
       )
     }
 
@@ -850,7 +850,10 @@ module App = {
         }
       | Demo(queryString) => <>
           <DemoListSidebar
-            demos urlSearchParams isCategoriesCollapsed onToggleCollapsedCategories
+            demos
+            urlSearchParams
+            isCategoriesCollapsedByDefault
+            onToggleCollapsedCategoriesByDefault
           />
           <div name="Content" style=Styles.right>
             <TopPanel
@@ -884,7 +887,10 @@ module App = {
         </>
       | Home => <>
           <DemoListSidebar
-            demos urlSearchParams isCategoriesCollapsed onToggleCollapsedCategories
+            demos
+            urlSearchParams
+            isCategoriesCollapsedByDefault
+            onToggleCollapsedCategoriesByDefault
           />
           <div style=Styles.empty>
             <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
