@@ -189,14 +189,14 @@ module Collapsible = {
     </svg>
 
   @react.component
-  let make = (~title: React.element, ~isDefaultOpen: bool=false, ~children) => {
+  let make = (~title: React.element, ~isDefaultOpen: bool=false, ~isForceOpen=false, ~children) => {
     let (isOpen, setIsOpen) = React.useState(() => isDefaultOpen)
 
     <div>
       <div style=Styles.clickableArea onClick={_event => setIsOpen(isOpen => !isOpen)}>
         {triangleIcon(isOpen)} title
       </div>
-      {isOpen ? children : React.null}
+      {isForceOpen || isOpen ? children : React.null}
     </div>
   }
 }

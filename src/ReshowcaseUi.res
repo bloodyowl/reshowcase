@@ -275,7 +275,8 @@ module DemoListSidebar = {
                 title={<div style=Styles.categoryName>
                   <HighlightSubstring text=entityName substring />
                 </div>}
-                isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsed}>
+                isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsed}
+                isForceOpen={substring != ""}>
                 {renderMenu(
                   ~parentCategoryHasSubstring=entityNameHasSubstring || parentCategoryHasSubstring,
                   ~filterValue,
