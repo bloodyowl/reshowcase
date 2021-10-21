@@ -32,7 +32,7 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
     urlSearchParams
     ->URLSearchParams.toArray()
     ->List.fromArray
-    ->List.keep(((key, _value)) => key != "demo" && key != "iframe")
+    ->List.keep(((key, _value)) => key->Js.String2.startsWith("category"))
     ->List.sort(((categoryNum1, _), (categoryNum2, _)) =>
       String.compare(categoryNum1, categoryNum2)
     )
