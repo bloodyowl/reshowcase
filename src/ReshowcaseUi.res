@@ -320,14 +320,12 @@ module DemoListSidebar = {
     )
   }
 
-
-
   @react.component
   let make = (
     ~urlSearchParams: URLSearchParams.t,
     ~demos: Demos.t,
     ~isCategoriesCollapsed: bool,
-    ~onToggleCollapseCategories: unit => unit,
+    ~onToggleCollapsedCategories: unit => unit,
   ) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
@@ -354,7 +352,7 @@ module DemoListSidebar = {
             title={"Toggle default collapsed categories"}
             onClick={event => {
               event->ReactEvent.Mouse.preventDefault
-              onToggleCollapseCategories()
+              onToggleCollapsedCategories()
             }}>
             {isCategoriesCollapsed ? Icon.categoryCollapsed : Icon.categoryExpanded}
           </button>
@@ -827,12 +825,12 @@ module App = {
 
     let (isCategoriesCollapsed, toggleIsCategoriesCollapsed) = React.useState(() => {
       switch LocalStorage.localStorage->LocalStorage.getItem("isCategoriesCollapsed") {
-      | Some("false") => false
-      | _ => true
+      | Some("true") => true
+      | _ => false
       }
     })
 
-    let onToggleCollapseCategories = () => {
+    let onToggleCollapsedCategories = () => {
       toggleIsCategoriesCollapsed(_ => !isCategoriesCollapsed)
       LocalStorage.localStorage->LocalStorage.setItem(
         "isCategoriesCollapsed",
@@ -851,7 +849,9 @@ module App = {
           </div>
         }
       | Demo(queryString) => <>
-          <DemoListSidebar demos urlSearchParams isCategoriesCollapsed onToggleCollapseCategories />
+          <DemoListSidebar
+            demos urlSearchParams isCategoriesCollapsed onToggleCollapsedCategories
+          />
           <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
@@ -883,7 +883,9 @@ module App = {
           </div>
         </>
       | Home => <>
-          <DemoListSidebar demos urlSearchParams isCategoriesCollapsed onToggleCollapseCategories />
+          <DemoListSidebar
+            demos urlSearchParams isCategoriesCollapsed onToggleCollapsedCategories
+          />
           <div style=Styles.empty>
             <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
           </div>
