@@ -179,7 +179,7 @@ module DemoListSidebar = {
       (),
     )
 
-    let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
+    let activeLink = ReactDOM.Style.make(~backgroundColor=Color.midGray, ())
   }
 
   module SearchInput = {
