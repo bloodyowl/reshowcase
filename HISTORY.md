@@ -1,3 +1,13 @@
+## 4.3.2
+
+Changes:
+
+- Listen to websocket port when provided (thanks [@rusty-key](https://github.com/rusty-key)) (afcf98a)
+
+Fixes:
+
+- Fix query params handling (thanks [@denis-ok](https://github.com/denis-ok)) (114554d)
+
 ## 4.3.1
 
 Features:
