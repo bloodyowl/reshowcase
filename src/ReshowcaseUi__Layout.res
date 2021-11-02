@@ -221,13 +221,25 @@ module Collapsible = {
   }
 
   let triangleIcon = isOpen =>
-    <svg width="10" height="6" transform={isOpen ? "" : "rotate(-90)"}>
+    <svg
+      width="10"
+      height="6"
+      style={ReactDOM.Style.make(
+        ~transition="200ms ease-out transform",
+        ~transform=isOpen ? "" : "rotate(-90deg)",
+        (),
+      )}>
       <polygon points="0,0  10,0  5,6" fill=Color.darkGray />
     </svg>
 
   @react.component
   let make = (~title: React.element, ~isDefaultOpen: bool=false, ~isForceOpen=false, ~children) => {
     let (isOpen, setIsOpen) = React.useState(() => isDefaultOpen)
+
+    React.useEffect1(() => {
+      setIsOpen(_ => isDefaultOpen)
+      None
+    }, [isDefaultOpen])
 
     <div>
       <div style=Styles.clickableArea onClick={_event => setIsOpen(isOpen => !isOpen)}>
