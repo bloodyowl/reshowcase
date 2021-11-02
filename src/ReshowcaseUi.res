@@ -3,13 +3,17 @@ open Belt
 module Color = ReshowcaseUi__Layout.Color
 module Gap = ReshowcaseUi__Layout.Gap
 module Border = ReshowcaseUi__Layout.Border
+module BorderRadius = ReshowcaseUi__Layout.BorderRadius
+module FontSize = ReshowcaseUi__Layout.FontSize
 module PaddedBox = ReshowcaseUi__Layout.PaddedBox
 module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module Icon = ReshowcaseUi__Layout.Icon
+module Collapsible = ReshowcaseUi__Layout.Collapsible
 module HighlightSubstring = ReshowcaseUi__Layout.HighlightSubstring
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
+module LocalStorage = ReshowcaseUi__Bindings.LocalStorage
 module Array = Js.Array2
 
 type responsiveMode =
@@ -30,7 +34,7 @@ module TopPanel = {
       ~display="flex",
       ~flexDirection="row",
       ~alignItems="stretch",
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
       (),
     )
 
@@ -38,7 +42,7 @@ module TopPanel = {
       ~height="32px",
       ~width="48px",
       ~cursor="pointer",
-      ~fontSize="14px",
+      ~fontSize=FontSize.sm,
       ~backgroundColor=Color.lightGray,
       ~color=Color.darkGray,
       ~border="none",
@@ -64,12 +68,7 @@ module TopPanel = {
       (),
     )
 
-    let rightSection = ReactDOM.Style.make(
-      ~width="32px",
-      ~display="flex",
-      ~justifyContent="flex-end",
-      (),
-    )
+    let rightSection = ReactDOM.Style.make(~display="flex", ())
   }
 
   @react.component
@@ -77,7 +76,7 @@ module TopPanel = {
     ~isSidebarHidden: bool,
     ~responsiveMode: responsiveMode,
     ~onRightSidebarToggle: unit => unit,
-    ~setResponsiveMode: (responsiveMode => responsiveMode) => unit,
+    ~onSetResponsiveMode: (responsiveMode => responsiveMode) => unit,
   ) => {
     <div style=Styles.panel>
       <div style=Styles.rightSection />
@@ -89,7 +88,7 @@ module TopPanel = {
               style={responsiveMode == Desktop ? Styles.activeButton : Styles.button}
               onClick={event => {
                 event->ReactEvent.Mouse.preventDefault
-                setResponsiveMode(_ => Desktop)
+                onSetResponsiveMode(_ => Desktop)
               }}>
               {Icon.desktop}
             </button>
@@ -98,7 +97,7 @@ module TopPanel = {
               style={responsiveMode == Mobile ? Styles.activeButton : Styles.button}
               onClick={event => {
                 event->ReactEvent.Mouse.preventDefault
-                setResponsiveMode(_ => Mobile)
+                onSetResponsiveMode(_ => Mobile)
               }}>
               {Icon.mobile}
             </button>
@@ -162,17 +161,25 @@ module Link = {
 
 module DemoListSidebar = {
   module Styles = {
-    let categoryName = ReactDOM.Style.make(~fontWeight="500", ~padding=`${Gap.xs} ${Gap.xxs}`, ())
+    let categoryName = ReactDOM.Style.make(
+      ~padding=`${Gap.xs} ${Gap.xxs}`,
+      ~fontSize=FontSize.md,
+      ~fontWeight="500",
+      (),
+    )
+
     let link = ReactDOM.Style.make(
       ~textDecoration="none",
       ~color=Color.blue,
       ~display="block",
       ~padding=`${Gap.xs} ${Gap.md}`,
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
+      ~fontSize=FontSize.md,
       ~fontWeight="500",
       (),
     )
-    let activeLink = ReactDOM.Style.make(~backgroundColor=Color.blue, ~color=Color.white, ())
+
+    let activeLink = ReactDOM.Style.make(~backgroundColor=Color.midGray, ())
   }
 
   module SearchInput = {
@@ -196,7 +203,7 @@ module DemoListSidebar = {
         ~display="flex",
         ~alignItems="center",
         ~backgroundColor=Color.midGray,
-        ~borderRadius="7px",
+        ~borderRadius=BorderRadius.default,
         (),
       )
 
@@ -204,11 +211,13 @@ module DemoListSidebar = {
         ~padding=`${Gap.xs} ${Gap.md}`,
         ~width="100%",
         ~margin="0",
+        ~height="32px",
+        ~boxSizing="border-box",
         ~fontFamily="inherit",
-        ~fontSize="16px",
+        ~fontSize=FontSize.md,
         ~border="none",
         ~backgroundColor=Color.transparent,
-        ~borderRadius="7px",
+        ~borderRadius=BorderRadius.default,
         (),
       )
     }
@@ -223,71 +232,143 @@ module DemoListSidebar = {
     let make = (~value, ~onChange, ~onClear) =>
       <div style=Styles.inputWrapper>
         <input style=Styles.input placeholder="Filter" value onChange />
-        {value === "" ? React.null : <ClearButton onClear />}
+        {value == "" ? React.null : <ClearButton onClear />}
       </div>
   }
 
-  let rec renderMenu = (~filterValue, ~nesting=(0, ""), demos: Demos.t) => {
-    let demos = demos->Js.Dict.entries
-    let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
-    let (level, categoryQuery) = nesting
+  let renderMenu = (
+    ~isCategoriesCollapsedByDefault: bool,
+    ~urlSearchParams: URLSearchParams.t,
+    ~filterValue,
+    demos: Demos.t,
+  ) => {
+    let rec renderMenu = (
+      ~parentCategoryHasSubstring: bool,
+      ~filterValue,
+      ~nestingLevel,
+      ~categoryQuery,
+      demos: Demos.t,
+    ) => {
+      let demos = demos->Js.Dict.entries
+      let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
 
-    demos
-    ->Array.map(((entityName, entity)) => {
-      let entityNameHasSubstring =
-        entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
-      switch entity {
-      | Demo(_) =>
-        if entityNameHasSubstring {
-          <Link
-            key={entityName}
-            style=Styles.link
-            activeStyle=Styles.activeLink
-            href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
-            text=<HighlightSubstring text=entityName substring />
-          />
-        } else {
-          React.null
+      demos
+      ->Array.map(((entityName, entity)) => {
+        let entityNameHasSubstring =
+          entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+        switch entity {
+        | Demo(_) =>
+          if entityNameHasSubstring || parentCategoryHasSubstring {
+            <Link
+              key={entityName}
+              style=Styles.link
+              activeStyle=Styles.activeLink
+              href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
+              text={<HighlightSubstring text=entityName substring />}
+            />
+          } else {
+            React.null
+          }
+        | Category(demos) =>
+          if (
+            entityNameHasSubstring ||
+            Demos.hasNestedEntityWithSubstring(demos, substring) ||
+            parentCategoryHasSubstring
+          ) {
+            let levelStr = Int.toString(nestingLevel)
+            let categoryQueryKey = `category${levelStr}`
+            let isCategoryInQuery = switch urlSearchParams->URLSearchParams.get(categoryQueryKey) {
+            | Some(value) if value->Js.Global.decodeURIComponent == entityName => true
+            | Some(_) | None => false
+            }
+
+            <PaddedBox key={entityName} padding=LeftRight>
+              <Collapsible
+                title={<div style=Styles.categoryName>
+                  <HighlightSubstring text=entityName substring />
+                </div>}
+                isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsedByDefault}
+                isForceOpen={substring != ""}>
+                <PaddedBox padding=LeftRight>
+                  {renderMenu(
+                    ~parentCategoryHasSubstring=entityNameHasSubstring ||
+                    parentCategoryHasSubstring,
+                    ~filterValue,
+                    ~nestingLevel=nestingLevel + 1,
+                    ~categoryQuery=`&category${levelStr}=` ++
+                    entityName->Js.Global.encodeURIComponent ++
+                    categoryQuery,
+                    demos,
+                  )}
+                </PaddedBox>
+              </Collapsible>
+            </PaddedBox>
+          } else {
+            React.null
+          }
         }
-      | Category(demos) =>
-        if entityNameHasSubstring || Demos.hasNestedEntityWithSubstring(demos, substring) {
-          let levelStr = Int.toString(level)
-          <PaddedBox key={entityName} padding=LeftRight>
-            <div style=Styles.categoryName> <HighlightSubstring text=entityName substring />  </div>
-            {renderMenu(
-              ~filterValue,
-              ~nesting=(
-                level + 1,
-                `&category${levelStr}=` ++
-                entityName->Js.Global.encodeURIComponent ++
-                categoryQuery,
-              ),
-              demos,
-            )}
-          </PaddedBox>
-        } else {
-          React.null
-        }
-      }
-    })
-    ->React.array
+      })
+      ->React.array
+    }
+
+    renderMenu(
+      ~parentCategoryHasSubstring=false,
+      ~filterValue,
+      ~nestingLevel=0,
+      ~categoryQuery="",
+      (demos: Demos.t),
+    )
   }
 
   @react.component
-  let make = (~demos: Demos.t) => {
+  let make = (
+    ~urlSearchParams: URLSearchParams.t,
+    ~demos: Demos.t,
+    ~isCategoriesCollapsedByDefault: bool,
+    ~onToggleCollapsedCategoriesByDefault: unit => unit,
+  ) => {
     let (filterValue, setFilterValue) = React.useState(() => None)
     <Sidebar fullHeight=true>
       <PaddedBox gap=Md border=Bottom>
-        <SearchInput
-          value={filterValue->Option.getWithDefault("")}
-          onChange={event => {
-            let value = (event->ReactEvent.Form.target)["value"]
-            setFilterValue(_ => value->Js.String2.trim === "" ? None : Some(value))
-          }}
-          onClear={() => setFilterValue(_ => None)}
-        />
+        <div style={ReactDOM.Style.make(~display="flex", ~alignItems="center", ~gridGap="5px", ())}>
+          <button
+            style={ReactDOM.Style.make(
+              ~height="32px",
+              ~minWidth="32px",
+              ~width="32px",
+              ~cursor="pointer",
+              ~fontSize=FontSize.sm,
+              ~backgroundColor=Color.white,
+              ~color=Color.darkGray,
+              ~border=Border.default,
+              ~borderRadius=BorderRadius.default,
+              ~margin="0",
+              ~padding="0",
+              ~display="flex",
+              ~alignItems="center",
+              ~justifyContent="center",
+              (),
+            )}
+            title={"Toggle default collapsed categories"}
+            onClick={event => {
+              event->ReactEvent.Mouse.preventDefault
+              onToggleCollapsedCategoriesByDefault()
+            }}>
+            {isCategoriesCollapsedByDefault ? Icon.categoryCollapsed : Icon.categoryExpanded}
+          </button>
+          <SearchInput
+            value={filterValue->Option.getWithDefault("")}
+            onChange={event => {
+              let value = (event->ReactEvent.Form.target)["value"]
+              setFilterValue(_ => value->Js.String2.trim == "" ? None : Some(value))
+            }}
+            onClear={() => setFilterValue(_ => None)}
+          />
+        </div>
       </PaddedBox>
-      <PaddedBox gap=Xxs> {renderMenu(demos, ~filterValue)} </PaddedBox>
+      <PaddedBox gap=Xxs>
+        {renderMenu(~isCategoriesCollapsedByDefault, ~filterValue, ~urlSearchParams, demos)}
+      </PaddedBox>
     </Sidebar>
   }
 }
@@ -297,32 +378,35 @@ module DemoUnitSidebar = {
     let label = ReactDOM.Style.make(
       ~display="block",
       ~backgroundColor=Color.white,
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
       ~boxShadow="0 5px 10px rgba(0, 0, 0, 0.07)",
       (),
     )
-    let labelText = ReactDOM.Style.make(~fontSize="16px", ~textAlign="center", ())
+
+    let labelText = ReactDOM.Style.make(~fontSize=FontSize.md, ~textAlign="center", ())
+
     let textInput = ReactDOM.Style.make(
-      ~fontSize="16px",
+      ~fontSize=FontSize.md,
       ~width="100%",
       ~boxSizing="border-box",
       ~backgroundColor=Color.lightGray,
       ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
       ~border="none",
       ~padding=Gap.md,
-      ~borderRadius="7px",
+      ~borderRadius=BorderRadius.default,
       (),
     )
+
     let select =
       ReactDOM.Style.make(
-        ~fontSize="16px",
+        ~fontSize=FontSize.md,
         ~width="100%",
         ~boxSizing="border-box",
         ~backgroundColor=Color.lightGray,
         ~boxShadow="inset 0 0 0 1px rgba(0, 0, 0, 0.1)",
         ~border="none",
         ~padding=Gap.md,
-        ~borderRadius="7px",
+        ~borderRadius=BorderRadius.default,
         ~appearance="none",
         ~paddingRight="30px",
         ~backgroundImage=`url("data:image/svg+xml,%3Csvg width='36' height='36' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%2342484E' stroke-width='2' d='M12.246 14.847l5.826 5.826 5.827-5.826' fill='none' fill-rule='evenodd' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
@@ -331,7 +415,13 @@ module DemoUnitSidebar = {
         ~backgroundRepeat="no-repeat",
         (),
       )->ReactDOM.Style.unsafeAddProp("WebkitAppearance", "none")
-    let checkbox = ReactDOM.Style.make(~fontSize="16px", ~margin="0 auto", ~display="block", ())
+
+    let checkbox = ReactDOM.Style.make(
+      ~fontSize=FontSize.md,
+      ~margin="0 auto",
+      ~display="block",
+      (),
+    )
   }
 
   module PropBox = {
@@ -675,7 +765,7 @@ module App = {
       (),
     )
     let emptyText = ReactDOM.Style.make(
-      ~fontSize="22px",
+      ~fontSize=FontSize.lg,
       ~color=Color.black40a,
       ~textAlign="center",
       (),
@@ -719,20 +809,34 @@ module App = {
     }, [url])
 
     let (showRightSidebar, toggleShowRightSidebar) = React.useState(() => {
-      open ReshowcaseUi__Bindings
-      localStorage->LocalStorage.getItem("sidebar")->Option.isSome
+      LocalStorage.localStorage->LocalStorage.getItem("sidebar")->Option.isSome
     })
-    let (responsiveMode, setResponsiveMode) = React.useState(() => Desktop)
+
+    let (responsiveMode, onSetResponsiveMode) = React.useState(() => Desktop)
 
     React.useEffect1(() => {
-      open ReshowcaseUi__Bindings
       if showRightSidebar {
-        localStorage->LocalStorage.setItem("sidebar", "1")
+        LocalStorage.localStorage->LocalStorage.setItem("sidebar", "1")
       } else {
-        localStorage->LocalStorage.removeItem("sidebar")
+        LocalStorage.localStorage->LocalStorage.removeItem("sidebar")
       }
       None
     }, [showRightSidebar])
+
+    let (isCategoriesCollapsedByDefault, toggleIsCategoriesCollapsed) = React.useState(() => {
+      switch LocalStorage.localStorage->LocalStorage.getItem("isCategoriesCollapsedByDefault") {
+      | Some("true") => true
+      | _ => false
+      }
+    })
+
+    let onToggleCollapsedCategoriesByDefault = () => {
+      toggleIsCategoriesCollapsed(_ => !isCategoriesCollapsedByDefault)
+      LocalStorage.localStorage->LocalStorage.setItem(
+        "isCategoriesCollapsedByDefault",
+        !isCategoriesCollapsedByDefault ? "true" : "false",
+      )
+    }
 
     <div name="App" style=Styles.app>
       {switch route {
@@ -745,7 +849,12 @@ module App = {
           </div>
         }
       | Demo(queryString) => <>
-          <DemoListSidebar demos />
+          <DemoListSidebar
+            demos
+            urlSearchParams
+            isCategoriesCollapsedByDefault
+            onToggleCollapsedCategoriesByDefault
+          />
           <div name="Content" style=Styles.right>
             <TopPanel
               isSidebarHidden={!showRightSidebar}
@@ -759,7 +868,7 @@ module App = {
                 | _ => ()
                 }
               }}
-              setResponsiveMode
+              onSetResponsiveMode
             />
             <div name="Demo" style=Styles.demo>
               <div style=Styles.demoContents>
@@ -777,7 +886,12 @@ module App = {
           </div>
         </>
       | Home => <>
-          <DemoListSidebar demos />
+          <DemoListSidebar
+            demos
+            urlSearchParams
+            isCategoriesCollapsedByDefault
+            onToggleCollapsedCategoriesByDefault
+          />
           <div style=Styles.empty>
             <div style=Styles.emptyText> {"Pick a demo"->React.string} </div>
           </div>
