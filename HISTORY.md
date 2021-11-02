@@ -1,3 +1,9 @@
+## 4.4.0
+
+Changes:
+
+- Add collapsing logic (thanks [@denis-ok](https://github.com/denis-ok)) (9246d7f)
+
 ## 4.3.2
 
 Changes:
