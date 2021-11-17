@@ -1,3 +1,9 @@
+## 5.0.0
+
+Changes:
+
+- Migrate to `@rescript/react` (7bf60ee)
+
 ## 4.4.0
 
 Changes:
