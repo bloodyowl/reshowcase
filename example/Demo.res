@@ -57,7 +57,7 @@ demo(({addDemo: _, addCategory}) => {
     addCategory("Headings", ({addDemo, addCategory: _}) => {
       addDemo("H1", ({string, int}) =>
         <h1
-          style={ReactDOMRe.Style.make(
+          style={ReactDOM.Style.make(
             ~fontSize={
               let size = int("Font size", {min: 0, max: 100, initial: 30, step: 1})
               j`$(size)px`
@@ -92,7 +92,7 @@ demo(({addDemo: _, addCategory}) => {
     addCategory(\"Headings\", ({addDemo, addCategory: _}) => {
       addDemo(\"H1\", ({string, int}) =>
         <h1
-          style={ReactDOMRe.Style.make(
+          style={ReactDOM.Style.make(
             ~fontSize={
               let size = int(\"Font size\", {min: 0, max: 100, initial: 30, step: 1})
               j`$(size)px`

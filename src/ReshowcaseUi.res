@@ -135,7 +135,7 @@ let rightSidebarId = "rightSidebar"
 module Link = {
   @react.component
   let make = (~href, ~text: React.element, ~style=?, ~activeStyle=?) => {
-    let url = ReasonReact.Router.useUrl()
+    let url = RescriptReactRouter.useUrl()
     let path = String.concat("/", url.path)
     let isActive = (path ++ ("?" ++ url.search))->Js.String2.endsWith(href)
     <a
@@ -144,7 +144,7 @@ module Link = {
         switch (ReactEvent.Mouse.metaKey(event), ReactEvent.Mouse.ctrlKey(event)) {
         | (false, false) =>
           ReactEvent.Mouse.preventDefault(event)
-          ReasonReact.Router.push(href)
+          RescriptReactRouter.push(href)
         | _ => ()
         }}
       style=?{switch (style, activeStyle, isActive) {
@@ -207,7 +207,7 @@ module DemoListSidebar = {
         (),
       )
 
-      let input = ReactDOMRe.Style.make(
+      let input = ReactDOM.Style.make(
         ~padding=`${Gap.xs} ${Gap.md}`,
         ~width="100%",
         ~margin="0",
@@ -788,7 +788,7 @@ module App = {
 
   @react.component
   let make = (~demos: Demos.t) => {
-    let url = ReasonReact.Router.useUrl()
+    let url = RescriptReactRouter.useUrl()
     let urlSearchParams = url.search->URLSearchParams.make
     let route = switch (
       urlSearchParams->URLSearchParams.get("iframe"),
