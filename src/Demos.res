@@ -42,23 +42,25 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
 }
 
 let getMatchingTerms = (searchValue, ~entityName) => {
-  let searchValue = searchValue->Js.String2.trim->Js.String2.toLowerCase
-  let entityName = entityName->Js.String2.toLowerCase
-
-  if entityName->Js.String2.toLowerCase->Js.String2.includes(searchValue) {
-    [searchValue]
-  } else {
-    let terms =
-      searchValue
-      ->Js.String2.replaceByRe(%re("/\\s+/g"), " ")
-      ->Js.String2.splitByRe(%re("/( |, |,)/"))
-      ->Belt.Array.keepMap(s =>
-        switch s {
-        | None => None
-        | Some(s) => String.length(s) > 1 ? Some(s) : None
-        }
-      )
-    terms->Belt.Array.keep(term => Js.String2.includes(entityName, term))
+  switch searchValue {
+  | "" => []
+  | _ =>
+    let entityName = entityName->Js.String2.toLowerCase
+    if entityName->Js.String2.includes(searchValue) {
+      [searchValue]
+    } else {
+      let terms =
+        searchValue
+        ->Js.String2.replaceByRe(%re("/\\s+/g"), " ")
+        ->Js.String2.splitByRe(%re("/( |, |,)/"))
+        ->Belt.Array.keepMap(s =>
+          switch s {
+          | None => None
+          | Some(s) => String.length(s) > 1 ? Some(s) : None
+          }
+        )
+      terms->Belt.Array.keep(term => Js.String2.includes(entityName, term))
+    }
   }
 }
 

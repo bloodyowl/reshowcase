@@ -239,26 +239,24 @@ module DemoListSidebar = {
   let renderMenu = (
     ~isCategoriesCollapsedByDefault: bool,
     ~urlSearchParams: URLSearchParams.t,
-    ~filterValue,
+    ~searchString,
     demos: Demos.t,
   ) => {
     let rec renderMenu = (
-      ~parentCategoryHasSubstring: bool,
-      ~filterValue,
+      ~parentCategoryMatchedSearch: bool,
       ~nestingLevel,
       ~categoryQuery,
       demos: Demos.t,
     ) => {
       let demos = demos->Js.Dict.entries
-      let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let searchMatchingTerms = Demos.getMatchingTerms(substring, ~entityName)
-        let isEntityNameMatchSearch = searchMatchingTerms->Belt.Array.size > 0
+        let searchMatchingTerms = Demos.getMatchingTerms(searchString, ~entityName)
+        let isEntityNameMatchSearch = searchString == "" || searchMatchingTerms->Belt.Array.size > 0
         switch entity {
         | Demo(_) =>
-          if isEntityNameMatchSearch || parentCategoryHasSubstring {
+          if isEntityNameMatchSearch || parentCategoryMatchedSearch {
             <Link
               key={entityName}
               style=Styles.link
@@ -272,8 +270,8 @@ module DemoListSidebar = {
         | Category(demos) =>
           if (
             isEntityNameMatchSearch ||
-            Demos.isNestedEntityMatchSearch(demos, substring) ||
-            parentCategoryHasSubstring
+            Demos.isNestedEntityMatchSearch(demos, searchString) ||
+            parentCategoryMatchedSearch
           ) {
             let levelStr = Int.toString(nestingLevel)
             let categoryQueryKey = `category${levelStr}`
@@ -288,12 +286,11 @@ module DemoListSidebar = {
                   <HighlightTerms text=entityName terms=searchMatchingTerms />
                 </div>}
                 isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsedByDefault}
-                isForceOpen={substring != ""}>
+                isForceOpen={searchString != ""}>
                 <PaddedBox padding=LeftRight>
                   {renderMenu(
-                    ~parentCategoryHasSubstring=isEntityNameMatchSearch ||
-                    parentCategoryHasSubstring,
-                    ~filterValue,
+                    ~parentCategoryMatchedSearch=isEntityNameMatchSearch ||
+                    parentCategoryMatchedSearch,
                     ~nestingLevel=nestingLevel + 1,
                     ~categoryQuery=`&category${levelStr}=` ++
                     entityName->Js.Global.encodeURIComponent ++
@@ -312,8 +309,7 @@ module DemoListSidebar = {
     }
 
     renderMenu(
-      ~parentCategoryHasSubstring=false,
-      ~filterValue,
+      ~parentCategoryMatchedSearch=false,
       ~nestingLevel=0,
       ~categoryQuery="",
       (demos: Demos.t),
@@ -367,7 +363,12 @@ module DemoListSidebar = {
         </div>
       </PaddedBox>
       <PaddedBox gap=Xxs>
-        {renderMenu(~isCategoriesCollapsedByDefault, ~filterValue, ~urlSearchParams, demos)}
+        {renderMenu(
+          ~isCategoriesCollapsedByDefault,
+          ~searchString=filterValue->Option.mapWithDefault("", Js.String2.toLowerCase),
+          ~urlSearchParams,
+          demos,
+        )}
       </PaddedBox>
     </Sidebar>
   }
