@@ -7,7 +7,28 @@ type textPart = Marked(string) | Unmarked(string)
 
 type termPosition = Start | Middle | End
 
-type markRange = (int, int)
+let getMatchingTerms = (searchString, ~entityName) => {
+  switch searchString {
+  | "" => []
+  | _ =>
+    let entityName = entityName->String.toLowerCase
+    if entityName->String.includes(searchString) {
+      [searchString]
+    } else {
+      let terms =
+        searchString
+        ->String.replaceByRe(%re("/\\s+/g"), " ")
+        ->String.splitByRe(%re("/( |, |,)/"))
+        ->Belt.Array.keepMap(s =>
+          switch s {
+          | None => None
+          | Some(s) => String.length(s) > 1 ? Some(s) : None // filter out meaningless one-char terms
+          }
+        )
+      terms->Array.filter(term => Js.String2.includes(entityName, term))
+    }
+  }
+}
 
 let getMarkRangeIndexes = (text, substring) => {
   let indexFrom = String.indexOf(String.toLowerCase(text), String.toLowerCase(substring))

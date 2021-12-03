@@ -1,6 +1,7 @@
 open Belt
 
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
+module HighlightTerms = ReshowcaseUi__HighlightTerms
 
 type t = Js.Dict.t<Entity.t>
 
@@ -41,37 +42,15 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
   demos->dig(categories, demoName)
 }
 
-let getMatchingTerms = (searchValue, ~entityName) => {
-  switch searchValue {
-  | "" => []
-  | _ =>
-    let entityName = entityName->Js.String2.toLowerCase
-    if entityName->Js.String2.includes(searchValue) {
-      [searchValue]
-    } else {
-      let terms =
-        searchValue
-        ->Js.String2.replaceByRe(%re("/\\s+/g"), " ")
-        ->Js.String2.splitByRe(%re("/( |, |,)/"))
-        ->Belt.Array.keepMap(s =>
-          switch s {
-          | None => None
-          | Some(s) => String.length(s) > 1 ? Some(s) : None
-          }
-        )
-      terms->Belt.Array.keep(term => Js.String2.includes(entityName, term))
-    }
-  }
-}
-
-let rec isNestedEntityMatchSearch = (demos: t, substring) => {
+let rec isNestedEntityMatchSearch = (demos: t, searchString) => {
   demos
   ->Js.Dict.entries
   ->Array.some(((entityName, entity)) => {
-    let isEntityNameMatchSearch = getMatchingTerms(substring, ~entityName)->Array.size > 0
+    let isEntityNameMatchSearch =
+      HighlightTerms.getMatchingTerms(searchString, ~entityName)->Array.size > 0
     switch entity {
     | Demo(_) => isEntityNameMatchSearch
-    | Category(demos) => isEntityNameMatchSearch || isNestedEntityMatchSearch(demos, substring)
+    | Category(demos) => isEntityNameMatchSearch || isNestedEntityMatchSearch(demos, searchString)
     }
   })
 }
