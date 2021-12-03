@@ -41,11 +41,32 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
   demos->dig(categories, demoName)
 }
 
+let isSearchValueMatch = (searchValue, ~entityName) => {
+  let searchValue = searchValue->Js.String2.trim->Js.String2.toLowerCase
+  let entityName = entityName->Js.String2.toLowerCase
+
+  if entityName->Js.String2.toLowerCase->Js.String2.includes(searchValue) {
+    true
+  } else {
+    let terms =
+      searchValue
+      ->Js.String2.replaceByRe(%re("/\\s+/g"), " ")
+      ->Js.String2.splitByRe(%re("/( |, |,)/"))
+      ->Belt.Array.keepMap(s =>
+        switch s {
+        | None => None
+        | Some(s) => String.length(s) > 1 ? Some(s) : None
+        }
+      )
+    terms->Belt.Array.some(term => Js.String2.includes(entityName, term))
+  }
+}
+
 let rec hasNestedEntityWithSubstring = (demos: t, substring) => {
   demos
   ->Js.Dict.entries
   ->Array.some(((entityName, entity)) => {
-    let entityNameHasSubstring = entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+    let entityNameHasSubstring = isSearchValueMatch(substring, ~entityName)
     switch entity {
     | Demo(_) => entityNameHasSubstring
     | Category(demos) => entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring)

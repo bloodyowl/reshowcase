@@ -254,8 +254,7 @@ module DemoListSidebar = {
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let entityNameHasSubstring =
-          entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+        let entityNameHasSubstring = Demos.isSearchValueMatch(substring, ~entityName)
         switch entity {
         | Demo(_) =>
           if entityNameHasSubstring || parentCategoryHasSubstring {
