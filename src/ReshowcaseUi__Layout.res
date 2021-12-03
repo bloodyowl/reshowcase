@@ -1,5 +1,3 @@
-module List = Belt.List
-
 module Color = {
   let white = "#fff"
   let lightGray = "#f5f6f6"
@@ -183,16 +181,19 @@ module Icon = {
 }
 
 module HighlightTerms = {
-  type textPart = Marked((int, int)) | Unmarked((int, int))
+  module List = Belt.List
+  module String = Js.String2
+  module Array = Js.Array2
+
+  type textPart = Marked(string) | Unmarked(string)
 
   type termPosition = Start | Middle | End
 
-  let getRangeIndexes = (string, substring) => {
-    let indexFrom = Js.String2.indexOf(
-      Js.String2.toLowerCase(string),
-      Js.String2.toLowerCase(substring),
-    )
-    let indexTo = indexFrom + Js.String2.length(substring)
+  type markRange = (int, int)
+
+  let getMarkRangeIndexes = (text, substring) => {
+    let indexFrom = String.indexOf(String.toLowerCase(text), String.toLowerCase(substring))
+    let indexTo = indexFrom + String.length(substring)
     (indexFrom, indexTo)
   }
 
@@ -203,65 +204,67 @@ module HighlightTerms = {
     | _ => Middle
     }
 
-  let isRangeIntersection = ((from1: int, to1), (from2, to2)) => {
+  let isRangeIntersection = ((from1, to1): (int, int), (from2, to2)) => {
     !(from2 > to1 && from2 > from1 && to2 > to1 && to2 > from1)
   }
 
-  let mergeIntersections = ranges => {
-    let rec mergeIntersections = (acc, ranges) => {
+  let mergeRangeIntersections = ranges => {
+    let rec mergeRangeIntersections = (acc, ranges) => {
       switch (ranges, acc) {
       | (list{}, _) => acc
-      | (list{range, ...ranges}, list{}) => mergeIntersections(list{range}, ranges)
-      | (
-          list{(_nextFrom, nextTo) as next, ...tail},
-          list{(prevFrom, _prevTo) as prev, ...accTail},
-        ) =>
+      | (list{range, ...ranges}, list{}) => mergeRangeIntersections(list{range}, ranges)
+      | (list{(_, nextTo) as next, ...restRanges}, list{(prevFrom, _) as prev, ...accTail}) =>
         if isRangeIntersection(prev, next) {
-          let merged = (prevFrom, nextTo)
-          let acc = list{merged, ...accTail}
-          mergeIntersections(acc, tail)
+          let mergedRange = (prevFrom, nextTo)
+          mergeRangeIntersections(list{mergedRange, ...accTail}, restRanges)
         } else {
-          let acc = list{next, ...acc}
-          mergeIntersections(acc, tail)
+          mergeRangeIntersections(list{next, ...acc}, restRanges)
         }
       }
     }
-    mergeIntersections(list{}, ranges)->List.reverse
+    mergeRangeIntersections(list{}, ranges)->List.reverse
   }
 
   let getMarkRanges = (text, terms) =>
-    terms->Js.Array2.map(term => getRangeIndexes(text, term))->Js.Array2.copy->Js.Array2.sortInPlace
+    terms->Array.map(term => getMarkRangeIndexes(text, term))->Array.copy->Array.sortInPlace
 
-  let getMarkedUnmarkedIndexes = (ranges, max) => {
+  let getMarkedUnmarkedParts = (ranges, text) => {
+    let max = String.length(text)
+    let getTerm = (from, to_) => String.slice(text, ~from, ~to_)
+
     let rec iter = ((_, prevTo), acc, ranges) => {
       switch ranges {
-      | list{} => prevTo < max ? list{Unmarked(prevTo, max), ...acc} : acc
-      | list{(from_, to_) as previous, ...tail} =>
-        iter(previous, list{Marked(from_, to_), Unmarked(prevTo, from_), ...acc}, tail)
+      | list{} => prevTo < max ? list{Unmarked(getTerm(prevTo, max)), ...acc} : acc
+      | list{(from, to_) as previous, ...tail} =>
+        iter(
+          previous,
+          list{Marked(getTerm(from, to_)), Unmarked(getTerm(prevTo, from)), ...acc},
+          tail,
+        )
       }
     }
 
     let result = switch ranges {
     | list{} => list{}
-    | list{(from_, to_) as range, ...tail} =>
+    | list{(from, to_) as range, ...tail} =>
       switch getTermPosition(range, max) {
       | Start =>
-        let acc = list{Marked(range)}
+        let acc = list{Marked(getTerm(from, to_))}
         let previous = range
         iter(previous, acc, tail)
       | Middle =>
-        let acc = list{Marked(range), Unmarked(0, from_)}
+        let acc = list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, from))}
         let previous = range
         iter(previous, acc, tail)
-      | End => list{Marked(range), Unmarked(0, to_)}
+      | End => list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, to_))}
       }
     }
     result->List.reverse
   }
 
   let getTextParts = (~text, ~terms) => {
-    let markRanges = getMarkRanges(text, terms)->List.fromArray->mergeIntersections
-    getMarkedUnmarkedIndexes(markRanges, String.length(text))->List.toArray
+    let markRanges = getMarkRanges(text, terms)->List.fromArray->mergeRangeIntersections
+    getMarkedUnmarkedParts(markRanges, text)->List.toArray
   }
 
   @react.component
@@ -271,18 +274,16 @@ module HighlightTerms = {
     | _ => {
         let textParts = getTextParts(~text, ~terms)
         textParts
-        ->Belt.Array.mapWithIndex((index, item) =>
+        ->Array.mapi((item, index) =>
           switch item {
-          | Marked(from, to_) =>
+          | Marked(text) =>
             <mark
               key={Belt.Int.toString(index)}
               style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
-              {Js.String2.slice(text, ~from, ~to_)->React.string}
+              {text->React.string}
             </mark>
-          | Unmarked(from, to_) =>
-            <React.Fragment key={Belt.Int.toString(index)}>
-              {Js.String2.slice(text, ~from, ~to_)->React.string}
-            </React.Fragment>
+          | Unmarked(text) =>
+            <React.Fragment key={Belt.Int.toString(index)}> {text->React.string} </React.Fragment>
           }
         )
         ->React.array
