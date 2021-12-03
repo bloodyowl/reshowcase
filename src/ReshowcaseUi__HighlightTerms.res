@@ -72,17 +72,17 @@ let getMarkRanges = (text, terms) =>
   ->Array.copy
   ->Array.sortInPlaceWith(((from1, to1), (from2, to2)) => compareInt(from1 + to1, from2 + to2))
 
-let getMarkedUnmarkedParts = (ranges, text) => {
+let getMarkedAndUnmarkedParts = (ranges, text) => {
   let max = String.length(text)
   let getTerm = (from, to_) => String.slice(text, ~from, ~to_)
 
-  let rec iter = ((_, prevTo), acc, ranges) => {
+  let rec iter = (prevRangeEnd, acc, ranges) => {
     switch ranges {
-    | list{} => prevTo < max ? list{Unmarked(getTerm(prevTo, max)), ...acc} : acc
-    | list{(from, to_) as previous, ...tail} =>
+    | list{} => prevRangeEnd < max ? list{Unmarked(getTerm(prevRangeEnd, max)), ...acc} : acc
+    | list{(from, to_), ...tail} =>
       iter(
-        previous,
-        list{Marked(getTerm(from, to_)), Unmarked(getTerm(prevTo, from)), ...acc},
+        to_,
+        list{Marked(getTerm(from, to_)), Unmarked(getTerm(prevRangeEnd, from)), ...acc},
         tail,
       )
     }
@@ -94,12 +94,10 @@ let getMarkedUnmarkedParts = (ranges, text) => {
     switch getTermPosition(range, max) {
     | Start =>
       let acc = list{Marked(getTerm(from, to_))}
-      let previous = range
-      iter(previous, acc, tail)
+      iter(to_, acc, tail)
     | Middle =>
       let acc = list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, from))}
-      let previous = range
-      iter(previous, acc, tail)
+      iter(to_, acc, tail)
     | End => list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, from))}
     }
   }
@@ -108,7 +106,7 @@ let getMarkedUnmarkedParts = (ranges, text) => {
 
 let getTextParts = (~text, ~terms) => {
   let markRanges = getMarkRanges(text, terms)->List.fromArray->mergeRangeIntersections
-  getMarkedUnmarkedParts(markRanges, text)->List.toArray
+  getMarkedAndUnmarkedParts(markRanges, text)->List.toArray
 }
 
 @react.component
