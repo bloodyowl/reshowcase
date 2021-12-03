@@ -1,3 +1,5 @@
+module List = Belt.List
+
 module Color = {
   let white = "#fff"
   let lightGray = "#f5f6f6"
@@ -181,11 +183,11 @@ module Icon = {
 }
 
 module HighlightTerms = {
-  type part = [#Marked((int, int)) | #Unmarked((int, int))]
+  type textPart = Marked((int, int)) | Unmarked((int, int))
 
   type termPosition = Start | Middle | End
 
-  let getFromToIndex = (string, substring) => {
+  let getRangeIndexes = (string, substring) => {
     let indexFrom = Js.String2.indexOf(
       Js.String2.toLowerCase(string),
       Js.String2.toLowerCase(substring),
@@ -194,22 +196,48 @@ module HighlightTerms = {
     (indexFrom, indexTo)
   }
 
-  let getTermPosition = (fromTo, max: int) =>
-    switch fromTo {
+  let getTermPosition = (range, max: int) =>
+    switch range {
     | (0, _) => Start
     | (_, to_) if to_ >= max => End
     | _ => Middle
     }
 
-  let getIndexesOfMarkedTerms = (text, terms) =>
-    terms->Js.Array2.map(term => getFromToIndex(text, term))->Js.Array2.copy->Js.Array2.sortInPlace
+  let isRangeIntersection = ((from1: int, to1), (from2, to2)) => {
+    !(from2 > to1 && from2 > from1 && to2 > to1 && to2 > from1)
+  }
+
+  let mergeIntersections = ranges => {
+    let rec mergeIntersections = (acc, ranges) => {
+      switch (ranges, acc) {
+      | (list{}, _) => acc
+      | (list{range, ...ranges}, list{}) => mergeIntersections(list{range}, ranges)
+      | (
+          list{(_nextFrom, nextTo) as next, ...tail},
+          list{(prevFrom, _prevTo) as prev, ...accTail},
+        ) =>
+        if isRangeIntersection(prev, next) {
+          let merged = (prevFrom, nextTo)
+          let acc = list{merged, ...accTail}
+          mergeIntersections(acc, tail)
+        } else {
+          let acc = list{next, ...acc}
+          mergeIntersections(acc, tail)
+        }
+      }
+    }
+    mergeIntersections(list{}, ranges)->List.reverse
+  }
+
+  let getMarkRanges = (text, terms) =>
+    terms->Js.Array2.map(term => getRangeIndexes(text, term))->Js.Array2.copy->Js.Array2.sortInPlace
 
   let getMarkedUnmarkedIndexes = (ranges, max) => {
     let rec iter = ((_, prevTo), acc, ranges) => {
       switch ranges {
-      | list{} => prevTo < max ? list{#Unmarked(prevTo, max), ...acc} : acc
+      | list{} => prevTo < max ? list{Unmarked(prevTo, max), ...acc} : acc
       | list{(from_, to_) as previous, ...tail} =>
-        iter(previous, list{#Marked(from_, to_), #Unmarked(prevTo, from_), ...acc}, tail)
+        iter(previous, list{Marked(from_, to_), Unmarked(prevTo, from_), ...acc}, tail)
       }
     }
 
@@ -218,43 +246,40 @@ module HighlightTerms = {
     | list{(from_, to_) as range, ...tail} =>
       switch getTermPosition(range, max) {
       | Start =>
-        let acc = list{#Marked(range)}
+        let acc = list{Marked(range)}
         let previous = range
         iter(previous, acc, tail)
       | Middle =>
-        let acc = list{#Marked(range), #Unmarked(0, from_)}
+        let acc = list{Marked(range), Unmarked(0, from_)}
         let previous = range
         iter(previous, acc, tail)
-      | End => list{#Marked(range), #Unmarked(0, to_)}
+      | End => list{Marked(range), Unmarked(0, to_)}
       }
     }
+    result->List.reverse
+  }
 
-    result->Belt.List.reverse
+  let getTextParts = (~text, ~terms) => {
+    let markRanges = getMarkRanges(text, terms)->List.fromArray->mergeIntersections
+    getMarkedUnmarkedIndexes(markRanges, String.length(text))->List.toArray
   }
 
   @react.component
   let make = (~text, ~terms) => {
     switch terms {
-    | [] | [""] => text->React.string
+    | [] => text->React.string
     | _ => {
-        let markIndexes = getIndexesOfMarkedTerms(text, terms)
-
-        let taggedItems =
-          getMarkedUnmarkedIndexes(
-            markIndexes->Belt.List.fromArray,
-            String.length(text),
-          )->Belt.List.toArray
-
-        taggedItems
+        let textParts = getTextParts(~text, ~terms)
+        textParts
         ->Belt.Array.mapWithIndex((index, item) =>
           switch item {
-          | #Marked(from, to_) =>
+          | Marked(from, to_) =>
             <mark
               key={Belt.Int.toString(index)}
               style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
               {Js.String2.slice(text, ~from, ~to_)->React.string}
             </mark>
-          | #Unmarked(from, to_) =>
+          | Unmarked(from, to_) =>
             <React.Fragment key={Belt.Int.toString(index)}>
               {Js.String2.slice(text, ~from, ~to_)->React.string}
             </React.Fragment>
