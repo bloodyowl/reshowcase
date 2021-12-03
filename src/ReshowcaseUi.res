@@ -254,10 +254,10 @@ module DemoListSidebar = {
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let entityNameHasSubstring = Demos.isSearchValueMatch(substring, ~entityName)
+        let isEntityNameMatchSearch = Demos.isEntityNameMatchSearch(substring, ~entityName)
         switch entity {
         | Demo(_) =>
-          if entityNameHasSubstring || parentCategoryHasSubstring {
+          if isEntityNameMatchSearch || parentCategoryHasSubstring {
             <Link
               key={entityName}
               style=Styles.link
@@ -270,8 +270,8 @@ module DemoListSidebar = {
           }
         | Category(demos) =>
           if (
-            entityNameHasSubstring ||
-            Demos.hasNestedEntityWithSubstring(demos, substring) ||
+            isEntityNameMatchSearch ||
+            Demos.isNestedEntityMatchSearch(demos, substring) ||
             parentCategoryHasSubstring
           ) {
             let levelStr = Int.toString(nestingLevel)
@@ -290,7 +290,7 @@ module DemoListSidebar = {
                 isForceOpen={substring != ""}>
                 <PaddedBox padding=LeftRight>
                   {renderMenu(
-                    ~parentCategoryHasSubstring=entityNameHasSubstring ||
+                    ~parentCategoryHasSubstring=isEntityNameMatchSearch ||
                     parentCategoryHasSubstring,
                     ~filterValue,
                     ~nestingLevel=nestingLevel + 1,

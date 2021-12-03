@@ -41,7 +41,7 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
   demos->dig(categories, demoName)
 }
 
-let isSearchValueMatch = (searchValue, ~entityName) => {
+let isEntityNameMatchSearch = (searchValue, ~entityName) => {
   let searchValue = searchValue->Js.String2.trim->Js.String2.toLowerCase
   let entityName = entityName->Js.String2.toLowerCase
 
@@ -62,14 +62,14 @@ let isSearchValueMatch = (searchValue, ~entityName) => {
   }
 }
 
-let rec hasNestedEntityWithSubstring = (demos: t, substring) => {
+let rec isNestedEntityMatchSearch = (demos: t, substring) => {
   demos
   ->Js.Dict.entries
   ->Array.some(((entityName, entity)) => {
-    let entityNameHasSubstring = isSearchValueMatch(substring, ~entityName)
+    let isEntityNameMatchSearch = isEntityNameMatchSearch(substring, ~entityName)
     switch entity {
-    | Demo(_) => entityNameHasSubstring
-    | Category(demos) => entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring)
+    | Demo(_) => isEntityNameMatchSearch
+    | Category(demos) => isEntityNameMatchSearch || isNestedEntityMatchSearch(demos, substring)
     }
   })
 }
