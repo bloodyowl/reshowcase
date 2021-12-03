@@ -43,8 +43,13 @@ let mergeRangeIntersections = ranges => {
   mergeRangeIntersections(list{}, ranges)->List.reverse
 }
 
+let compareInt: (int, int) => int = Pervasives.compare
+
 let getMarkRanges = (text, terms) =>
-  terms->Array.map(term => getMarkRangeIndexes(text, term))->Array.copy->Array.sortInPlace
+  terms
+  ->Array.map(term => getMarkRangeIndexes(text, term))
+  ->Array.copy
+  ->Array.sortInPlaceWith(((from1, to1), (from2, to2)) => compareInt(from1 + to1, from2 + to2))
 
 let getMarkedUnmarkedParts = (ranges, text) => {
   let max = String.length(text)
@@ -74,7 +79,7 @@ let getMarkedUnmarkedParts = (ranges, text) => {
       let acc = list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, from))}
       let previous = range
       iter(previous, acc, tail)
-    | End => list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, to_))}
+    | End => list{Marked(getTerm(from, to_)), Unmarked(getTerm(0, from))}
     }
   }
   result->List.reverse

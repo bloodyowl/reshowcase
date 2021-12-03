@@ -28,6 +28,9 @@ jobs:
     - name: build bsb
       run: yarn build
 
+    - name: test
+      run: yarn test
+
     - name: Deploy
       if: "contains('refs/heads/main', github.ref)"
       uses: peaceiris/actions-gh-pages@v3
