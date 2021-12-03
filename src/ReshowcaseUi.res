@@ -10,7 +10,7 @@ module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module Icon = ReshowcaseUi__Layout.Icon
 module Collapsible = ReshowcaseUi__Layout.Collapsible
-module HighlightSubstring = ReshowcaseUi__Layout.HighlightSubstring
+module HighlightTerms = ReshowcaseUi__Layout.HighlightTerms
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 module LocalStorage = ReshowcaseUi__Bindings.LocalStorage
@@ -254,7 +254,8 @@ module DemoListSidebar = {
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let isEntityNameMatchSearch = Demos.isEntityNameMatchSearch(substring, ~entityName)
+        let searchMatchingTerms = Demos.getMatchingTerms(substring, ~entityName)
+        let isEntityNameMatchSearch = searchMatchingTerms->Belt.Array.size > 0
         switch entity {
         | Demo(_) =>
           if isEntityNameMatchSearch || parentCategoryHasSubstring {
@@ -263,7 +264,7 @@ module DemoListSidebar = {
               style=Styles.link
               activeStyle=Styles.activeLink
               href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
-              text={<HighlightSubstring text=entityName substring />}
+              text={<HighlightTerms text=entityName terms=searchMatchingTerms />}
             />
           } else {
             React.null
@@ -284,7 +285,7 @@ module DemoListSidebar = {
             <PaddedBox key={entityName} padding=LeftRight>
               <Collapsible
                 title={<div style=Styles.categoryName>
-                  <HighlightSubstring text=entityName substring />
+                  <HighlightTerms text=entityName terms=searchMatchingTerms />
                 </div>}
                 isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsedByDefault}
                 isForceOpen={substring != ""}>

@@ -180,33 +180,90 @@ module Icon = {
     </svg>
 }
 
-module HighlightSubstring = {
-  @react.component
-  let make = (~text, ~substring) =>
-    switch substring {
-    | "" => text->React.string
-    | _ => {
-        let indexFrom = Js.String2.indexOf(
-          Js.String2.toLowerCase(text),
-          Js.String2.toLowerCase(substring),
-        )
-        switch indexFrom {
-        | -1 => text->React.string
-        | _ =>
-          let indexTo = indexFrom + Js.String2.length(substring)
-          let leftPart = Js.String2.slice(text, ~from=0, ~to_=indexFrom)
-          let markedPart = Js.String2.slice(text, ~from=indexFrom, ~to_=indexTo)
-          let rightPart = Js.String2.slice(text, ~from=indexTo, ~to_=Js.String2.length(text))
-          <>
-            {leftPart->React.string}
-            <mark style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
-              {markedPart->React.string}
-            </mark>
-            {rightPart->React.string}
-          </>
-        }
+module HighlightTerms = {
+  type part = [#Marked((int, int)) | #Unmarked((int, int))]
+
+  type termPosition = Start | Middle | End
+
+  let getFromToIndex = (string, substring) => {
+    let indexFrom = Js.String2.indexOf(
+      Js.String2.toLowerCase(string),
+      Js.String2.toLowerCase(substring),
+    )
+    let indexTo = indexFrom + Js.String2.length(substring)
+    (indexFrom, indexTo)
+  }
+
+  let getTermPosition = (fromTo, max: int) =>
+    switch fromTo {
+    | (0, _) => Start
+    | (_, to_) if to_ >= max => End
+    | _ => Middle
+    }
+
+  let getIndexesOfMarkedTerms = (text, terms) =>
+    terms->Js.Array2.map(term => getFromToIndex(text, term))->Js.Array2.copy->Js.Array2.sortInPlace
+
+  let getMarkedUnmarkedIndexes = (ranges, max) => {
+    let rec iter = ((_, prevTo), acc, ranges) => {
+      switch ranges {
+      | list{} => prevTo < max ? list{#Unmarked(prevTo, max), ...acc} : acc
+      | list{(from_, to_) as previous, ...tail} =>
+        iter(previous, list{#Marked(from_, to_), #Unmarked(prevTo, from_), ...acc}, tail)
       }
     }
+
+    let result = switch ranges {
+    | list{} => list{}
+    | list{(from_, to_) as range, ...tail} =>
+      switch getTermPosition(range, max) {
+      | Start =>
+        let acc = list{#Marked(range)}
+        let previous = range
+        iter(previous, acc, tail)
+      | Middle =>
+        let acc = list{#Marked(range), #Unmarked(0, from_)}
+        let previous = range
+        iter(previous, acc, tail)
+      | End => list{#Marked(range), #Unmarked(0, to_)}
+      }
+    }
+
+    result->Belt.List.reverse
+  }
+
+  @react.component
+  let make = (~text, ~terms) => {
+    switch terms {
+    | [] | [""] => text->React.string
+    | _ => {
+        let markIndexes = getIndexesOfMarkedTerms(text, terms)
+
+        let taggedItems =
+          getMarkedUnmarkedIndexes(
+            markIndexes->Belt.List.fromArray,
+            String.length(text),
+          )->Belt.List.toArray
+
+        taggedItems
+        ->Belt.Array.mapWithIndex((index, item) =>
+          switch item {
+          | #Marked(from, to_) =>
+            <mark
+              key={Belt.Int.toString(index)}
+              style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
+              {Js.String2.slice(text, ~from, ~to_)->React.string}
+            </mark>
+          | #Unmarked(from, to_) =>
+            <React.Fragment key={Belt.Int.toString(index)}>
+              {Js.String2.slice(text, ~from, ~to_)->React.string}
+            </React.Fragment>
+          }
+        )
+        ->React.array
+      }
+    }
+  }
 }
 
 module Collapsible = {
