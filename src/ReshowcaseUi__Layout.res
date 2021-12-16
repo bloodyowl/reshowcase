@@ -180,34 +180,7 @@ module Icon = {
     </svg>
 }
 
-module HighlightSubstring = {
-  @react.component
-  let make = (~text, ~substring) =>
-    switch substring {
-    | "" => text->React.string
-    | _ => {
-        let indexFrom = Js.String2.indexOf(
-          Js.String2.toLowerCase(text),
-          Js.String2.toLowerCase(substring),
-        )
-        switch indexFrom {
-        | -1 => text->React.string
-        | _ =>
-          let indexTo = indexFrom + Js.String2.length(substring)
-          let leftPart = Js.String2.slice(text, ~from=0, ~to_=indexFrom)
-          let markedPart = Js.String2.slice(text, ~from=indexFrom, ~to_=indexTo)
-          let rightPart = Js.String2.slice(text, ~from=indexTo, ~to_=Js.String2.length(text))
-          <>
-            {leftPart->React.string}
-            <mark style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
-              {markedPart->React.string}
-            </mark>
-            {rightPart->React.string}
-          </>
-        }
-      }
-    }
-}
+
 
 module Collapsible = {
   module Styles = {

@@ -1,6 +1,7 @@
 open Belt
 
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
+module HighlightTerms = ReshowcaseUi__HighlightTerms
 
 type t = Js.Dict.t<Entity.t>
 
@@ -41,14 +42,15 @@ let findDemo = (urlSearchParams: URLSearchParams.t, demoName, demos: t) => {
   demos->dig(categories, demoName)
 }
 
-let rec hasNestedEntityWithSubstring = (demos: t, substring) => {
+let rec isNestedEntityMatchSearch = (demos: t, searchString) => {
   demos
   ->Js.Dict.entries
   ->Array.some(((entityName, entity)) => {
-    let entityNameHasSubstring = entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+    let isEntityNameMatchSearch =
+      HighlightTerms.getMatchingTerms(searchString, ~entityName)->Array.size > 0
     switch entity {
-    | Demo(_) => entityNameHasSubstring
-    | Category(demos) => entityNameHasSubstring || hasNestedEntityWithSubstring(demos, substring)
+    | Demo(_) => isEntityNameMatchSearch
+    | Category(demos) => isEntityNameMatchSearch || isNestedEntityMatchSearch(demos, searchString)
     }
   })
 }

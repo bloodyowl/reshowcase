@@ -10,7 +10,7 @@ module Stack = ReshowcaseUi__Layout.Stack
 module Sidebar = ReshowcaseUi__Layout.Sidebar
 module Icon = ReshowcaseUi__Layout.Icon
 module Collapsible = ReshowcaseUi__Layout.Collapsible
-module HighlightSubstring = ReshowcaseUi__Layout.HighlightSubstring
+module HighlightTerms = ReshowcaseUi__HighlightTerms
 module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
 module Window = ReshowcaseUi__Bindings.Window
 module LocalStorage = ReshowcaseUi__Bindings.LocalStorage
@@ -239,41 +239,39 @@ module DemoListSidebar = {
   let renderMenu = (
     ~isCategoriesCollapsedByDefault: bool,
     ~urlSearchParams: URLSearchParams.t,
-    ~filterValue,
+    ~searchString,
     demos: Demos.t,
   ) => {
     let rec renderMenu = (
-      ~parentCategoryHasSubstring: bool,
-      ~filterValue,
+      ~parentCategoryMatchedSearch: bool,
       ~nestingLevel,
       ~categoryQuery,
       demos: Demos.t,
     ) => {
       let demos = demos->Js.Dict.entries
-      let substring = filterValue->Option.mapWithDefault("", Js.String2.toLowerCase)
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let entityNameHasSubstring =
-          entityName->Js.String2.toLowerCase->Js.String2.includes(substring)
+        let searchMatchingTerms = HighlightTerms.getMatchingTerms(searchString, ~entityName)
+        let isEntityNameMatchSearch = searchString == "" || searchMatchingTerms->Belt.Array.size > 0
         switch entity {
         | Demo(_) =>
-          if entityNameHasSubstring || parentCategoryHasSubstring {
+          if isEntityNameMatchSearch || parentCategoryMatchedSearch {
             <Link
               key={entityName}
               style=Styles.link
               activeStyle=Styles.activeLink
               href={"?demo=" ++ entityName->Js.Global.encodeURIComponent ++ categoryQuery}
-              text={<HighlightSubstring text=entityName substring />}
+              text={<HighlightTerms text=entityName terms=searchMatchingTerms />}
             />
           } else {
             React.null
           }
         | Category(demos) =>
           if (
-            entityNameHasSubstring ||
-            Demos.hasNestedEntityWithSubstring(demos, substring) ||
-            parentCategoryHasSubstring
+            isEntityNameMatchSearch ||
+            Demos.isNestedEntityMatchSearch(demos, searchString) ||
+            parentCategoryMatchedSearch
           ) {
             let levelStr = Int.toString(nestingLevel)
             let categoryQueryKey = `category${levelStr}`
@@ -285,15 +283,14 @@ module DemoListSidebar = {
             <PaddedBox key={entityName} padding=LeftRight>
               <Collapsible
                 title={<div style=Styles.categoryName>
-                  <HighlightSubstring text=entityName substring />
+                  <HighlightTerms text=entityName terms=searchMatchingTerms />
                 </div>}
                 isDefaultOpen={isCategoryInQuery || !isCategoriesCollapsedByDefault}
-                isForceOpen={substring != ""}>
+                isForceOpen={searchString != ""}>
                 <PaddedBox padding=LeftRight>
                   {renderMenu(
-                    ~parentCategoryHasSubstring=entityNameHasSubstring ||
-                    parentCategoryHasSubstring,
-                    ~filterValue,
+                    ~parentCategoryMatchedSearch=isEntityNameMatchSearch ||
+                    parentCategoryMatchedSearch,
                     ~nestingLevel=nestingLevel + 1,
                     ~categoryQuery=`&category${levelStr}=` ++
                     entityName->Js.Global.encodeURIComponent ++
@@ -312,8 +309,7 @@ module DemoListSidebar = {
     }
 
     renderMenu(
-      ~parentCategoryHasSubstring=false,
-      ~filterValue,
+      ~parentCategoryMatchedSearch=false,
       ~nestingLevel=0,
       ~categoryQuery="",
       (demos: Demos.t),
@@ -367,7 +363,12 @@ module DemoListSidebar = {
         </div>
       </PaddedBox>
       <PaddedBox gap=Xxs>
-        {renderMenu(~isCategoriesCollapsedByDefault, ~filterValue, ~urlSearchParams, demos)}
+        {renderMenu(
+          ~isCategoriesCollapsedByDefault,
+          ~searchString=filterValue->Option.mapWithDefault("", Js.String2.toLowerCase),
+          ~urlSearchParams,
+          demos,
+        )}
       </PaddedBox>
     </Sidebar>
   }
