@@ -1,3 +1,9 @@
+## 5.1.0
+
+Features:
+
+- Allow search with multiple terms (thanks [@denis-ok](https://github.com/denis-ok)) (62b4653)
+
 ## 5.0.0
 
 Changes:
