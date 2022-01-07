@@ -1,6 +1,6 @@
 {
   "name": "@ahrefs/reshowcase",
-  "version": "5.1.0",
+  "version": "5.1.2",
   "description": "> A tool to create demos for your ReScript React components",
   "main": "index.js",
   "directories": {
