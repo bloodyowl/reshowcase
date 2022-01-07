@@ -1,5 +1,7 @@
 # Reshowcase
 
+⚠️ this is a fork of [original tool](https://github.com/bloodyowl/reshowcase) with `rescript-react` migration reverted, `reason-react` is used instead ⚠️
+
 > A tool to create demos for your ReScript React components
 
 ![Screenshot](./example/example-2021.png)
