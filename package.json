@@ -1,6 +1,20 @@
 {
-  "name": "reshowcase",
+  "name": "@ahrefs/reshowcase",
   "version": "5.1.0",
+  "description": "> A tool to create demos for your ReScript React components",
+  "main": "index.js",
+  "directories": {
+    "example": "example",
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahrefs/reshowcase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahrefs/reshowcase/issues"
+  },
+  "homepage": "https://github.com/ahrefs/reshowcase#readme",
   "bin": {
     "reshowcase": "./commands/reshowcase"
   },
@@ -18,9 +32,9 @@
   "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
-    "@rescript/react": ">=0.10.0",
     "copy-webpack-plugin": "^8.1.0",
     "html-webpack-plugin": "^5.3.1",
+    "reason-react": ">=0.9.1",
     "webpack": "^5.35.1",
     "webpack-dev-server": "^3.11.2"
   },
