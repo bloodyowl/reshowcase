@@ -130,19 +130,19 @@ if (isBuild) {
     ...(config.devServer || {})
   });
 
-  if (config.devServer && config.devServer.socket) {
-    ['SIGINT', 'SIGTERM'].forEach((signal) => {
-      process.on(signal, () => {
-        if (server) {
-          server.close(() => {
-            process.exit();
-          })
-        } else {
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, () => {
+      if (server) {
+        server.close(() => {
           process.exit();
-        }
-      })
-    });
+        })
+      } else {
+        process.exit();
+      }
+    })
+  });
 
+  if (config.devServer && config.devServer.socket) {
     server.listen(config.devServer.socket);
   } else {
     server.listen(port, "0.0.0.0");
