@@ -131,6 +131,18 @@ if (isBuild) {
   });
 
   if (config.devServer && config.devServer.socket) {
+    ['SIGINT', 'SIGTERM'].forEach((signal) => {
+      process.on(signal, () => {
+        if (server) {
+          server.close(() => {
+            process.exit();
+          })
+        } else {
+          process.exit();
+        }
+      })
+    });
+
     server.listen(config.devServer.socket);
   } else {
     server.listen(port, "0.0.0.0");
