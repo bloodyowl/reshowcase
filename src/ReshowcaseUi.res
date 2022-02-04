@@ -724,7 +724,7 @@ module DemoUnitFrame = {
           let window = iframe["contentWindow"]
           onLoad(window)
         }}
-        src={`?iframe=true&${queryString}`}
+        src={`/demo.html?iframe=true&${queryString}`}
         style={ReactDOM.Style.make(
           ~height={
             switch responsiveMode {

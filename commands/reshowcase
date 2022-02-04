@@ -88,6 +88,11 @@ const compiler = webpack({
       patterns: [{ from: path.join(__dirname, "../src/favicon.png"), to: "" }],
     }),
     new HtmlWebpackPlugin({
+      filename: "index.html",
+      template: path.join(__dirname, "../src/ui-template.html"),
+    }),
+    new HtmlWebpackPlugin({
+      filename: "demo.html",
       template: process.argv.find((item) => item.startsWith("--template="))
         ? path.join(
             process.cwd(),
@@ -95,7 +100,7 @@ const compiler = webpack({
               .find((item) => item.startsWith("--template="))
               .replace(/--template=/, "")
           )
-        : path.join(__dirname, "../src/index.html"),
+        : path.join(__dirname, "../src/demo-template.html"),
     }),
   ],
 });
@@ -127,7 +132,7 @@ if (isBuild) {
       index: "/index.html",
     },
     stats: "errors-only",
-    ...(config.devServer || {})
+    ...(config.devServer || {}),
   });
 
   if (config.devServer && config.devServer.socket) {
