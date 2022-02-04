@@ -47,7 +47,7 @@ let rec isNestedEntityMatchSearch = (demos: t, searchString) => {
   ->Js.Dict.entries
   ->Array.some(((entityName, entity)) => {
     let isEntityNameMatchSearch =
-      HighlightTerms.getMatchingTerms(searchString, ~entityName)->Array.size > 0
+      HighlightTerms.getMatchingTerms(~searchString, ~entityName)->Array.size > 0
     switch entity {
     | Demo(_) => isEntityNameMatchSearch
     | Category(demos) => isEntityNameMatchSearch || isNestedEntityMatchSearch(demos, searchString)

@@ -252,7 +252,7 @@ module DemoListSidebar = {
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let searchMatchingTerms = HighlightTerms.getMatchingTerms(searchString, ~entityName)
+        let searchMatchingTerms = HighlightTerms.getMatchingTerms(~searchString, ~entityName)
         let isEntityNameMatchSearch = searchString == "" || searchMatchingTerms->Belt.Array.size > 0
         switch entity {
         | Demo(_) =>

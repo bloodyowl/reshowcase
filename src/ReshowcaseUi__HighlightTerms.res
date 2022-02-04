@@ -7,27 +7,37 @@ type textPart = Marked(string) | Unmarked(string)
 
 type termPosition = Start | Middle | End
 
-let getMatchingTerms = (searchString, ~entityName) => {
+let getTermGroups = (~searchString, ~entityName) => {
   switch searchString {
   | "" => []
   | _ =>
+    let searchString = searchString->String.toLowerCase
     let entityName = entityName->String.toLowerCase
+
     if entityName->String.includes(searchString) {
-      [searchString]
+      [[searchString]]
     } else {
-      let terms =
+
+      let refinedSearchString =
         searchString
         ->String.replaceByRe(%re("/\\s+/g"), " ")
-        ->String.splitByRe(%re("/( |, |,)/"))
-        ->Belt.Array.keepMap(s =>
-          switch s {
-          | None => None
-          | Some(s) => String.length(s) > 1 ? Some(s) : None // filter out meaningless one-char terms
-          }
-        )
-      terms->Array.filter(term => Js.String2.includes(entityName, term))
+        ->String.replaceByRe(%re("/( , |, | ,)/g"), ",")
+
+      refinedSearchString
+      ->String.split(",")
+      ->Array.map(s => s->String.split(" "))
+      ->Array.map(arr => arr->Belt.Array.keepMap(s => String.length(s) > 1 ? Some(s) : None))
+      // filter out meaningless one-char terms
     }
   }
+}
+
+let getMatchingTerms = (~searchString, ~entityName) => {
+  let entityName = entityName->String.toLowerCase
+  let termGroups = getTermGroups(~searchString, ~entityName)
+  let includedTerms =
+    termGroups->Array.filter(terms => terms->Array.every(term => String.includes(entityName, term)))
+  Belt.Array.concatMany(includedTerms)
 }
 
 let getMarkRangeIndexes = (text, substring) => {
