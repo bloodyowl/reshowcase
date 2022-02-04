@@ -8,8 +8,8 @@
     "build-bsb": "bsb -make-world",
     "clean": "bsb -clean-world",
     "start-bsb": "bsb -make-world -w",
-    "start": "bsb -clean-world && bsb -make-world; concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase start --entry=./example/Demo.bs.js --template=./example/template.html --full-iframe-url=false'",
-    "build": "bsb -clean-world && bsb -make-world && rm -r build ; ./commands/reshowcase build --entry=./example/Demo.bs.js --template=./example/template.html --output=./build --full-iframe-url=false",
+    "start": "bsb -clean-world && bsb -make-world; concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase start --entry=./example/Demo.bs.js'",
+    "build": "bsb -clean-world && bsb -make-world && rm -r build ; ./commands/reshowcase build --entry=./example/Demo.bs.js --output=./build",
     "test": "node ./lib/js/src/tests/HighlightTermsTest.bs.js"
   },
   "keywords": [
