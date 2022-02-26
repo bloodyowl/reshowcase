@@ -43,6 +43,23 @@ if (task !== "build" && task !== "start") {
   process.exit(1);
 }
 
+// Servers can handle paths to HTML files differently.
+// Allow using full path to HTML template in "src" attribute of iframe in case of possible issues.
+const useFullframeUrl = (() => {
+  const prefix = `--full-iframe-url=`;
+  const arg = process.argv.find((item) => item.startsWith(prefix));
+  if (arg === undefined) {
+    return false;
+  } else {
+    const value = arg.replace(prefix, "");
+    if (value === "true") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+})();
+
 const isBuild = task === "build";
 
 const entryPath = getRequiredPathValue("entry");
@@ -88,6 +105,11 @@ const compiler = webpack({
       patterns: [{ from: path.join(__dirname, "../src/favicon.png"), to: "" }],
     }),
     new HtmlWebpackPlugin({
+      filename: "index.html",
+      template: path.join(__dirname, "../src/ui-template.html"),
+    }),
+    new HtmlWebpackPlugin({
+      filename: "./demo/index.html",
       template: process.argv.find((item) => item.startsWith("--template="))
         ? path.join(
             process.cwd(),
@@ -95,7 +117,10 @@ const compiler = webpack({
               .find((item) => item.startsWith("--template="))
               .replace(/--template=/, "")
           )
-        : path.join(__dirname, "../src/index.html"),
+        : path.join(__dirname, "../src/demo-template.html"),
+    }),
+    new webpack.DefinePlugin({
+      USE_FULL_IFRAME_URL: JSON.stringify(useFullframeUrl),
     }),
   ],
 });
@@ -127,7 +152,7 @@ if (isBuild) {
       index: "/index.html",
     },
     stats: "errors-only",
-    ...(config.devServer || {})
+    ...(config.devServer || {}),
   });
 
   if (config.devServer && config.devServer.socket) {
