@@ -155,6 +155,18 @@ if (isBuild) {
     ...(config.devServer || {}),
   });
 
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, () => {
+      if (server) {
+        server.close(() => {
+          process.exit();
+        })
+      } else {
+        process.exit();
+      }
+    })
+  });
+
   if (config.devServer && config.devServer.socket) {
     server.listen(config.devServer.socket);
   } else {
