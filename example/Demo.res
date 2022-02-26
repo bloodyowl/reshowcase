@@ -119,4 +119,12 @@ start()
   )
 })
 
+demo(({addDemo: _, addCategory}) => {
+  addCategory("Test search", ({addDemo, addCategory: _}) => {
+    addDemo("OneTwoThreeFour", _ => React.null)
+    addDemo("OneTwoThreeFive", _ => React.null)
+    addDemo("OneTwoFourSeven", _ => React.null)
+  })
+})
+
 start()
