@@ -252,7 +252,7 @@ module DemoListSidebar = {
 
       demos
       ->Array.map(((entityName, entity)) => {
-        let searchMatchingTerms = HighlightTerms.getMatchingTerms(searchString, ~entityName)
+        let searchMatchingTerms = HighlightTerms.getMatchingTerms(~searchString, ~entityName)
         let isEntityNameMatchSearch = searchString == "" || searchMatchingTerms->Belt.Array.size > 0
         switch entity {
         | Demo(_) =>
@@ -715,8 +715,11 @@ module DemoUnitFrame = {
       (),
     )
 
+  let useFullframeUrl: bool = %raw(`typeof USE_FULL_IFRAME_URL === "boolean" ? USE_FULL_IFRAME_URL : false`)
+
   @react.component
   let make = (~queryString: string, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
+    let iframePath = useFullframeUrl ? "/demo/index.html" : "/demo"
     <div name="DemoUnitFrame" style={container(responsiveMode)}>
       <iframe
         onLoad={event => {
@@ -724,7 +727,7 @@ module DemoUnitFrame = {
           let window = iframe["contentWindow"]
           onLoad(window)
         }}
-        src={`?iframe=true&${queryString}`}
+        src={`${iframePath}?iframe=true&${queryString}`}
         style={ReactDOM.Style.make(
           ~height={
             switch responsiveMode {
