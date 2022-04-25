@@ -719,7 +719,7 @@ module DemoUnitFrame = {
 
   @react.component
   let make = (~queryString: string, ~responsiveMode, ~onLoad: Js.t<'a> => unit) => {
-    let iframePath = useFullframeUrl ? "/demo/index.html" : "/demo"
+    let iframePath = useFullframeUrl ? "demo/index.html" : "demo"
     <div name="DemoUnitFrame" style={container(responsiveMode)}>
       <iframe
         onLoad={event => {
