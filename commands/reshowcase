@@ -8,6 +8,7 @@ const os = require("os");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const child_process = require("child_process");
+const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 const toAbsolutePath = (filepath) => {
   if (path.isAbsolute(filepath)) {
@@ -88,16 +89,18 @@ const compiler = webpack({
   // https://github.com/webpack/webpack-dev-server/issues/2758#issuecomment-813135032
   // target: "web" (probably) can be removed after upgrading to webpack-dev-server v4
   target: "web",
-  mode: "development",
+  mode: isBuild ? "production" : "development",
   entry: {
     index: entryPath,
   },
+  devtool: "source-map",
   output: {
     path: outputPath,
     filename: "reshowcase[fullhash].js",
     globalObject: "this",
     chunkLoadingGlobal: "reshowcase__d",
   },
+  stats: isBuild ? 'normal' : 'errors-only',
   module: config.module,
   plugins: [
     ...(config.plugins ? config.plugins : []),
@@ -122,7 +125,8 @@ const compiler = webpack({
     new webpack.DefinePlugin({
       USE_FULL_IFRAME_URL: JSON.stringify(useFullframeUrl),
     }),
-  ],
+    !isBuild && new ReactRefreshPlugin(),
+  ].filter(Boolean),
 });
 
 if (isBuild) {
@@ -144,16 +148,16 @@ if (isBuild) {
     10
   );
 
-  const server = new WebpackDevServer(compiler, {
+  const server = new WebpackDevServer({
     compress: true,
     port: port,
-    publicPath: "/",
+    static: { publicPath: "/" },
     historyApiFallback: {
       index: "/index.html",
     },
-    stats: "errors-only",
+    hot: true,
     ...(config.devServer || {}),
-  });
+  }, compiler);
 
   ['SIGINT', 'SIGTERM'].forEach((signal) => {
     process.on(signal, () => {
@@ -168,9 +172,9 @@ if (isBuild) {
   });
 
   if (config.devServer && config.devServer.socket) {
-    server.listen(config.devServer.socket);
+    server.start(config.devServer.socket);
   } else {
-    server.listen(port, "0.0.0.0");
+    server.start(port, "0.0.0.0");
     child_process.exec("open http://localhost:" + port, () => {});
   }
 }

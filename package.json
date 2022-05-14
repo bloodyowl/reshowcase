@@ -18,11 +18,13 @@
   "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.6",
     "@rescript/react": ">=0.10.0",
     "copy-webpack-plugin": "^8.1.0",
     "html-webpack-plugin": "^5.3.1",
+    "react-refresh": "^0.13.0",
     "webpack": "^5.35.1",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^4.9.0"
   },
   "devDependencies": {
     "bs-platform": "^9.0.2",
