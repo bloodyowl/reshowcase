@@ -88,7 +88,7 @@ const compiler = webpack({
   // https://github.com/webpack/webpack-dev-server/issues/2758#issuecomment-813135032
   // target: "web" (probably) can be removed after upgrading to webpack-dev-server v4
   target: "web",
-  mode: "development",
+  mode: isBuild ? "production" : "development",
   entry: {
     index: entryPath,
   },
