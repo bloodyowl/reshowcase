@@ -1,3 +1,9 @@
+## 5.2.0
+
+Features:
+
+- Use prod mode when isBuild is true (thanks [@jchavarri](https://github.com/jchavarri)) (914d280)
+
 ## 5.1.0
 
 Features:
@@ -108,7 +114,6 @@ Changes:
 
 - Update React (thanks [@denis-ok](https://github.com/denis-ok)) (1d2cc99)
 - UI updates (5789d48)
-
 
 ## 3.0.1
 
