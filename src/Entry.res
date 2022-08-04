@@ -41,6 +41,7 @@ let demo = (f): unit => {
 
 let start = () =>
   switch ReactDOM.querySelector("#root") {
-  | Some(root) => ReactDOM.render(<ReshowcaseUi.App demos=rootMap />, root)
+  | Some(root) =>
+    ReactDOM18.createRoot(root)->ReactDOM18.renderFromRoot(<ReshowcaseUi.App demos=rootMap />)
   | None => ()
   }
