@@ -81,7 +81,12 @@ let config;
 try {
   config = require(path.join(process.cwd(), ".reshowcase/config.js"));
 } catch (err) {
-  config = {};
+  if (err.code == "MODULE_NOT_FOUND" && err.requireStack && err.requireStack.length == 1) {
+    config = {};
+  } else {
+    // Some error on custom `.reshowcase/config.js` file, let it through to let user know
+    throw err;
+  }
 }
 
 const compiler = webpack({
