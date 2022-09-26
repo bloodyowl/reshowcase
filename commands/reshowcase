@@ -126,12 +126,26 @@ const compiler = webpack({
 });
 
 if (isBuild) {
-  console.log("Building reshowcase bundle...");
-  compiler.run((err, _result) => {
+  console.log("Building Reshowcase bundle...");
+  compiler.run((err, stats) => {
+    // https://webpack.js.org/api/node/#error-handling
     if (err) {
-      console.error(err);
+      console.error("Build failed. Webpack fatal errors:\n", err);
+      process.exit(1);
     } else {
-      console.log("Build finished.");
+      const info = stats.toJson();
+      if (stats.hasErrors && info.errors.length > 0) {
+        console.error(
+          "Build failed. Webpack complilation errors:\n",
+          info.errors
+        );
+        process.exit(1);
+      } else {
+        console.log(
+          stats.toString({ assets: true, chunks: true, colors: true })
+        );
+        console.log("Reshowcase build finished successfully.");
+      }
     }
   });
 } else {
@@ -155,16 +169,16 @@ if (isBuild) {
     ...(config.devServer || {}),
   });
 
-  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+  ["SIGINT", "SIGTERM"].forEach((signal) => {
     process.on(signal, () => {
       if (server) {
         server.close(() => {
           process.exit();
-        })
+        });
       } else {
         process.exit();
       }
-    })
+    });
   });
 
   if (config.devServer && config.devServer.socket) {
