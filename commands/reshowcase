@@ -77,12 +77,26 @@ const outputPath = (() => {
   }
 })();
 
-let config;
-try {
-  config = require(path.join(process.cwd(), ".reshowcase/config.js"));
-} catch (err) {
-  config = {};
-}
+const config = (() => {
+  const configDir = path.join(process.cwd(), ".reshowcase");
+  const configFilenames = fs.readdirSync(configDir);
+  const configFilename = configFilenames.find(
+    (filename) => filename === "config.cjs" || filename === "config.js"
+  );
+
+  if (configFilename === undefined) {
+    return {};
+  } else {
+    try {
+      const pathToConfig = path.join(configDir, configFilename);
+      const config_ = require(pathToConfig);
+      return config_;
+    } catch (error) {
+      console.error("Failed to read config:", error);
+      return {};
+    }
+  }
+})();
 
 const compiler = webpack({
   // https://github.com/webpack/webpack-dev-server/issues/2758#issuecomment-813135032
