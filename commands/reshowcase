@@ -79,21 +79,25 @@ const outputPath = (() => {
 
 const config = (() => {
   const configDir = path.join(process.cwd(), ".reshowcase");
-  const configFilenames = fs.readdirSync(configDir);
-  const configFilename = configFilenames.find(
-    (filename) => filename === "config.cjs" || filename === "config.js"
-  );
 
-  if (configFilename === undefined) {
+  if (!fs.existsSync(configDir)) {
     return {};
   } else {
-    try {
-      const pathToConfig = path.join(configDir, configFilename);
-      const config_ = require(pathToConfig);
-      return config_;
-    } catch (error) {
-      console.error("Failed to read config:", error);
+    const configFilenames = fs.readdirSync(configDir);
+    const configFilename = configFilenames.find(
+      (filename) => filename === "config.cjs" || filename === "config.js"
+    );
+    if (configFilename === undefined) {
       return {};
+    } else {
+      try {
+        const pathToConfig = path.join(configDir, configFilename);
+        const config_ = require(pathToConfig);
+        return config_;
+      } catch (error) {
+        console.error("Failed to read config:", error);
+        return {};
+      }
     }
   }
 })();
