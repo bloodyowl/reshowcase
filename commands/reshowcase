@@ -176,21 +176,27 @@ if (isBuild) {
     10
   );
 
-  const server = new WebpackDevServer(compiler, {
-    compress: true,
-    port: port,
-    publicPath: "/",
-    historyApiFallback: {
-      index: "/index.html",
+  const server = new WebpackDevServer(
+    {
+      compress: true,
+      port: port,
+      historyApiFallback: {
+        index: "/index.html",
+      },
+      devMiddleware: {
+        publicPath: "/",
+        stats: "errors-warnings",
+      },
+      ...(config.devServer || {}),
     },
-    stats: "errors-only",
-    ...(config.devServer || {}),
-  });
+    compiler
+  );
 
   ["SIGINT", "SIGTERM"].forEach((signal) => {
     process.on(signal, () => {
       if (server) {
-        server.close(() => {
+        server.stopCallback(() => {
+          console.log("Webpack DevServer has stopped!");
           process.exit();
         });
       } else {
@@ -199,10 +205,5 @@ if (isBuild) {
     });
   });
 
-  if (config.devServer && config.devServer.socket) {
-    server.listen(config.devServer.socket);
-  } else {
-    server.listen(port, "0.0.0.0");
-    child_process.exec("open http://localhost:" + port, () => {});
-  }
+  server.startCallback(() => console.log("Webpack DevServer has started!"));
 }
