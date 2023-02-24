@@ -1,6 +1,6 @@
 {
   "name": "@ahrefs/reshowcase",
-  "version": "5.2.4",
+  "version": "5.3.0",
   "description": "> A tool to create demos for your ReScript React components",
   "main": "index.js",
   "directories": {
@@ -32,11 +32,11 @@
   "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
-    "copy-webpack-plugin": "^8.1.0",
-    "html-webpack-plugin": "^5.3.1",
+    "copy-webpack-plugin": "^11.0.0",
+    "html-webpack-plugin": "^5.5.0",
     "reason-react": ">=0.9.1",
-    "webpack": "^5.35.1",
-    "webpack-dev-server": "^3.11.2"
+    "webpack": "^5.75.0",
+    "webpack-dev-server": "^4.11.1"
   },
   "devDependencies": {
     "bs-platform": "^9.0.2",
