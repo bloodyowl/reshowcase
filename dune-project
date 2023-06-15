@@ -17,7 +17,7 @@
 
 (package
  (name reshowcase)
- (synopsis "")
+ (synopsis "A tool to create demos for your ReasonReact components")
  (description "")
  (depends
   (ocaml

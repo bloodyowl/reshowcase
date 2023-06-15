@@ -3,5 +3,5 @@
  (preprocess
   (pps melange.ppx reactjs-jsx-ppx))
  (libraries reason-react)
- (package reshowcase)
+ (public_name reshowcase)
  (modes melange))
