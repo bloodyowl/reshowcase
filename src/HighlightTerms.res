@@ -1,7 +1,6 @@
 module List = Belt.List
 module String = Js.String2
 module Array = Js.Array2
-module Color = ReshowcaseUi__Layout.Color
 
 type textPart = Marked(string) | Unmarked(string)
 
@@ -74,7 +73,7 @@ let mergeRangeIntersections = ranges => {
   mergeRangeIntersections(list{}, ranges)->List.reverse
 }
 
-let compareInt: (int, int) => int = Pervasives.compare
+let compareInt: (int, int) => int = Stdlib.compare
 
 let getMarkRanges = (text, terms) =>
   terms
@@ -131,7 +130,7 @@ let make = (~text, ~terms) => {
         | Marked(text) =>
           <mark
             key={Belt.Int.toString(index)}
-            style={ReactDOM.Style.make(~backgroundColor=Color.orange, ())}>
+            style={ReactDOM.Style.make(~backgroundColor=Layout.Color.orange, ())}>
             {text->React.string}
           </mark>
         | Unmarked(text) =>

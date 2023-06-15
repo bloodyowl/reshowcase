@@ -1,0 +1,7 @@
+(library
+ (name reshowcase)
+ (preprocess
+  (pps melange.ppx reactjs-jsx-ppx))
+ (libraries reason-react)
+ (package ahrefs-reshowcase)
+ (modes melange))

@@ -34,12 +34,10 @@
   "dependencies": {
     "copy-webpack-plugin": "^11.0.0",
     "html-webpack-plugin": "^5.5.0",
-    "reason-react": ">=0.9.1",
     "webpack": "^5.76.1",
     "webpack-dev-server": "^4.11.1"
   },
   "devDependencies": {
-    "bs-platform": "^9.0.2",
     "concurrently": "^6.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"

@@ -1,0 +1,5 @@
+(melange.emit
+ (target tests)
+ (libraries reshowcase)
+ (preprocess
+  (pps melange.ppx)))
