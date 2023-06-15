@@ -4,7 +4,7 @@
 
 (generate_opam_files true)
 
-(name ahrefs-reshowcase)
+(name reshowcase)
 
 (source
  (github ahrefs/reshowcase))
@@ -16,7 +16,7 @@
 (license "MIT")
 
 (package
- (name ahrefs-reshowcase)
+ (name reshowcase)
  (synopsis "")
  (description "")
  (depends
