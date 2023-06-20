@@ -44,13 +44,26 @@ start()
 
 ## Install
 
-```console
-yarn add --dev reshowcase
+Install [opam](https://opam.ocaml.org/) package manager.
+
+Then:
+
+```
+opam pin add reshowcase.dev git+https://github.com/ahrefs/reshowcase.git#main
 ```
 
-Then add to your `"reshowcase"` to `bs-dependencies` in your `bsconfig.json`.
+This will make the NodeJS script `reshowcase` available in your opam switch.
 
-> If you're still using JSX 2, install `reshowcase@1.4.0`.
+To make sure this script works, add the following dependencies to your application `package.json`:
+
+```json
+  "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "html-webpack-plugin": "^5.5.0",
+    "webpack": "^5.76.1",
+    "webpack-dev-server": "^4.11.1",
+  }
+```
 
 ## Usage
 

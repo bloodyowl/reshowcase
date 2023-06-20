@@ -10,3 +10,5 @@ _esy
 esy.lock
 .vscode/settings.json
 _build
+_opam
+*.install

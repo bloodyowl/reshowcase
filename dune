@@ -1,1 +1,6 @@
-(dirs src tests)
+(dirs commands src tests)
+
+(install
+ (section bin)
+ (package reshowcase)
+ (files commands/reshowcase))
