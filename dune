@@ -1,4 +1,4 @@
-(dirs commands src tests)
+(dirs commands example src tests)
 
 (install
  (section bin)
@@ -8,3 +8,30 @@
   commands/favicon.png
   commands/reshowcase
   commands/ui-template.html))
+
+(rule
+ (alias start-example)
+ (deps
+  %{bin:demo-template.html}
+  %{bin:favicon.png}
+  %{bin:reshowcase}
+  %{bin:ui-template.html})
+ (action
+  (run
+   %{bin:reshowcase}
+   start
+   --entry=%{project_root}/example/example/example/Demo.js)))
+
+(rule
+ (alias build-example)
+ (deps
+  %{bin:demo-template.html}
+  %{bin:favicon.png}
+  %{bin:reshowcase}
+  %{bin:ui-template.html})
+ (action
+  (run
+   %{bin:reshowcase}
+   build
+   --entry=%{project_root}/example/example/example/Demo.js
+   --output=./build)))

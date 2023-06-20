@@ -46,3 +46,15 @@ format-check: ## Checks if format is correct
 .PHONY: watch
 watch: ## Watch for the filesystem and rebuild on every change
 	$(DUNE) build --watch
+
+.PHONY: test
+test: ## Run tests
+	$(DUNE) build @runtest
+
+.PHONY: start-example
+start-example: ## Runs the example in watch mode
+	$(DUNE) build -w @start-example
+
+.PHONY: build-example
+build-example: ## Builds the example
+	$(DUNE) build @build-example
