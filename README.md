@@ -70,13 +70,13 @@ To make sure this script works, add the following dependencies to your applicati
 ### To start / develop:
 
 ```console
-$ reshowcase start --entry=path/to/Demo.bs.js
+$ reshowcase start --entry=path/to/Demo.js
 ```
 
 ### To build bundle:
 
 ```console
-$ reshowcase build --entry=path/to/Demo.bs.js --output=path/to/bundle
+$ reshowcase build --entry=path/to/Demo.js --output=path/to/bundle
 ```
 
 If you need custom webpack options, create the `.reshowcase/config.js` and export the webpack config, plugins and modules will be merged.
