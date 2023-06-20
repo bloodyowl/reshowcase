@@ -3,4 +3,8 @@
 (install
  (section bin)
  (package reshowcase)
- (files commands/reshowcase))
+ (files
+  commands/demo-template.html
+  commands/favicon.png
+  commands/reshowcase
+  commands/ui-template.html))
