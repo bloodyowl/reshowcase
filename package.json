@@ -1,35 +1,4 @@
 {
-  "name": "@ahrefs/reshowcase",
-  "version": "5.3.1",
-  "description": "> A tool to create demos for your ReScript React components",
-  "main": "index.js",
-  "directories": {
-    "example": "example",
-    "lib": "lib"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ahrefs/reshowcase.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ahrefs/reshowcase/issues"
-  },
-  "homepage": "https://github.com/ahrefs/reshowcase#readme",
-  "bin": {
-    "reshowcase": "./commands/reshowcase"
-  },
-  "scripts": {
-    "build-bsb": "bsb -make-world",
-    "clean": "bsb -clean-world",
-    "start-bsb": "bsb -make-world -w",
-    "start": "bsb -clean-world && bsb -make-world; concurrently --names 'wp,bs' -c 'bgBlue.bold,bgGreen.bold' 'bsb -make-world -w' './commands/reshowcase start --entry=./example/Demo.bs.js'",
-    "build": "bsb -clean-world && bsb -make-world && rm -r build ; ./commands/reshowcase build --entry=./example/Demo.bs.js --output=./build",
-    "test": "node ./lib/js/src/tests/HighlightTermsTest.bs.js"
-  },
-  "keywords": [
-    "BuckleScript"
-  ],
-  "author": "bloodyowl <mlbli@me.com>",
   "license": "MIT",
   "dependencies": {
     "copy-webpack-plugin": "^11.0.0",

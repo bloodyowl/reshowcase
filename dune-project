@@ -19,6 +19,8 @@
  (name reshowcase)
  (synopsis "A tool to create demos for your ReasonReact components")
  (description "")
+ (maintainers "Denis Strelkov <denis.strelkov@ahrefs.com>")
+ (authors "bloodyowl <mlbli@me.com>")
  (depends
   (ocaml
    (>= 4.13.0))

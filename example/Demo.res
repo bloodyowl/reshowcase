@@ -1,8 +1,8 @@
-open Entry
+open Reshowcase.Entry
 
 demo(({addDemo: _, addCategory}) => {
   addCategory("Buttons", ({addDemo, addCategory: _}) => {
-    addDemo("Normal", ({string, bool}) => {
+    addDemo("Normal", ({string, bool, _}) => {
       let disabled = bool("Disabled", false)
       <button
         disabled
@@ -26,7 +26,7 @@ demo(({addDemo: _, addCategory}) => {
       </button>
     })
 
-    addDemo("Huge", ({string, bool}) => {
+    addDemo("Huge", ({string, bool, _}) => {
       let disabled = bool("Disabled", false)
       <button
         disabled
@@ -55,9 +55,9 @@ demo(({addDemo: _, addCategory}) => {
 demo(({addDemo: _, addCategory}) => {
   addCategory("Typography", ({addDemo: _, addCategory}) => {
     addCategory("Headings", ({addDemo, addCategory: _}) => {
-      addDemo("H1", ({string, int}) =>
+      addDemo("H1", ({string, int, _}) =>
         <h1
-          style={ReactDOMRe.Style.make(
+          style={ReactDOM.Style.make(
             ~fontSize={
               let size = int("Font size", {min: 0, max: 100, initial: 30, step: 1})
               j`$(size)px`
@@ -67,12 +67,12 @@ demo(({addDemo: _, addCategory}) => {
           {string("Text", "hello")->React.string}
         </h1>
       )
-      addDemo("H2", ({string}) => <h2> {string("Text", "hello")->React.string} </h2>)
+      addDemo("H2", ({string, _}) => <h2> {string("Text", "hello")->React.string} </h2>)
     })
 
     addCategory("Text", ({addDemo, addCategory: _}) => {
-      addDemo("Paragraph", ({string}) => <p> {string("Text", "hello")->React.string} </p>)
-      addDemo("Italic", ({string}) => <i> {string("Text", "hello")->React.string} </i>)
+      addDemo("Paragraph", ({string, _}) => <p> {string("Text", "hello")->React.string} </p>)
+      addDemo("Italic", ({string, _}) => <i> {string("Text", "hello")->React.string} </i>)
     })
   })
 })
@@ -83,7 +83,7 @@ demo(({addDemo, addCategory: _}) => {
       style={ReactDOM.Style.make(
         ~whiteSpace="pre",
         ~padding="0",
-        ~backgroundColor=ReshowcaseUi__Layout.Color.lightGray,
+        ~backgroundColor=Reshowcase.Layout.Color.lightGray,
         (),
       )}>
       {"
@@ -92,7 +92,7 @@ demo(({addDemo: _, addCategory}) => {
     addCategory(\"Headings\", ({addDemo, addCategory: _}) => {
       addDemo(\"H1\", ({string, int}) =>
         <h1
-          style={ReactDOMRe.Style.make(
+          style={ReactDOM.Style.make(
             ~fontSize={
               let size = int(\"Font size\", {min: 0, max: 100, initial: 30, step: 1})
               j`$(size)px`

@@ -2,6 +2,8 @@
 opam-version: "2.0"
 synopsis: "A tool to create demos for your ReasonReact components"
 description: ""
+maintainer: ["Denis Strelkov <denis.strelkov@ahrefs.com>"]
+authors: ["bloodyowl <mlbli@me.com>"]
 license: "MIT"
 homepage: "https://github.com/ahrefs/reshowcase"
 doc: "https://github.com/ahrefs/reshowcase"
