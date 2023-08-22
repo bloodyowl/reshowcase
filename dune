@@ -15,7 +15,8 @@
   %{bin:demo-template.html}
   %{bin:favicon.png}
   %{bin:reshowcase}
-  %{bin:ui-template.html})
+  %{bin:ui-template.html}
+  (alias ./example/example))
  (action
   (run
    %{bin:reshowcase}
@@ -28,7 +29,8 @@
   %{bin:demo-template.html}
   %{bin:favicon.png}
   %{bin:reshowcase}
-  %{bin:ui-template.html})
+  %{bin:ui-template.html}
+  (alias ./example/example))
  (action
   (run
    %{bin:reshowcase}
