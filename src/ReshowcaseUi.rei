@@ -1,4 +1,4 @@
 module App: {
   [@react.component]
-  let make: (~demos: [@ns.namedArgLoc] Demos.t) => React.element;
+  let make: (~demos: Demos.t) => React.element;
 };
