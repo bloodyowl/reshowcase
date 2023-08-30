@@ -30,5 +30,4 @@
    (>= 3.6.0))
   reason-react
   reason-react-ppx
-  rescript-syntax
   (ocaml-lsp-server :with-test)))

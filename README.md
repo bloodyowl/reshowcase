@@ -1,8 +1,11 @@
 # Reshowcase
 
-⚠️ this is a fork of [original tool](https://github.com/bloodyowl/reshowcase) with `rescript-react` migration reverted, `reason-react` is used instead ⚠️
+⚠️ this is a fork of [original tool](https://github.com/bloodyowl/reshowcase) with the following updates:
+- Migrated to use Melange and Dune, instead of ReScript and Ninja
+- Use `reason-react` instead of `rescript-react`
+- Use Reason syntax instead of ReScript syntax
 
-> A tool to create demos for your ReScript React components
+> A tool to create demos for your Reason React components
 
 ![Screenshot](./example/example-2021.png)
 
