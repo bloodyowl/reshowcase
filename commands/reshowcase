@@ -120,11 +120,11 @@ const compiler = webpack({
   plugins: [
     ...(config.plugins ? config.plugins : []),
     new CopyWebpackPlugin({
-      patterns: [{ from: path.join(__dirname, "../src/favicon.png"), to: "" }],
+      patterns: [{ from: path.join(__dirname, "./favicon.png"), to: "" }],
     }),
     new HtmlWebpackPlugin({
       filename: "index.html",
-      template: path.join(__dirname, "../src/ui-template.html"),
+      template: path.join(__dirname, "./ui-template.html"),
     }),
     new HtmlWebpackPlugin({
       filename: "./demo/index.html",
@@ -135,7 +135,7 @@ const compiler = webpack({
               .find((item) => item.startsWith("--template="))
               .replace(/--template=/, "")
           )
-        : path.join(__dirname, "../src/demo-template.html"),
+        : path.join(__dirname, "./demo-template.html"),
     }),
     new webpack.DefinePlugin({
       USE_FULL_IFRAME_URL: JSON.stringify(useFullframeUrl),

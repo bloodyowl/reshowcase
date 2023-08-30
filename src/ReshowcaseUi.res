@@ -1,19 +1,18 @@
 open Belt
 
-module Color = ReshowcaseUi__Layout.Color
-module Gap = ReshowcaseUi__Layout.Gap
-module Border = ReshowcaseUi__Layout.Border
-module BorderRadius = ReshowcaseUi__Layout.BorderRadius
-module FontSize = ReshowcaseUi__Layout.FontSize
-module PaddedBox = ReshowcaseUi__Layout.PaddedBox
-module Stack = ReshowcaseUi__Layout.Stack
-module Sidebar = ReshowcaseUi__Layout.Sidebar
-module Icon = ReshowcaseUi__Layout.Icon
-module Collapsible = ReshowcaseUi__Layout.Collapsible
-module HighlightTerms = ReshowcaseUi__HighlightTerms
-module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
-module Window = ReshowcaseUi__Bindings.Window
-module LocalStorage = ReshowcaseUi__Bindings.LocalStorage
+module Color = Layout.Color
+module Gap = Layout.Gap
+module Border = Layout.Border
+module BorderRadius = Layout.BorderRadius
+module FontSize = Layout.FontSize
+module PaddedBox = Layout.PaddedBox
+module Stack = Layout.Stack
+module Sidebar = Layout.Sidebar
+module Icon = Layout.Icon
+module Collapsible = Layout.Collapsible
+module URLSearchParams = Bindings.URLSearchParams
+module Window = Bindings.Window
+module LocalStorage = Bindings.LocalStorage
 module Array = Js.Array2
 
 type responsiveMode =
@@ -135,7 +134,7 @@ let rightSidebarId = "rightSidebar"
 module Link = {
   @react.component
   let make = (~href, ~text: React.element, ~style=?, ~activeStyle=?) => {
-    let url = ReasonReact.Router.useUrl()
+    let url = ReasonReactRouter.useUrl()
     let path = String.concat("/", url.path)
     let isActive = (path ++ ("?" ++ url.search))->Js.String2.endsWith(href)
     <a
@@ -144,7 +143,7 @@ module Link = {
         switch (ReactEvent.Mouse.metaKey(event), ReactEvent.Mouse.ctrlKey(event)) {
         | (false, false) =>
           ReactEvent.Mouse.preventDefault(event)
-          ReasonReact.Router.push(href)
+          ReasonReactRouter.push(href)
         | _ => ()
         }}
       style=?{switch (style, activeStyle, isActive) {
@@ -207,7 +206,7 @@ module DemoListSidebar = {
         (),
       )
 
-      let input = ReactDOMRe.Style.make(
+      let input = ReactDOM.Style.make(
         ~padding=`${Gap.xs} ${Gap.md}`,
         ~width="100%",
         ~margin="0",
@@ -483,7 +482,7 @@ module DemoUnitSidebar = {
         ->React.array}
         {ints
         ->Map.String.toArray
-        ->Array.map(((propName, ({min, max}, value))) =>
+        ->Array.map(((propName, ({min, max, _}, value))) =>
           <PropBox key=propName propName>
             <input
               type_="number"
@@ -499,7 +498,7 @@ module DemoUnitSidebar = {
         ->React.array}
         {floats
         ->Map.String.toArray
-        ->Array.map(((propName, ({min, max}, value))) =>
+        ->Array.map(((propName, ({min, max, _}, value))) =>
           <PropBox key=propName propName>
             <input
               type_="number"
@@ -792,7 +791,7 @@ module App = {
 
   @react.component
   let make = (~demos: Demos.t) => {
-    let url = ReasonReact.Router.useUrl()
+    let url = ReasonReactRouter.useUrl()
     let urlSearchParams = url.search->URLSearchParams.make
     let route = switch (
       urlSearchParams->URLSearchParams.get("iframe"),

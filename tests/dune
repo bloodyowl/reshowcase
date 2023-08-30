@@ -1,0 +1,13 @@
+(melange.emit
+ (target test)
+ (alias test)
+ (libraries reshowcase)
+ (preprocess
+  (pps melange.ppx)))
+
+(rule
+ (alias runtest)
+ (deps
+  (alias_rec test))
+ (action
+  (run node %{project_root}/tests/test/tests/HighlightTermsTest.js)))

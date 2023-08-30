@@ -1,4 +1,4 @@
-module HighlightTerms = ReshowcaseUi__HighlightTerms
+module HighlightTerms = Reshowcase.HighlightTerms
 
 @val external process: 'a = "process"
 

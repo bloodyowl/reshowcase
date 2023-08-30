@@ -1,7 +1,6 @@
 open Belt
 
-module URLSearchParams = ReshowcaseUi__Bindings.URLSearchParams
-module HighlightTerms = ReshowcaseUi__HighlightTerms
+module URLSearchParams = Bindings.URLSearchParams
 
 type t = Js.Dict.t<Entity.t>
 
