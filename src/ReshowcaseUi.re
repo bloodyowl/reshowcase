@@ -909,7 +909,7 @@ module DemoUnitFrame = {
       (),
     );
 
-  let useFullframeUrl: bool = [%bs.raw
+  let useFullframeUrl: bool = [%mel.raw
     {js|typeof USE_FULL_IFRAME_URL === "boolean" ? USE_FULL_IFRAME_URL : false|js}
   ];
 

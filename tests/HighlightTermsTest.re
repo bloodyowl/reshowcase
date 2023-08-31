@@ -1,7 +1,7 @@
 module HighlightTerms = Reshowcase.HighlightTerms;
 
-[@bs.val] external process: 'a = "process";
-[@bs.module] external util: 'a = "util";
+external process: 'a = "process";
+[@mel.module] external util: 'a = "util";
 
 let inspect = (value): string =>
   util##inspect(value, {"compact": false, "depth": 20, "colors": true});

@@ -1,12 +1,12 @@
 module URLSearchParams = {
   type t;
 
-  [@bs.new] external make: string => t = "URLSearchParams";
+  [@mel.new] external make: string => t = "URLSearchParams";
 
-  [@bs.return nullable] [@bs.send]
+  [@mel.return nullable] [@mel.send]
   external get: (t, string) => option(string) = "get";
 
-  [@bs.send]
+  [@mel.send]
   external forEach: (t, (string, string) => unit) => unit = "forEach";
 
   let toArray = (t, ()) => {
@@ -35,7 +35,7 @@ module Window = {
       };
   };
 
-  [@bs.val] external window: Js.t({..}) = "window";
+  external window: Js.t({..}) = "window";
 
   let addMessageListener = (func: Js.t('a) => unit): unit =>
     window##addEventListener("message", func, false);
@@ -47,10 +47,10 @@ module Window = {
 module LocalStorage = {
   type t;
 
-  [@bs.return nullable] [@bs.send]
+  [@mel.return nullable] [@mel.send]
   external getItem: (t, string) => option(string) = "getItem";
 
-  [@bs.send] external setItem: (t, string, string) => unit = "setItem";
-  [@bs.send] external removeItem: (t, string) => unit = "removeItem";
-  [@bs.val] external localStorage: t = "localStorage";
+  [@mel.send] external setItem: (t, string, string) => unit = "setItem";
+  [@mel.send] external removeItem: (t, string) => unit = "removeItem";
+  external localStorage: t = "localStorage";
 };
