@@ -20,6 +20,7 @@ init: create-switch install ## Configure everything to develop this repository i
 
 .PHONY: install
 install: ## Install development dependencies
+	yarn install
 	opam update
 	opam install -y . --deps-only
 	opam exec opam-check-npm-deps
