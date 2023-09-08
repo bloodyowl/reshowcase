@@ -30,4 +30,6 @@
    (>= 3.6.0))
   reason-react
   reason-react-ppx
-  (ocaml-lsp-server :with-test)))
+  (ocaml-lsp-server :with-test)
+  (opam-check-npm-deps :dev) ; todo: use with-dev-setup once opam 2.2 is out
+  ))
