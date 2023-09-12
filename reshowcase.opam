@@ -10,13 +10,13 @@ doc: "https://github.com/ahrefs/reshowcase"
 bug-reports: "https://github.com/ahrefs/reshowcase/issues"
 depends: [
   "dune" {>= "3.8"}
-  "ocaml" {>= "4.13.0"}
-  "melange" {>= "1.0.0"}
-  "reason" {>= "3.6.0"}
+  "ocaml"
+  "melange" {>= "2.0.0"}
+  "reason" {>= "3.10.0"}
   "reason-react"
   "reason-react-ppx"
   "ocaml-lsp-server" {with-test}
-  "opam-check-npm-deps" {dev}
+  "opam-check-npm-deps" {with-test}
   "odoc" {with-doc}
 ]
 build: [
@@ -41,7 +41,7 @@ depexts: [
   ["webpack-dev-server"] {npm-version = "^4.11.1"}
 ]
 pin-depends: [
-  ["melange.dev"           "git+https://github.com/melange-re/melange.git#e114ad55d185badeb32b3c766c9ab547495eac1b"]
+  ["melange.2.0.0"         "git+https://github.com/melange-re/melange.git#e114ad55d185badeb32b3c766c9ab547495eac1b"]
   ["reason.3.10.0"         "git+https://github.com/reasonml/reason.git#972261dab3b651ff8ab9b8b9fcc32940595073dc"]
   ["reason-react.dev"      "git+https://github.com/reasonml/reason-react.git#2e99c8ee87cefe241b698c191c74226da54cf9db"]
   ["reason-react-ppx.dev"  "git+https://github.com/reasonml/reason-react.git#2e99c8ee87cefe241b698c191c74226da54cf9db"]

@@ -22,14 +22,13 @@
  (maintainers "Denis Strelkov <denis.strelkov@ahrefs.com>")
  (authors "bloodyowl <mlbli@me.com>")
  (depends
-  (ocaml
-   (>= 4.13.0))
+  ocaml
   (melange
-   (>= 1.0.0))
+   (>= 2.0.0))
   (reason
-   (>= 3.6.0))
+   (>= 3.10.0))
   reason-react
   reason-react-ppx
   (ocaml-lsp-server :with-test)
-  (opam-check-npm-deps :dev) ; todo: use with-dev-setup once opam 2.2 is out
+  (opam-check-npm-deps :with-test) ; todo: use with-dev-setup once opam 2.2 is out
   ))
