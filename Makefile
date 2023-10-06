@@ -53,7 +53,7 @@ test: ## Run tests
 
 .PHONY: start-example
 start-example: ## Runs the example in watch mode
-	$(DUNE) build -w @start-example
+	$(DUNE) build -w @start-example --no-buffer # --no-buffer so that reshowcase output is shown
 
 .PHONY: build-example
 build-example: ## Builds the example
