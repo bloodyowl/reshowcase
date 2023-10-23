@@ -46,7 +46,7 @@ jobs:
         run: make build-example
 
       - name: Deploy
-        # if: "contains('refs/heads/main', github.ref)"
+        if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
