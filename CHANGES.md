@@ -1,3 +1,7 @@
+## 5.3.0 (2023-10-23)
+
+Migrate to Melange v2.
+
 ## 5.2.0
 
 Features:

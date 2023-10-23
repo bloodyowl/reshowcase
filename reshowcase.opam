@@ -10,12 +10,13 @@ doc: "https://github.com/ahrefs/reshowcase"
 bug-reports: "https://github.com/ahrefs/reshowcase/issues"
 depends: [
   "dune" {>= "3.8"}
-  "ocaml" {>= "4.13.0"}
-  "melange" {>= "1.0.0"}
-  "reason" {>= "3.6.0"}
+  "ocaml"
+  "melange" {>= "2.0.0"}
+  "reason" {>= "3.10.0"}
   "reason-react"
   "reason-react-ppx"
   "ocaml-lsp-server" {with-test}
+  "opam-check-npm-deps" {with-test}
   "odoc" {with-doc}
 ]
 build: [
@@ -33,3 +34,9 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/ahrefs/reshowcase.git"
+depexts: [
+  ["copy-webpack-plugin"] {npm-version = "^11.0.0"}
+  ["html-webpack-plugin"] {npm-version = "^5.5.0"}
+  ["webpack"] {npm-version = "^5.76.1"}
+  ["webpack-dev-server"] {npm-version = "^4.11.1"}
+]
