@@ -45,8 +45,8 @@ jobs:
       - name: Build example
         run: make build-example
 
-      - name: Deploy
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy (Linux only)
+        if: github.ref == 'refs/heads/main' && matrix.system == 'ubuntu-latest'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
