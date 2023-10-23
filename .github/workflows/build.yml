@@ -42,3 +42,9 @@ jobs:
       - name: Test
         run: make test
 
+      - name: Deploy
+        # if: "contains('refs/heads/main', github.ref)"
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_build/default/build
