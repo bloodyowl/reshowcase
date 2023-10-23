@@ -5,6 +5,7 @@ description: ""
 maintainer: ["Denis Strelkov <denis.strelkov@ahrefs.com>"]
 authors: ["bloodyowl <mlbli@me.com>"]
 license: "MIT"
+tags: ["melange" "org:ahrefs"]
 homepage: "https://github.com/ahrefs/reshowcase"
 doc: "https://github.com/ahrefs/reshowcase"
 bug-reports: "https://github.com/ahrefs/reshowcase/issues"

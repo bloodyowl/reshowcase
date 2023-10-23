@@ -21,6 +21,8 @@
  (description "")
  (maintainers "Denis Strelkov <denis.strelkov@ahrefs.com>")
  (authors "bloodyowl <mlbli@me.com>")
+ (license "MIT")
+ (tags ("melange" "org:ahrefs"))
  (depends
   ocaml
   (melange
