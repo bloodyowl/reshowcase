@@ -2,6 +2,7 @@
   "license": "MIT",
   "dependencies": {
     "copy-webpack-plugin": "^11.0.0",
+    "esbuild": "^0.19.5",
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.76.1",
     "webpack-dev-server": "^4.11.1"
